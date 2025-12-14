@@ -1,320 +1,273 @@
 "use client";
 
-import { ThemeToggle } from "@/components/theme-toggle";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import {
-  ArrowRight,
-  Clock,
-  DollarSign,
-  Filter,
-  Plus,
-  Search,
-  User,
-  Zap,
-} from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, Clock, DollarSign, Filter, Search } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { projectService, type Project } from "@/lib/project-service";
 
 export default function ProjectsPage() {
-  const [userRole] = useState<"freelancer" | "client">("client");
-  const [filter, setFilter] = useState<
-    "all" | "active" | "completed" | "review"
-  >("all");
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [loading, setLoading] = useState(true);
 
-  const projects = [
-    {
-      id: 1,
-      title: "E-Commerce Website Redesign",
-      description: "Full-stack development with modern UI/UX",
-      budget: 12500,
-      duration: "6 weeks",
-      progress: 67,
-      status: "active",
-      client: "Tech Solutions Inc",
-      freelancer: "Sarah Johnson",
-    },
-    {
-      id: 2,
-      title: "Mobile App Development",
-      description: "React Native iOS & Android app",
-      budget: 18000,
-      duration: "8 weeks",
-      progress: 35,
-      status: "active",
-      client: "Startup Ventures",
-      freelancer: "Mike Chen",
-    },
-    {
-      id: 3,
-      title: "Brand Identity Design",
-      description: "Logo, colors, and brand guidelines",
-      budget: 5500,
-      duration: "3 weeks",
-      progress: 90,
-      status: "review",
-      client: "Creative Agency",
-      freelancer: "Emma Davis",
-    },
-    {
-      id: 4,
-      title: "API Integration Project",
-      description: "Third-party API integration and documentation",
-      budget: 8000,
-      duration: "4 weeks",
-      progress: 100,
-      status: "completed",
-      client: "Enterprise Corp",
-      freelancer: "John Doe",
-    },
-  ];
+  // Load projects on component mount
+  useEffect(() => {
+    loadProjects();
+    
+    // Set up polling to refresh projects every 10 seconds
+    const interval = setInterval(() => {
+      loadProjects();
+    }, 10000);
+    
+    return () => clearInterval(interval);
+  }, []);
 
-  const filteredProjects = projects.filter((project) => {
-    if (filter === "all") return true;
-    return project.status === filter;
-  });
+  const loadProjects = async () => {
+    try {
+      setLoading(true);
+      const fetchedProjects = await projectService.getAllProjects();
+      setProjects(fetchedProjects);
+    } catch (error) {
+      console.error("Error loading projects:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const getStatusColor = (status: string) => {
+  // Apply filters when projects, search term, or status filter changes
+  useEffect(() => {
+    let result = projects;
+    
+    // Apply search filter
+    if (searchTerm) {
+      result = result.filter(project => 
+        project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.description.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    // Apply status filter
+    if (statusFilter !== "all") {
+      result = result.filter(project => project.status === statusFilter);
+    }
+    
+    setFilteredProjects(result);
+  }, [projects, searchTerm, statusFilter]);
+
+  const getStatusVariant = (status: string): "default" | "secondary" | "outline" => {
     switch (status) {
-      case "active":
-        return "bg-[#64FFDA]/10 text-[#0A8B8B] dark:text-[#64FFDA] border-[#64FFDA]/20";
-      case "review":
-        return "bg-yellow-100 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-500 border-yellow-200 dark:border-yellow-500/20";
-      case "completed":
-        return "bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-500 border-green-200 dark:border-green-500/20";
-      default:
-        return "bg-gray-100 dark:bg-gray-500/10 text-gray-700 dark:text-gray-500 border-gray-200 dark:border-gray-500/20";
+      case "active": return "default";
+      case "pending": return "secondary";
+      case "completed": return "secondary"; // Using secondary for completed projects
+      default: return "outline";
+    }
+  };
+
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchTerm) {
+      try {
+        setLoading(true);
+        const searchedProjects = await projectService.searchProjects(searchTerm);
+        // Ensure we're working with an array
+        const projectsArray = Array.isArray(searchedProjects) ? searchedProjects : [];
+        setFilteredProjects(projectsArray);
+      } catch (error) {
+        console.error("Error searching projects:", error);
+        setFilteredProjects([]);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // If search term is empty, show all projects
+      setFilteredProjects(projects);
     }
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0A192F] text-gray-900 dark:text-white">
-      {/* Navigation */}
-      <nav className="border-b border-gray-200 dark:border-white/10 bg-white/80 dark:bg-[#0A192F]/80 backdrop-blur-sm sticky top-0 z-50">
+    <div className="min-h-screen bg-white text-gray-900">
+      <nav className="border-b border-gray-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-8">
-              <Link href="/" className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-[#64FFDA] rounded-lg flex items-center justify-center">
-                  <Zap className="w-5 h-5 text-[#0A192F]" />
-                </div>
-                <span className="text-xl font-bold bg-gradient-to-r from-[#0A192F] to-[#0A192F]/70 dark:from-white dark:to-white/70 bg-clip-text text-transparent">
-                  SkillSync
-                </span>
-              </Link>
-              <div className="hidden md:flex items-center gap-6">
-                <Link
-                  href="/dashboard"
-                  className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-[#0A8B8B] dark:hover:text-[#64FFDA] transition-colors"
+            <Link href="/" className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-5 h-5 text-white"
                 >
-                  Dashboard
-                </Link>
-                <Link
-                  href="/projects"
-                  className="text-sm font-medium text-[#0A8B8B] dark:text-[#64FFDA]"
-                >
-                  Projects
-                </Link>
-                <Link
-                  href="/profile"
-                  className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-[#0A8B8B] dark:hover:text-[#64FFDA] transition-colors"
-                >
-                  Profile
-                </Link>
+                  <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+                  <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+                  <path d="m10 11 5 3-5 3Z" />
+                </svg>
               </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <ThemeToggle />
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-white/10 cursor-pointer"
+              <span className="text-xl font-bold bg-gradient-to-r from-skillsync-dark-blue to-skillsync-dark-blue/70 bg-clip-text text-transparent">
+                SkillSync
+              </span>
+            </Link>
+            <nav className="hidden md:flex items-center space-x-8">
+              <Link
+                href="/"
+                className="text-secondary hover:text-primary-heading transition-colors"
               >
-                <User className="w-4 h-4 mr-2" />
-                John Doe
-              </Button>
-            </div>
+                Home
+              </Link>
+              <Link
+                href="/projects"
+                className="text-secondary hover:text-primary-heading transition-colors"
+              >
+                Projects
+              </Link>
+              <Link
+                href="/dashboard"
+                className="text-secondary hover:text-primary-heading transition-colors"
+              >
+                Dashboard
+              </Link>
+            </nav>
           </div>
         </div>
       </nav>
 
-      {/* Main Content */}
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Projects</h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              {userRole === "client"
-                ? "Manage your posted projects"
-                : "Browse and manage your active projects"}
+            <h1 className="text-3xl font-bold text-primary-heading mb-2">
+              My Projects
+            </h1>
+            <p className="text-body">
+              Manage and track all your projects in one place
             </p>
           </div>
-          {userRole === "client" && (
-            <Button className="mt-4 md:mt-0 bg-[#64FFDA] text-[#0A192F] hover:bg-[#64FFDA]/90 font-semibold cursor-pointer">
-              <Plus className="w-4 h-4 mr-2" />
-              Post New Project
-            </Button>
-          )}
+          <Button asChild>
+            <Link href="/projects/new">Create New Project</Link>
+          </Button>
         </div>
 
-        {/* Search & Filters */}
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-500 dark:text-gray-400" />
-            <Input
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-8">
+          <form onSubmit={handleSearch} className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <input
+              type="text"
               placeholder="Search projects..."
-              className="pl-10 bg-gray-50 dark:bg-[#0A192F] border-gray-200 dark:border-white/10 text-gray-900 dark:text-white"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-skillsync-cyan-dark focus:border-skillsync-cyan-dark"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
-          </div>
+          </form>
           <div className="flex gap-2">
-            <Button
-              variant={filter === "all" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setFilter("all")}
-              className={
-                filter === "all"
-                  ? "bg-[#64FFDA] text-[#0A192F] hover:bg-[#64FFDA]/90 cursor-pointer"
-                  : "border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer"
-              }
+            <Filter className="w-4 h-4 text-gray-500 mt-3" />
+            <select
+              className="border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-skillsync-cyan-dark focus:border-skillsync-cyan-dark"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
             >
-              All
-            </Button>
-            <Button
-              variant={filter === "active" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setFilter("active")}
-              className={
-                filter === "active"
-                  ? "bg-[#64FFDA] text-[#0A192F] hover:bg-[#64FFDA]/90 cursor-pointer"
-                  : "border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer"
-              }
-            >
-              Active
-            </Button>
-            <Button
-              variant={filter === "review" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setFilter("review")}
-              className={
-                filter === "review"
-                  ? "bg-[#64FFDA] text-[#0A192F] hover:bg-[#64FFDA]/90 cursor-pointer"
-                  : "border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer"
-              }
-            >
-              Review
-            </Button>
-            <Button
-              variant={filter === "completed" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setFilter("completed")}
-              className={
-                filter === "completed"
-                  ? "bg-[#64FFDA] text-[#0A192F] hover:bg-[#64FFDA]/90 cursor-pointer"
-                  : "border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer"
-              }
-            >
-              Completed
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer"
-            >
-              <Filter className="w-4 h-4" />
-            </Button>
+              <option value="all">All Statuses</option>
+              <option value="active">Active</option>
+              <option value="pending">Pending</option>
+              <option value="completed">Completed</option>
+            </select>
           </div>
         </div>
 
         {/* Projects Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {filteredProjects.map((project) => (
-            <Card
-              key={project.id}
-              className="border-gray-200 dark:border-white/10 bg-white dark:bg-[#112240] hover:border-[#64FFDA]/50 transition-all cursor-pointer"
-            >
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                      {project.title}
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {project.description}
-                    </p>
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-skillsync-cyan-dark"></div>
+          </div>
+        ) : (Array.isArray(filteredProjects) && filteredProjects.length === 0) ? (
+          <Card className="border border-gray-200 bg-white">
+            <CardContent className="py-12 text-center">
+              <h3 className="text-lg font-medium text-primary-heading mb-2">
+                No projects found
+              </h3>
+              <p className="text-body mb-4">
+                {searchTerm || statusFilter !== "all"
+                  ? "Try adjusting your search or filter criteria"
+                  : "Get started by creating your first project"}
+              </p>
+              <Button asChild>
+                <Link href="/projects/new">Create New Project</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {Array.isArray(filteredProjects) && filteredProjects.map((project) => (
+              <Card key={project.id} className="border border-gray-200 bg-white hover:shadow-md transition-shadow">
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle className="text-primary-heading mb-1">
+                        {project.title}
+                      </CardTitle>
+                      <Badge variant={getStatusVariant(project.status)}>
+                        {project.status === "pending" ? "Pending Approval" : project.status}
+                      </Badge>
+                    </div>
                   </div>
-                  <Badge className={getStatusColor(project.status)}>
-                    {project.status.charAt(0).toUpperCase() +
-                      project.status.slice(1)}
-                  </Badge>
-                </div>
-
-                {project.status !== "completed" && (
-                  <div className="mb-4">
-                    <div className="flex justify-between text-sm mb-2">
-                      <span className="text-gray-600 dark:text-gray-400">
-                        Progress
+                  <CardDescription className="mt-3 line-clamp-2">
+                    {project.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-center text-sm">
+                      <DollarSign className="w-4 h-4 text-gray-500 mr-2" />
+                      <span className="text-primary-heading font-medium">
+                        {project.budget}
                       </span>
-                      <span className="font-semibold text-gray-900 dark:text-white">
-                        {project.progress}%
+                    </div>
+                    <div className="flex items-center text-sm">
+                      <Calendar className="w-4 h-4 text-gray-500 mr-2" />
+                      <span className="text-body">
+                        Created: {project.createdAt}
                       </span>
                     </div>
-                    <div className="h-2 bg-gray-200 dark:bg-white/5 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-[#64FFDA] rounded-full transition-all"
-                        style={{ width: `${project.progress}%` }}
-                      />
+                    <div className="flex items-center text-sm">
+                      <Clock className="w-4 h-4 text-gray-500 mr-2" />
+                      <span className="text-body">
+                        Est. Time: {project.estimatedTime} days
+                      </span>
                     </div>
                   </div>
-                )}
-
-                <div className="flex items-center justify-between text-sm mb-4">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                      <DollarSign className="w-4 h-4" />
-                      <span>${project.budget.toLocaleString()}</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                      <Clock className="w-4 h-4" />
-                      <span>{project.duration}</span>
+                  
+                  <div className="mt-4">
+                    <div className="flex flex-wrap gap-1">
+                      {project.technologies.slice(0, 3).map((tech, index) => (
+                        <Badge key={index} variant="secondary" className="text-xs">
+                          {tech}
+                        </Badge>
+                      ))}
+                      {project.technologies.length > 3 && (
+                        <Badge variant="secondary" className="text-xs">
+                          +{project.technologies.length - 3} more
+                        </Badge>
+                      )}
                     </div>
                   </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-white/10">
-                  <div className="text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">
-                      {userRole === "client" ? "Freelancer: " : "Client: "}
-                    </span>
-                    <span className="font-medium text-gray-900 dark:text-white">
-                      {userRole === "client"
-                        ? project.freelancer
-                        : project.client}
-                    </span>
-                  </div>
-                  <Link href={`/projects/${project.id}`}>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-[#0A8B8B] dark:text-[#64FFDA] hover:text-[#0A8B8B]/80 dark:hover:text-[#64FFDA]/80 cursor-pointer"
-                    >
-                      View Details
-                      <ArrowRight className="w-4 h-4 ml-1" />
+                  
+                  <div className="mt-6">
+                    <Button variant="outline" className="w-full" asChild>
+                      <Link href={`/projects/${project.id}`}>
+                        View Details
+                      </Link>
                     </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {filteredProjects.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-600 dark:text-gray-400">
-              No projects found matching your criteria
-            </p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         )}
       </main>

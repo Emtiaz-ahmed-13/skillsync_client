@@ -1,31 +1,27 @@
 "use client";
 
-import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Form, FormField } from "@/components/ui/form";
-import { LoginCredentials } from "@/types/auth";
-import { handleApiError } from "@/utils/helpers/api";
-import { createErrorResponse } from "@/utils/helpers/error-handler";
-import { validateEmail } from "@/utils/helpers/validation";
-import { ArrowRight, Github, Lock, Mail, Zap } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Chrome, Github, Loader2, Lock, Zap } from "lucide-react";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { FcGoogle } from "react-icons/fc";
+import { toast } from "react-toastify";
 
-export default function SignInPage() {
-  const router = useRouter();
+export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [formData, setFormData] = useState<LoginCredentials>({
+  const router = useRouter();
+
+  const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
@@ -38,181 +34,147 @@ export default function SignInPage() {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setIsLoading(true);
-    setError(null);
 
     try {
-      if (!formData.email || !formData.password) {
-        throw new Error("Email and password are required");
-      }
-
-      if (!validateEmail(formData.email)) {
-        throw new Error("Please enter a valid email address");
-      }
-
       const result = await signIn("credentials", {
+        redirect: false,
         email: formData.email,
         password: formData.password,
-        redirect: false,
       });
 
       if (result?.error) {
-        setError(result.error || "Invalid email or password");
+        toast.error("Invalid credentials");
       } else {
-        // Add a small delay to ensure session is updated before redirecting
-        setTimeout(() => {
-          router.push("/dashboard");
-        }, 300);
+        toast.success("Logged in successfully");
+        router.push("/dashboard");
       }
-    } catch (error: any) {
-      const standardizedError = createErrorResponse(error);
-      setError(handleApiError(standardizedError));
+    } catch (error) {
+      toast.error("An error occurred during login");
     } finally {
       setIsLoading(false);
     }
-  };
+  }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50 dark:from-[#0A192F] dark:via-[#0B1F3A] dark:to-[#0A192F] text-gray-900 dark:text-white p-6 overflow-hidden">
-      <div className="absolute inset-0 opacity-10 dark:opacity-5" />
+    <div className="relative flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50 text-gray-900 p-6 overflow-hidden">
+      <div className="absolute inset-0 opacity-10" />
+      <div className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] bg-grid-pattern opacity-5" />
+      <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-skillsync-cyan rounded-full filter blur-3xl opacity-20 animate-pulse" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-skillsync-cyan-dark rounded-full filter blur-3xl opacity-10 animate-pulse delay-1000" />
 
-      <Link
-        href="/"
-        className="absolute top-6 left-6 flex items-center gap-2 group z-10"
-      >
-        <div className="w-9 h-9 bg-[#64FFDA] rounded-xl flex items-center justify-center shadow-md shadow-[#64FFDA]/20 group-hover:scale-105 transition-transform">
-          <Zap className="w-5 h-5 text-[#0A192F]" />
-        </div>
-        <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-white group-hover:text-[#0A8B8B] dark:group-hover:text-[#64FFDA] transition-colors">
-          SkillSync
-        </span>
-      </Link>
-
-      <div className="absolute top-6 right-6 z-10">
-        <ThemeToggle />
+      <div className="absolute top-8 left-8">
+        <Link href="/" className="group flex items-center space-x-2">
+          <div className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center">
+            <Zap className="w-5 h-5 text-white" />
+          </div>
+          <span className="text-xl font-bold tracking-tight text-primary-heading group-hover:text-skillsync-cyan-dark transition-colors">
+            SkillSync
+          </span>
+        </Link>
       </div>
 
-      <Card className="relative z-10 w-full max-w-md border border-gray-200 dark:border-white/10 bg-white/80 dark:bg-[#112240]/90 backdrop-blur-xl shadow-2xl rounded-2xl">
-        <CardHeader className="space-y-2 text-center">
-          <div className="flex justify-center mb-2">
-            <div className="w-12 h-12 bg-[#64FFDA]/10 rounded-xl flex items-center justify-center">
-              <Lock className="w-6 h-6 text-[#0A8B8B] dark:text-[#64FFDA]" />
+      <Card className="relative z-10 w-full max-w-md border border-gray-200 bg-white/80 backdrop-blur-xl shadow-2xl rounded-2xl">
+        <CardHeader className="space-y-1">
+          <div className="flex justify-center mb-4">
+            <div className="w-12 h-12 bg-skillsync-cyan-dark rounded-xl flex items-center justify-center">
+              <Lock className="w-6 h-6 text-skillsync-cyan" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
-          <CardDescription className="text-gray-600 dark:text-gray-400">
-            Sign in to your account to continue your journey.
+          <CardTitle className="text-2xl font-bold text-center text-primary-heading">
+            Welcome Back
+          </CardTitle>
+          <CardDescription className="text-body text-center">
+            Sign in to your account to continue
           </CardDescription>
         </CardHeader>
-
-        <CardContent className="space-y-5">
-          <Form onSubmit={handleSubmit} className="space-y-5">
-            {error && (
-              <div className="text-red-500 text-sm text-center">{error}</div>
-            )}
-
-            <FormField
-              id="email"
-              label="Email Address"
-              type="email"
-              placeholder="name@example.com"
-              icon={<Mail className="w-4 h-4" />}
-              value={formData.email}
-              onChange={handleInputChange}
-              required
-            />
-
-            <FormField
-              id="password"
-              label="Password"
-              type="password"
-              placeholder="••••••••"
-              icon={<Lock className="w-4 h-4" />}
-              value={formData.password}
-              onChange={handleInputChange}
-              required
-            />
-
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="rounded border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-[#0A192F] text-[#64FFDA] focus:ring-[#64FFDA]"
-                />
-                <span className="text-gray-600 dark:text-gray-400">
-                  Remember me
-                </span>
-              </label>
-              <Link
-                href="#"
-                className="text-[#0A8B8B] dark:text-[#64FFDA] hover:underline"
+        <CardContent className="grid gap-4">
+          <form onSubmit={onSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <label
+                htmlFor="email"
+                className="text-sm font-medium text-primary-heading"
               >
-                Forgot password?
-              </Link>
+                Email
+              </label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="m@example.com"
+                value={formData.email}
+                onChange={handleInputChange}
+                required
+              />
             </div>
-
+            <div className="space-y-2">
+              <label
+                htmlFor="password"
+                className="text-sm font-medium text-primary-heading"
+              >
+                Password
+              </label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
             <Button
               type="submit"
+              className="w-full bg-gray-900 hover:bg-gray-800 text-white"
               disabled={isLoading}
-              className="w-full bg-[#64FFDA] text-[#0A192F] hover:bg-[#64FFDA]/90 font-semibold shadow-lg shadow-[#64FFDA]/20 cursor-pointer"
             >
               {isLoading ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#0A192F] mr-2"></div>
-                  Signing In...
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing in...
                 </>
               ) : (
-                <>
-                  Sign In
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </>
+                "Sign In"
               )}
             </Button>
-          </Form>
+          </form>
 
-          <div className="relative py-2 text-center">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300 dark:border-gray-600" />
-            </div>
-            <div className="relative inline-block bg-white dark:bg-[#112240] px-3 text-xs uppercase text-gray-500 dark:text-gray-400">
-              or continue with
+          <div className="relative my-4">
+            <div className="w-full border-t border-gray-300" />
+            <div className="relative inline-block bg-white px-3 text-xs uppercase text-muted -top-3 left-1/2 transform -translate-x-1/2">
+              Or continue with
             </div>
           </div>
 
-          <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <Button
               variant="outline"
-              type="button"
-              className="w-full border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer"
-              onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+              className="w-full border-gray-300 text-body hover:bg-gray-100 cursor-pointer"
+              onClick={() => signIn("github")}
             >
-              <FcGoogle className="w-5 h-5 mr-2" />
-              Continue with Google
+              <Github className="mr-2 h-4 w-4" />
+              GitHub
             </Button>
-
             <Button
               variant="outline"
-              type="button"
-              className="w-full border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer"
-              onClick={() => signIn("github", { callbackUrl: "/dashboard" })}
+              className="w-full border-gray-300 text-body hover:bg-gray-100 cursor-pointer"
+              onClick={() => signIn("google")}
             >
-              <Github className="w-5 h-5 mr-2" />
-              Continue with GitHub
+              <Chrome className="mr-2 h-4 w-4" />
+              Google
             </Button>
           </div>
-
-          <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+        </CardContent>
+        <CardFooter>
+          <p className="text-center text-sm text-body w-full">
             Don't have an account?{" "}
-            <Link
-              href="/auth/register"
-              className="text-[#0A8B8B] dark:text-[#64FFDA] hover:underline"
-            >
-              Create one
+            <Link href="/auth/register" className="text-link">
+              Sign up
             </Link>
           </p>
-        </CardContent>
+        </CardFooter>
       </Card>
     </div>
   );

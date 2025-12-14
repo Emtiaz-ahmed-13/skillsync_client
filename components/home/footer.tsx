@@ -2,32 +2,32 @@ import { Zap } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="border-t border-gray-200 dark:border-white/10 py-12 bg-gray-50 dark:bg-[#0A192F]">
+    <footer className="border-t border-gray-200 py-16 bg-gray-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-4 gap-8">
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-[#64FFDA] rounded-lg flex items-center justify-center">
-                <Zap className="w-5 h-5 text-[#0A192F]" />
+        <div className="grid md:grid-cols-4 gap-12">
+          <div className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center">
+                <Zap className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xl font-bold text-gray-900 dark:text-white">
+              <span className="text-2xl font-bold text-primary-heading">
                 SkillSync
               </span>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-body">
               The professional collaboration platform for freelancers and
               clients.
             </p>
           </div>
           <div>
-            <h4 className="font-semibold mb-4 text-gray-900 dark:text-white">
+            <h4 className="font-semibold mb-6 text-primary-heading text-lg">
               Product
             </h4>
-            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+            <ul className="space-y-3">
               <li>
                 <a
                   href="#"
-                  className="hover:text-[#64FFDA] dark:hover:text-[#64FFDA] transition-colors cursor-pointer"
+                  className="text-body hover:text-primary-heading transition-colors cursor-pointer"
                 >
                   Features
                 </a>
@@ -35,7 +35,7 @@ export function Footer() {
               <li>
                 <a
                   href="#"
-                  className="hover:text-[#64FFDA] dark:hover:text-[#64FFDA] transition-colors cursor-pointer"
+                  className="text-body hover:text-primary-heading transition-colors cursor-pointer"
                 >
                   Pricing
                 </a>
@@ -43,7 +43,7 @@ export function Footer() {
               <li>
                 <a
                   href="#"
-                  className="hover:text-[#64FFDA] dark:hover:text-[#64FFDA] transition-colors cursor-pointer"
+                  className="text-body hover:text-primary-heading transition-colors cursor-pointer"
                 >
                   Demo
                 </a>
@@ -51,14 +51,14 @@ export function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="font-semibold mb-4 text-gray-900 dark:text-white">
+            <h4 className="font-semibold mb-6 text-primary-heading text-lg">
               Company
             </h4>
-            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+            <ul className="space-y-3">
               <li>
                 <a
                   href="#"
-                  className="hover:text-[#64FFDA] dark:hover:text-[#64FFDA] transition-colors cursor-pointer"
+                  className="text-body hover:text-primary-heading transition-colors cursor-pointer"
                 >
                   About
                 </a>
@@ -66,7 +66,7 @@ export function Footer() {
               <li>
                 <a
                   href="#"
-                  className="hover:text-[#64FFDA] dark:hover:text-[#64FFDA] transition-colors cursor-pointer"
+                  className="text-body hover:text-primary-heading transition-colors cursor-pointer"
                 >
                   Blog
                 </a>
@@ -74,7 +74,7 @@ export function Footer() {
               <li>
                 <a
                   href="#"
-                  className="hover:text-[#64FFDA] dark:hover:text-[#64FFDA] transition-colors cursor-pointer"
+                  className="text-body hover:text-primary-heading transition-colors cursor-pointer"
                 >
                   Careers
                 </a>
@@ -82,14 +82,14 @@ export function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="font-semibold mb-4 text-gray-900 dark:text-white">
+            <h4 className="font-semibold mb-6 text-primary-heading text-lg">
               Legal
             </h4>
-            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+            <ul className="space-y-3">
               <li>
                 <a
                   href="#"
-                  className="hover:text-[#64FFDA] dark:hover:text-[#64FFDA] transition-colors cursor-pointer"
+                  className="text-body hover:text-primary-heading transition-colors cursor-pointer"
                 >
                   Privacy
                 </a>
@@ -97,7 +97,7 @@ export function Footer() {
               <li>
                 <a
                   href="#"
-                  className="hover:text-[#64FFDA] dark:hover:text-[#64FFDA] transition-colors cursor-pointer"
+                  className="text-body hover:text-primary-heading transition-colors cursor-pointer"
                 >
                   Terms
                 </a>
@@ -105,7 +105,7 @@ export function Footer() {
               <li>
                 <a
                   href="#"
-                  className="hover:text-[#64FFDA] dark:hover:text-[#64FFDA] transition-colors cursor-pointer"
+                  className="text-body hover:text-primary-heading transition-colors cursor-pointer"
                 >
                   Security
                 </a>
@@ -113,7 +113,7 @@ export function Footer() {
             </ul>
           </div>
         </div>
-        <div className="border-t border-gray-200 dark:border-white/10 mt-12 pt-8 text-center text-sm text-gray-600 dark:text-gray-400">
+        <div className="border-t border-gray-200 mt-16 pt-8 text-center text-secondary">
           <p>&copy; 2025 SkillSync. All rights reserved.</p>
         </div>
       </div>

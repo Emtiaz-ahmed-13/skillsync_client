@@ -1,294 +1,361 @@
 "use client";
 
-import { ActivityItem } from "@/components/dashboard/activity-item";
-import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
-import { StatsCard } from "@/components/dashboard/stats-card";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, Project } from "@/types/dashboard";
-import { DollarSign, FileText, Layers, Star } from "lucide-react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import {
+  ArrowRight,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  DollarSign,
+  FileText,
+  Plus,
+  Star,
+  TrendingUp,
+} from "lucide-react";
+import Link from "next/link";
 
-export default function FreelancerDashboardPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth/login");
-    }
-  }, [status, router]);
-
-  useEffect(() => {
-    if (status === "authenticated" && session?.user) {
-      // Try to get role from different possible locations
-      const role =
-        (session.user as any).role ||
-        (session.user as any).user?.role ||
-        (session as any).user?.role;
-
-      // If user is not a freelancer, redirect to main dashboard for proper role routing
-      if (role && role !== "freelancer") {
-        router.push("/dashboard");
-      }
-      // For users without a role, redirect to login to enforce proper authentication
-      else if (!role) {
-        router.push("/auth/login");
-      }
-    }
-  }, [status, session, router]);
-
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen bg-white dark:bg-[#0A192F] text-gray-900 dark:text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#64FFDA] mb-4"></div>
-          <p>Loading dashboard...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (status === "unauthenticated") {
-    return null;
-  }
-
-  // Sample data - in a real app this would come from an API
-  const statsData = [
+export default function FreelancerDashboard() {
+  const stats = [
     {
-      title: "Active Bids",
-      value: "7",
-      icon: <FileText className="w-6 h-6 text-[#0A8B8B] dark:text-[#64FFDA]" />,
+      title: "Active Projects",
+      value: "5",
+      description: "+1 from last week",
+      icon: FileText,
     },
     {
       title: "Total Earned",
-      value: "$8,250",
-      icon: (
-        <DollarSign className="w-6 h-6 text-[#0A8B8B] dark:text-[#64FFDA]" />
-      ),
+      value: "$8,240",
+      description: "+22% from last month",
+      icon: DollarSign,
     },
     {
-      title: "Completed Projects",
-      value: "24",
-      icon: <Layers className="w-6 h-6 text-[#0A8B8B] dark:text-[#64FFDA]" />,
+      title: "Avg. Rating",
+      value: "4.9",
+      description: "From 28 reviews",
+      icon: Star,
     },
     {
-      title: "Rating",
-      value: "4.8",
-      icon: <Star className="w-6 h-6 text-[#0A8B8B] dark:text-[#64FFDA]" />,
-    },
-  ];
-
-  const projectsData: Project[] = [
-    {
-      id: 1,
-      title: "Logo Design for Tech Startup",
-      budget: "$500 - $1,000",
-      skills: ["Logo Design", "Branding", "Illustration"],
-      posted: "2 hours ago",
-      bids: 12,
-      status: "Open",
-    },
-    {
-      id: 2,
-      title: "WordPress Website Development",
-      budget: "$1,500 - $2,500",
-      skills: ["WordPress", "PHP", "CSS"],
-      posted: "5 hours ago",
-      bids: 8,
-      status: "Open",
-    },
-    {
-      id: 3,
-      title: "Mobile App UI/UX Design",
-      budget: "$3,000 - $5,000",
-      skills: ["UI/UX", "Figma", "Mobile Design"],
-      posted: "1 day ago",
-      bids: 15,
-      status: "Open",
+      title: "Success Rate",
+      value: "96%",
+      description: "Completed projects",
+      icon: TrendingUp,
     },
   ];
 
-  const activitiesData: Activity[] = [
+  const recentProjects = [
     {
-      id: 1,
-      client: "TechCorp Inc.",
-      action: "accepted your bid",
-      project: "Logo Design",
-      time: "30 minutes ago",
+      id: "1",
+      title: "E-commerce Website Redesign",
+      client: "Acme Corp",
+      status: "In Progress",
+      earnings: "$2,500",
+      deadline: "Dec 15, 2025",
+      progress: 65,
     },
     {
-      id: 2,
-      client: "Digital Solutions",
-      action: "sent a message",
-      project: "Website Redesign",
-      time: "2 hours ago",
-    },
-    {
-      id: 3,
+      id: "2",
+      title: "Mobile App Development",
       client: "StartupXYZ",
-      action: "released payment",
-      project: "Mobile App",
-      time: "1 day ago",
+      status: "Review",
+      earnings: "$4,200",
+      deadline: "Jan 5, 2026",
+      progress: 90,
+    },
+    {
+      id: "3",
+      title: "Brand Identity Package",
+      client: "Global Solutions",
+      status: "Completed",
+      earnings: "$1,200",
+      deadline: "Nov 28, 2025",
+      progress: 100,
+    },
+  ];
+
+  const upcomingDeadlines = [
+    {
+      id: "1",
+      title: "E-commerce Website Redesign",
+      deadline: "Dec 15, 2025",
+      timeLeft: "3 days",
+    },
+    {
+      id: "2",
+      title: "Mobile App Development",
+      deadline: "Jan 5, 2026",
+      timeLeft: "23 days",
     },
   ];
 
   return (
-    <DashboardLayout
-      title="Freelancer Dashboard"
-      subtitle={`Welcome back, ${session?.user?.name || "Freelancer"}`}
-      user={{
-        name: session?.user?.name,
-        image: session?.user?.image,
-      }}
-      actionButton={{
-        label: "Browse Projects",
-        onClick: () => console.log("Browse projects"),
-      }}
-    >
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {statsData.map((stat, index) => (
-          <StatsCard
-            key={index}
-            title={stat.title}
-            value={stat.value}
-            icon={stat.icon}
-          />
-        ))}
-      </div>
+    <div className="min-h-screen bg-white text-gray-900 flex items-center justify-center p-4">
+      <div className="max-w-7xl w-full space-y-8">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-primary-heading mb-2">
+            Freelancer Dashboard
+          </h1>
+          <p className="text-body">
+            Track your projects, earnings, and performance metrics
+          </p>
+        </div>
 
-      {/* Available Projects & Tasks */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          <Card className="bg-white dark:bg-[#112240] border-gray-200 dark:border-white/10">
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-gray-900 dark:text-white">
-                  Available Projects
-                </CardTitle>
-                <button className="text-xs font-medium text-[#0A8B8B] dark:text-[#64FFDA] hover:underline">
-                  View All
-                </button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {projectsData.map((project) => (
-                  <div
-                    key={project.id}
-                    className="p-4 border border-gray-200 dark:border-white/10 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
-                  >
-                    <div className="flex justify-between">
-                      <h3 className="font-medium text-gray-900 dark:text-white">
-                        {project.title}
-                      </h3>
-                      <span className="text-sm font-medium text-[#64FFDA]">
-                        {project.budget}
-                      </span>
-                    </div>
-                    {project.skills && (
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {project.skills.map((skill, index) => (
-                          <span
-                            key={index}
-                            className="text-xs px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-500"
-                          >
-                            {skill}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    <div className="flex items-center justify-between mt-3">
-                      <span className="text-xs px-2 py-1 rounded-full bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-500">
-                        {project.status}
-                      </span>
-                      <div className="flex items-center gap-4">
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          {project.bids} bids
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {stats.map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <Card key={index} className="bg-white border-gray-200">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-primary-heading">
+                    {stat.title}
+                  </CardTitle>
+                  <Icon className="w-6 h-6 text-skillsync-cyan-dark" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-primary-heading">
+                    {stat.value}
+                  </div>
+                  <p className="text-sm text-body">{stat.description}</p>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2 space-y-6">
+            <Card className="bg-white border-gray-200">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="text-gray-900">Recent Projects</CardTitle>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/projects">
+                    View All <ArrowRight className="ml-2 w-4 h-4" />
+                  </Link>
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {recentProjects.map((project) => (
+                    <div
+                      key={project.id}
+                      className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h3 className="font-medium text-primary-heading">
+                            {project.title}
+                          </h3>
+                          <p className="text-sm text-body">{project.client}</p>
+                        </div>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            project.status === "Completed"
+                              ? "bg-green-100 text-green-800"
+                              : project.status === "Review"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-blue-100 text-blue-800"
+                          }`}
+                        >
+                          {project.status}
                         </span>
-                        <button className="text-xs font-medium text-[#0A8B8B] dark:text-[#64FFDA] hover:underline">
-                          Place Bid
-                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+                        <div>
+                          <p className="text-gray-600">Earnings</p>
+                          <p className="font-medium text-primary-heading">
+                            {project.earnings}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600">Deadline</p>
+                          <p className="font-medium text-primary-heading">
+                            {project.deadline}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mb-4">
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="text-body">Progress</span>
+                          <span className="font-medium text-primary-heading">
+                            {project.progress}%
+                          </span>
+                        </div>
+                        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-skillsync-cyan-dark rounded-full"
+                            style={{ width: `${project.progress}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end">
+                        <Button variant="outline" size="sm" asChild>
+                          <Link href={`/projects/${project.id}`}>View</Link>
+                        </Button>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
 
-        {/* Recent Activity & Time Tracking */}
-        <div>
-          <Card className="bg-white dark:bg-[#112240] border-gray-200 dark:border-white/10">
-            <CardHeader>
-              <CardTitle className="text-gray-900 dark:text-white">
-                Recent Activity
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {activitiesData.map((activity) => (
-                  <ActivityItem key={activity.id} activity={activity} />
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Active Tasks */}
-          <Card className="bg-white dark:bg-[#112240] border-gray-200 dark:border-white/10 mt-8">
-            <CardHeader>
-              <CardTitle className="text-gray-900 dark:text-white">
-                Active Tasks
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="p-3 border border-gray-200 dark:border-white/10 rounded-lg">
-                  <div className="flex justify-between">
-                    <h4 className="text-sm font-medium text-gray-900 dark:text-white">
-                      Homepage Wireframes
-                    </h4>
-                    <span className="text-xs text-[#64FFDA]">In Progress</span>
+            <Card className="bg-white border-gray-200">
+              <CardHeader>
+                <CardTitle className="text-gray-900">
+                  Upcoming Milestones
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                    <div>
+                      <h4 className="font-medium text-primary-heading">
+                        Design Review
+                      </h4>
+                      <p className="text-gray-600 mb-4">
+                        E-commerce Website Redesign
+                      </p>
+                      <div className="flex items-center text-sm text-body">
+                        <Calendar className="w-4 h-4 mr-1" />
+                        Dec 12, 2025
+                      </div>
+                    </div>
+                    <Button size="sm">Submit</Button>
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Mobile App UI/UX Design
-                  </p>
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                      2h 30m logged
-                    </span>
-                    <button className="text-xs font-medium text-[#0A8B8B] dark:text-[#64FFDA] hover:underline">
-                      Log Time
-                    </button>
+                  <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                    <div>
+                      <h4 className="font-medium text-primary-heading">
+                        Final Delivery
+                      </h4>
+                      <p className="text-gray-600 mb-4">
+                        Mobile App Development
+                      </p>
+                      <div className="flex items-center text-sm text-body">
+                        <Calendar className="w-4 h-4 mr-1" />
+                        Jan 5, 2026
+                      </div>
+                    </div>
+                    <Button size="sm" variant="outline">
+                      Prepare
+                    </Button>
                   </div>
                 </div>
-                <div className="p-3 border border-gray-200 dark:border-white/10 rounded-lg">
-                  <div className="flex justify-between">
-                    <h4 className="text-sm font-medium text-gray-900 dark:text-white">
-                      Logo Revisions
-                    </h4>
-                    <span className="text-xs text-green-500">Completed</span>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="space-y-6">
+            <Card className="bg-white border-gray-200">
+              <CardHeader>
+                <CardTitle className="text-gray-900">Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button className="w-full" asChild>
+                  <Link href="/projects">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Browse Projects
+                  </Link>
+                </Button>
+                <Button variant="outline" className="w-full" asChild>
+                  <Link href="/proposals">
+                    <FileText className="w-4 h-4 mr-2" />
+                    My Proposals
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white border-gray-200">
+              <CardHeader>
+                <CardTitle className="text-gray-900">
+                  Upcoming Deadlines
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {upcomingDeadlines.map((deadline) => (
+                    <div
+                      key={deadline.id}
+                      className="p-3 border border-gray-200 rounded-lg"
+                    >
+                      <h4 className="text-sm font-medium text-primary-heading">
+                        {deadline.title}
+                      </h4>
+                      <div className="flex items-center justify-between mt-2">
+                        <p className="text-xs text-gray-500">
+                          <Calendar className="w-3 h-3 inline mr-1" />
+                          {deadline.deadline}
+                        </p>
+                        <span className="text-xs text-gray-500">
+                          {deadline.timeLeft}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white border-gray-200 mt-8">
+              <CardHeader>
+                <CardTitle className="text-gray-900">Recent Activity</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-start">
+                    <div className="mt-0.5 mr-3 p-2 border border-gray-200 rounded-lg">
+                      <CheckCircle2 className="w-4 h-4 text-skillsync-cyan-dark" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-primary-heading">
+                        Payment Received
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        $1,200 received for Brand Identity Package
+                      </p>
+                      <span className="text-xs text-gray-500">1 day ago</span>
+                    </div>
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Tech Startup Logo
-                  </p>
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                      Ready for review
-                    </span>
-                    <button className="text-xs font-medium text-[#0A8B8B] dark:text-[#64FFDA] hover:underline">
-                      Submit
-                    </button>
+                  <div className="flex items-start">
+                    <div className="mt-0.5 mr-3 p-2 border border-gray-200 rounded-lg">
+                      <Clock className="w-4 h-4 text-skillsync-cyan-dark" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-primary-heading">
+                        Deadline Approaching
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        E-commerce Website Redesign due in 3 days
+                      </p>
+                      <button className="text-xs font-medium text-skillsync-cyan-dark hover:underline">
+                        View Project
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex items-start">
+                    <div className="mt-0.5 mr-3 p-2 border border-gray-200 rounded-lg">
+                      <Star className="w-4 h-4 text-skillsync-cyan-dark" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-primary-heading">
+                        New Review
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        5-star review received from Acme Corp
+                      </p>
+                      <button className="text-xs font-medium text-skillsync-cyan-dark hover:underline">
+                        View Review
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
-    </DashboardLayout>
+    </div>
   );
 }

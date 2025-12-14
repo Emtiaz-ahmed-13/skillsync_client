@@ -1,7 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { signOut } from "next-auth/react";
+import Link from "next/link";
 import { ReactNode } from "react";
+
+interface ActionButton {
+  label: string;
+  onClick?: () => void;
+  href?: string;
+}
 
 interface DashboardLayoutProps {
   title: string;
@@ -10,10 +17,8 @@ interface DashboardLayoutProps {
     name?: string | null;
     image?: string | null;
   };
-  actionButton?: {
-    label: string;
-    onClick: () => void;
-  };
+  actionButton?: ActionButton;
+  actionButtons?: ActionButton[];
   children: ReactNode;
 }
 
@@ -22,11 +27,17 @@ export function DashboardLayout({
   subtitle,
   user,
   actionButton,
+  actionButtons = [],
   children,
 }: DashboardLayoutProps) {
+  // Combine single actionButton with actionButtons array
+  const allActionButtons = actionButton
+    ? [actionButton, ...actionButtons]
+    : actionButtons;
+
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0A192F] text-gray-900 dark:text-white">
-      <div className="border-b border-gray-200 dark:border-white/10">
+    <div className="min-h-screen bg-white text-gray-900">
+      <div className="border-b border-gray-200">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -34,36 +45,42 @@ export function DashboardLayout({
                 <img
                   src={user.image}
                   alt={user.name || "User"}
-                  className="w-12 h-12 rounded-full object-cover border-2 border-[#64FFDA]"
+                  className="w-12 h-12 rounded-full object-cover border-2 border-skillsync-cyan"
                 />
               ) : (
-                <div className="w-12 h-12 rounded-full bg-[#64FFDA]/10 flex items-center justify-center border-2 border-[#64FFDA]">
-                  <span className="text-[#0A8B8B] dark:text-[#64FFDA] font-bold">
+                <div className="w-12 h-12 rounded-full bg-skillsync-cyan/10 flex items-center justify-center border-2 border-skillsync-cyan">
+                  <span className="text-skillsync-cyan-dark font-bold">
                     {user.name?.charAt(0) || "U"}
                   </span>
                 </div>
               )}
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {title}
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400 mt-1">
-                  {subtitle}
-                </p>
+                <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+                <p className="text-gray-600 mt-1">{subtitle}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {actionButton && (
+              {allActionButtons.map((btn, index) => (
                 <Button
-                  className="bg-[#64FFDA] text-[#0A192F] hover:bg-[#64FFDA]/90 cursor-pointer mr-2"
-                  onClick={actionButton.onClick}
+                  key={index}
+                  className={`${
+                    index === 0
+                      ? "bg-skillsync-cyan text-skillsync-dark-blue hover:bg-skillsync-cyan/90"
+                      : "border-gray-300 text-gray-700 hover:bg-gray-100"
+                  } cursor-pointer mr-2`}
+                  onClick={btn.onClick}
+                  {...(btn.href ? { asChild: true } : {})}
                 >
-                  {actionButton.label}
+                  {btn.href ? (
+                    <Link href={btn.href}>{btn.label}</Link>
+                  ) : (
+                    btn.label
+                  )}
                 </Button>
-              )}
+              ))}
               <Button
                 variant="outline"
-                className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer"
+                className="border-gray-300 text-gray-700 hover:bg-gray-100 cursor-pointer"
                 onClick={() => signOut({ callbackUrl: "/auth/login" })}
               >
                 <LogOut className="w-4 h-4 mr-2" />

@@ -64,7 +64,14 @@ export function isResponseOk(response: Response): boolean {
  */
 export async function parseJsonResponse(response: Response): Promise<any> {
   try {
-    const data = await response.json();
+    // Check if response has content
+    const text = await response.text();
+    if (!text) {
+      return {};
+    }
+
+    // Try to parse JSON
+    const data = JSON.parse(text);
     return data;
   } catch (error) {
     throw new Error("Invalid response format");

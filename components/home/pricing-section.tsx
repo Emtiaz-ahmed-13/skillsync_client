@@ -58,16 +58,16 @@ export function PricingSection() {
   ];
 
   return (
-    <section className="py-20 lg:py-32 bg-white dark:bg-[#0A192F]">
+    <section className="py-20 lg:py-32 bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-          <Badge className="mx-auto bg-[#64FFDA]/10 text-[#0A8B8B] dark:text-[#64FFDA] border-[#64FFDA]/20">
+          <Badge className="mx-auto bg-gray-100 text-gray-800 border-gray-200">
             Pricing
           </Badge>
-          <h2 className="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-primary-heading">
             Simple, Transparent Pricing
           </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-400">
+          <p className="text-lg text-body">
             Choose the plan that works best for you and your team
           </p>
         </div>
@@ -75,54 +75,48 @@ export function PricingSection() {
           {plans.map((plan, index) => (
             <Card
               key={index}
-              className={`relative border-gray-200 dark:border-white/10 ${
+              className={`relative border-gray-200 rounded-xl ${
                 plan.popular
-                  ? "ring-2 ring-[#64FFDA] bg-gradient-to-b from-[#64FFDA]/5 to-transparent dark:from-[#64FFDA]/10"
-                  : "bg-white dark:bg-[#112240]"
+                  ? "ring-2 ring-gray-900 bg-gradient-to-b from-gray-100 to-transparent"
+                  : "bg-white"
               }`}
             >
               {plan.popular && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <Badge className="bg-[#64FFDA] text-[#0A192F]">
-                    Most Popular
-                  </Badge>
+                  <Badge className="bg-gray-900 text-white">Most Popular</Badge>
                 </div>
               )}
-              <CardHeader className="pt-8 pb-4 text-center">
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+              <CardHeader className="pt-8 pb-6 text-center">
+                <h3 className="text-2xl font-bold text-primary-heading">
                   {plan.name}
                 </h3>
-                <div className="mt-2">
-                  <span className="text-4xl font-bold text-gray-900 dark:text-white">
+                <div className="mt-4">
+                  <span className="text-4xl font-bold text-primary-heading">
                     {plan.price}
                   </span>
                   {plan.period && (
-                    <span className="text-gray-600 dark:text-gray-400">
-                      /{plan.period}
-                    </span>
+                    <span className="text-secondary">/{plan.period}</span>
                   )}
                 </div>
-                <p className="text-gray-600 dark:text-gray-400 mt-2">
-                  {plan.description}
-                </p>
+                <p className="text-body mt-3">{plan.description}</p>
               </CardHeader>
-              <CardContent className="p-6 space-y-6">
-                <ul className="space-y-3">
+              <CardContent className="p-8 space-y-6">
+                <ul className="space-y-4">
                   {plan.features.map((feature, featureIndex) => (
                     <li
                       key={featureIndex}
-                      className="flex items-start gap-2 text-gray-600 dark:text-gray-400"
+                      className="flex items-start gap-3 text-body"
                     >
-                      <CheckCircle2 className="w-5 h-5 text-[#64FFDA] mt-0.5 flex-shrink-0" />
+                      <CheckCircle2 className="w-5 h-5 text-primary-heading mt-0.5 flex-shrink-0" />
                       <span>{feature}</span>
                     </li>
                   ))}
                 </ul>
                 <Button
-                  className={`w-full ${
+                  className={`w-full py-6 text-base ${
                     plan.popular
-                      ? "bg-[#64FFDA] text-[#0A192F] hover:bg-[#64FFDA]/90"
-                      : "border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5"
+                      ? "bg-gray-900 text-white hover:bg-gray-800"
+                      : "border-gray-300 text-body hover:bg-gray-100"
                   }`}
                   variant={plan.popular ? "default" : "outline"}
                 >
@@ -132,7 +126,7 @@ export function PricingSection() {
             </Card>
           ))}
         </div>
-        <div className="text-center mt-12 text-sm text-gray-600 dark:text-gray-400">
+        <div className="text-center mt-16 text-body">
           <p>All plans include a 14-day free trial. No credit card required.</p>
         </div>
       </div>

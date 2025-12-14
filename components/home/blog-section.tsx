@@ -31,16 +31,16 @@ export function BlogSection() {
   ];
 
   return (
-    <section className="py-20 lg:py-32 bg-white dark:bg-[#0A192F]">
+    <section className="py-20 lg:py-32 bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-          <Badge className="mx-auto bg-[#64FFDA]/10 text-[#0A8B8B] dark:text-[#64FFDA] border-[#64FFDA]/20">
+          <Badge className="mx-auto bg-gray-100 text-gray-800 border-gray-200">
             Blog
           </Badge>
-          <h2 className="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-3xl lg:text-5xl font-bold text-primary-heading">
             Latest Insights
           </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-400">
+          <p className="text-lg text-body">
             Stay updated with the latest trends and tips for professional
             collaboration
           </p>
@@ -49,33 +49,31 @@ export function BlogSection() {
           {articles.map((article, index) => (
             <Card
               key={index}
-              className="group bg-white dark:bg-[#112240] border-gray-200 dark:border-white/10 hover:shadow-xl hover:border-[#64FFDA]/50 transition-all duration-300"
+              className="group bg-white border-gray-200 hover:shadow-lg hover:border-gray-300 transition-all duration-300"
             >
               <CardContent className="p-6 space-y-4">
                 <div>
-                  <Badge className="mb-3 bg-[#64FFDA]/10 text-[#0A8B8B] dark:text-[#64FFDA] border-[#64FFDA]/20">
+                  <Badge className="mb-3 bg-gray-100 text-gray-800 border-gray-200">
                     {article.category}
                   </Badge>
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white group-hover:text-[#64FFDA] transition-colors">
+                  <h3 className="text-xl font-medium text-primary-heading group-hover:text-primary-heading transition-colors">
                     {article.title}
                   </h3>
                 </div>
-                <p className="text-gray-600 dark:text-gray-400">
-                  {article.excerpt}
-                </p>
+                <p className="text-body">{article.excerpt}</p>
                 <div className="flex items-center justify-between pt-4">
-                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                  <div className="text-sm text-muted">
                     <span>{article.date}</span> •{" "}
                     <span>{article.readTime}</span>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-[#64FFDA] group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="w-4 h-4 text-primary-heading group-hover:translate-x-1 transition-transform" />
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
         <div className="text-center mt-12">
-          <button className="inline-flex items-center gap-2 text-[#0A8B8B] dark:text-[#64FFDA] font-semibold hover:underline">
+          <button className="inline-flex items-center gap-2 text-link font-medium">
             View All Articles
             <ArrowRight className="w-4 h-4" />
           </button>

@@ -41,16 +41,16 @@ export function FAQSection() {
   ];
 
   return (
-    <section className="py-20 lg:py-32 bg-gray-50 dark:bg-[#112240]/50">
+    <section className="py-20 lg:py-32 bg-gray-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-          <Badge className="mx-auto bg-[#64FFDA]/10 text-[#0A8B8B] dark:text-[#64FFDA] border-[#64FFDA]/20">
+          <Badge className="mx-auto bg-gray-100 text-gray-800 border-gray-200">
             FAQ
           </Badge>
-          <h2 className="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-3xl lg:text-5xl font-bold text-primary-heading">
             Frequently Asked Questions
           </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-400">
+          <p className="text-lg text-body">
             Everything you need to know about the platform
           </p>
         </div>
@@ -60,12 +60,12 @@ export function FAQSection() {
               <AccordionItem
                 key={index}
                 value={`item-${index}`}
-                className="bg-white dark:bg-[#112240] border border-gray-200 dark:border-white/10 rounded-lg px-6"
+                className="bg-white border border-gray-200 rounded-lg px-6"
               >
-                <AccordionTrigger className="text-left text-gray-900 dark:text-white hover:no-underline py-4">
+                <AccordionTrigger className="text-left text-primary-heading hover:no-underline py-4">
                   {faq.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-gray-600 dark:text-gray-400 pb-4">
+                <AccordionContent className="text-body pb-4">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>

@@ -13,6 +13,7 @@ declare module "next-auth" {
       image?: string | null;
       role?: string;
     };
+    accessToken?: string;
   }
 
   interface User {
@@ -20,6 +21,36 @@ declare module "next-auth" {
     name?: string;
     email?: string;
     role?: string;
+    accessToken?: string;
+  }
+}
+
+// Function to fetch user role from backend API
+async function fetchUserRole(email: string): Promise<string | null> {
+  try {
+    // Try to fetch user from backend API
+    const res = await fetch(
+      `http://localhost:5001/api/v1/users?email=${encodeURIComponent(email)}`,
+      {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+    if (res.ok) {
+      const result = await res.json();
+
+      // If user exists, return their role
+      if (result.data && result.data.length > 0) {
+        const existingUser = result.data[0];
+        return existingUser.role || null;
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Error fetching user role:", error);
+    return null;
   }
 }
 
@@ -30,7 +61,6 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
-        role: { label: "Role", type: "text" }, // Added role to credentials
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -49,15 +79,14 @@ export const authOptions: NextAuthOptions = {
           });
 
           if (!res.ok) {
-            console.log("Backend API call failed with status:", res.status);
             return null;
           }
 
           const result = await res.json();
-          console.log("Backend response:", JSON.stringify(result, null, 2));
 
           // Extract user data from the response
           let userData = null;
+          let accessToken = null;
 
           // Handle the nested structure from your logs
           if (
@@ -67,15 +96,19 @@ export const authOptions: NextAuthOptions = {
           ) {
             // Deeply nested structure: result.data.userWithoutPassword._doc
             userData = result.data.userWithoutPassword._doc;
+            accessToken = result.data.accessToken;
           } else if (result.data && result.data.userWithoutPassword) {
             // Structure from your logs: result.data.userWithoutPassword
             userData = result.data.userWithoutPassword;
+            accessToken = result.data.accessToken;
           } else if (result.data && result.data.user) {
             // Alternative structure: result.data.user
             userData = result.data.user;
+            accessToken = result.data.accessToken;
           } else if (result.user) {
             // Direct user object
             userData = result.user;
+            accessToken = result.accessToken;
           }
 
           if (userData) {
@@ -84,21 +117,14 @@ export const authOptions: NextAuthOptions = {
               name: userData.name,
               email: userData.email,
               role: userData.role || "client", // Default to client role
+              accessToken: accessToken, // Store access token
             };
 
-            // If role is provided in credentials, use it
-            if (credentials.role) {
-              user.role = credentials.role;
-            }
-
-            console.log("Authorize - returning user:", user);
             return user;
           } else {
-            console.log("Could not extract user data from response");
             return null;
           }
         } catch (error) {
-          console.error("Authorization error:", error);
           return null;
         }
       },
@@ -114,35 +140,30 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async jwt({ token, user, account }) {
-      console.log("JWT callback called with:", { token, user, account });
-
       // When signing in with OAuth providers
       if (account && user) {
         // For OAuth providers, we need to create/fetch user from backend
         if (account.type === "oauth") {
           try {
-            // Check if user exists in our database
-            const res = await fetch(
-              `http://localhost:5001/api/v1/users?email=${user.email}`,
-              {
-                method: "GET",
-                headers: { "Content-Type": "application/json" },
-              }
-            );
+            // First, try to fetch the user's role from the backend
+            if (user.email) {
+              const userRole = await fetchUserRole(user.email);
 
-            if (res.ok) {
-              const result = await res.json();
-              console.log("User lookup result:", result);
-
-              // If user exists, return their data with client role
-              if (result.data && result.data.length > 0) {
-                const existingUser = result.data[0];
-                token.id = existingUser._id || existingUser.id;
-                token.email = existingUser.email;
-                token.name = existingUser.name;
-                token.role = existingUser.role || "client";
+              if (userRole) {
+                // User exists in our database, use their role
+                token.role = userRole;
               } else {
-                // If user doesn't exist, create them with client role
+                // User doesn't exist, assign default role based on email heuristic
+                // This follows the memory requirement for email-based heuristics
+                if (user.email.includes("freelancer")) {
+                  token.role = "freelancer";
+                } else if (user.email.includes("admin")) {
+                  token.role = "admin";
+                } else {
+                  token.role = "freelancer"; // CHANGED: Default to freelancer instead of client
+                }
+
+                // Create user in backend with assigned role
                 const createUserRes = await fetch(
                   "http://localhost:5001/api/v1/auth/signup",
                   {
@@ -151,50 +172,32 @@ export const authOptions: NextAuthOptions = {
                     body: JSON.stringify({
                       name: user.name,
                       email: user.email,
-                      role: "client", // Default to client role for OAuth users
+                      role: token.role,
                       // Note: OAuth users won't have a password set initially
                     }),
                   }
                 );
 
-                if (createUserRes.ok) {
-                  const createUserResult = await createUserRes.json();
-                  console.log("Created new OAuth user:", createUserResult);
-
-                  if (createUserResult.data && createUserResult.data.user) {
-                    token.id =
-                      createUserResult.data.user._id ||
-                      createUserResult.data.user.id;
-                    token.email = createUserResult.data.user.email;
-                    token.name = createUserResult.data.user.name;
-                    token.role = createUserResult.data.user.role || "client";
-                  }
-                } else {
-                  console.error(
-                    "Failed to create OAuth user:",
-                    await createUserRes.text()
-                  );
-                  // Fallback to basic user data
-                  token.id = user.id;
-                  token.email = user.email;
-                  token.name = user.name;
-                  token.role = "client"; // Default to client role
+                if (!createUserRes.ok) {
+                  console.error("Failed to create user in backend");
                 }
               }
-            } else {
-              // Fallback if user lookup fails
-              token.id = user.id;
-              token.email = user.email;
-              token.name = user.name;
-              token.role = "client"; // Default to client role
             }
-          } catch (error) {
-            console.error("Error in OAuth user handling:", error);
-            // Fallback to basic user data
+
+            // Set basic user info
             token.id = user.id;
             token.email = user.email;
             token.name = user.name;
-            token.role = "client"; // Default to client role
+
+            // For OAuth providers, we don't have an accessToken yet
+            // But we'll get one when the user accesses protected resources
+          } catch (error) {
+            console.error("Error in OAuth callback:", error);
+            // Fallback to basic user data with default role
+            token.id = user.id;
+            token.email = user.email;
+            token.name = user.name;
+            token.role = "freelancer"; // CHANGED: Default to freelancer instead of client
           }
         } else {
           // For credentials provider
@@ -202,36 +205,28 @@ export const authOptions: NextAuthOptions = {
           token.email = (user as any).email;
           token.name = (user as any).name;
           token.role = (user as any).role || "client";
+          token.accessToken = (user as any).accessToken || token.accessToken;
         }
-
-        console.log("JWT callback - token after assignment:", token);
       } else if (user) {
         // For credentials provider (legacy)
         token.id = (user as any).id;
         token.email = (user as any).email;
         token.name = (user as any).name;
         token.role = (user as any).role || "client";
-
-        console.log("JWT callback - user:", user);
-        console.log("JWT callback - token after assignment:", token);
-      } else {
-        console.log("JWT callback - no user or account provided");
+        token.accessToken = (user as any).accessToken || token.accessToken;
       }
 
       return token;
     },
     async session({ session, token }) {
-      console.log("Session callback - token:", token);
-      console.log("Session callback - session before:", session);
-
       if (token && session.user) {
         session.user.id = token.id as string;
         session.user.name = token.name as string;
         session.user.email = token.email as string;
-        session.user.role = (token.role as string) || "client"; // Default to client role
+        session.user.role = (token.role as string) || "client";
+        (session as any).accessToken = token.accessToken as string;
       }
 
-      console.log("Session callback - session after:", session);
       return session;
     },
   },
