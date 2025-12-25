@@ -1,16 +1,19 @@
 "use client";
 
-import { UserProfileDropdown } from "@/components/home/user-profile-dropdown";
-import { Button } from "@/components/ui/button";
+import { useNotifications } from "@/lib/notifications";
 import { Bell, Globe, Menu, Search, ShoppingCart, X, Zap } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useState } from "react";
+import { Button } from "../ui/button";
 
 export function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false);
 
-  // This would typically come from user session context
-  const isAuthenticated = false; // For now, we'll assume the user is not authenticated
+  const { data: session, status } = useSession();
+  const isAuthenticated = status === "authenticated";
+
+  const { unreadCount, loading, error } = useNotifications();
 
   const navItems = [
     { name: "Features", href: "#features" },
@@ -34,24 +37,6 @@ export function MobileMenu() {
     { code: "es", name: "Español" },
     { code: "fr", name: "Français" },
     { code: "de", name: "Deutsch" },
-  ];
-
-  const notifications = [
-    {
-      id: 1,
-      title: "New message from client",
-      description: "John Smith sent you a message about the website project",
-      time: "2 min ago",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Milestone completed",
-      description:
-        "Your milestone for the mobile app project has been approved",
-      time: "1 hour ago",
-      read: true,
-    },
   ];
 
   // This would typically come from a shopping cart context
@@ -143,7 +128,11 @@ export function MobileMenu() {
                       className="relative text-gray-700 hover:text-gray-900 hover:bg-gray-100"
                     >
                       <Bell className="w-5 h-5" />
-                      <span className="absolute top-1 right-1 w-2 h-2 bg-gray-900 rounded-full"></span>
+                      {isAuthenticated && unreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                          {unreadCount > 9 ? "9+" : unreadCount}
+                        </span>
+                      )}
                     </Button>
                     <Button
                       variant="ghost"
@@ -171,27 +160,19 @@ export function MobileMenu() {
                 </div>
               </div>
               <div className="flex flex-col gap-3">
-                {isAuthenticated ? (
-                  <div className="flex justify-center">
-                    <UserProfileDropdown />
-                  </div>
-                ) : (
-                  <>
-                    <Button
-                      variant="outline"
-                      className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 font-medium"
-                      asChild
-                    >
-                      <Link href="/auth/login">Sign In</Link>
-                    </Button>
-                    <Button
-                      className="w-full bg-gray-900 text-white hover:bg-gray-800 font-medium"
-                      asChild
-                    >
-                      <Link href="/auth/register">Get Started</Link>
-                    </Button>
-                  </>
-                )}
+                <Button
+                  variant="outline"
+                  className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 font-medium"
+                  asChild
+                >
+                  <Link href="/auth/login">Sign In</Link>
+                </Button>
+                <Button
+                  className="w-full bg-gray-900 text-white hover:bg-gray-800 font-medium"
+                  asChild
+                >
+                  <Link href="/auth/signup">Get Started</Link>
+                </Button>
               </div>
             </div>
           </div>

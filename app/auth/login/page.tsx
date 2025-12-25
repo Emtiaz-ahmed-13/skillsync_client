@@ -1,181 +1,171 @@
 "use client";
 
+import { Navbar } from "@/components/home/navbar";
+import { BackgroundRippleEffect } from "@/components/ui/background-ripple-effect";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Chrome, Github, Loader2, Lock, Zap } from "lucide-react";
+import { Label } from "@/components/ui/label";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { toast } from "react-toastify";
 
 export default function LoginPage() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl =
+    searchParams.get("callbackUrl") || "/api/auth/role-redirect";
 
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  async function onSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+
+    setLoading(true);
+    setError("");
 
     try {
+      // Always handle redirection manually for consistency
       const result = await signIn("credentials", {
-        redirect: false,
-        email: formData.email,
-        password: formData.password,
+        email: email,
+        password: password,
+        redirect: false, // Disable automatic redirect to handle it manually
       });
 
       if (result?.error) {
-        toast.error("Invalid credentials");
-      } else {
-        toast.success("Logged in successfully");
-        router.push("/dashboard");
+        // Provide a more user-friendly error message
+        if (result.error === "CredentialsSignin") {
+          setError("Invalid email or password. Please try again.");
+        } else {
+          setError(
+            result.error || "An error occurred during login. Please try again."
+          );
+        }
+      } else if (result?.ok) {
+        // Redirect to the appropriate URL after successful login
+        if (callbackUrl && !callbackUrl.includes("/auth/")) {
+          // If we have a valid callback URL, use it
+          router.push(callbackUrl);
+        } else {
+          // Otherwise, redirect to role-based dashboard
+          router.push("/api/auth/role-redirect");
+        }
       }
-    } catch (error) {
-      toast.error("An error occurred during login");
+    } catch (err) {
+      setError("An error occurred. Please try again.");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50 text-gray-900 p-6 overflow-hidden">
-      <div className="absolute inset-0 opacity-10" />
-      <div className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] bg-grid-pattern opacity-5" />
-      <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-skillsync-cyan rounded-full filter blur-3xl opacity-20 animate-pulse" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-skillsync-cyan-dark rounded-full filter blur-3xl opacity-10 animate-pulse delay-1000" />
+    <div className="min-h-screen bg-background overflow-hidden relative">
+      {/* NAVBAR */}
+      <Navbar />
 
-      <div className="absolute top-8 left-8">
-        <Link href="/" className="group flex items-center space-x-2">
-          <div className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center">
-            <Zap className="w-5 h-5 text-white" />
-          </div>
-          <span className="text-xl font-bold tracking-tight text-primary-heading group-hover:text-skillsync-cyan-dark transition-colors">
-            SkillSync
-          </span>
-        </Link>
+      {/* BACKGROUND */}
+      <div className="absolute inset-0 z-0 pt-16">
+        <BackgroundRippleEffect />
       </div>
 
-      <Card className="relative z-10 w-full max-w-md border border-gray-200 bg-white/80 backdrop-blur-xl shadow-2xl rounded-2xl">
-        <CardHeader className="space-y-1">
-          <div className="flex justify-center mb-4">
-            <div className="w-12 h-12 bg-skillsync-cyan-dark rounded-xl flex items-center justify-center">
-              <Lock className="w-6 h-6 text-skillsync-cyan" />
-            </div>
-          </div>
-          <CardTitle className="text-2xl font-bold text-center text-primary-heading">
-            Welcome Back
-          </CardTitle>
-          <CardDescription className="text-body text-center">
-            Sign in to your account to continue
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4">
-          <form onSubmit={onSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <label
-                htmlFor="email"
-                className="text-sm font-medium text-primary-heading"
-              >
-                Email
-              </label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="m@example.com"
-                value={formData.email}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <label
-                htmlFor="password"
-                className="text-sm font-medium text-primary-heading"
-              >
-                Password
-              </label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-            <Button
-              type="submit"
-              className="w-full bg-gray-900 hover:bg-gray-800 text-white"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Signing in...
-                </>
-              ) : (
-                "Sign In"
-              )}
-            </Button>
-          </form>
-
-          <div className="relative my-4">
-            <div className="w-full border-t border-gray-300" />
-            <div className="relative inline-block bg-white px-3 text-xs uppercase text-muted -top-3 left-1/2 transform -translate-x-1/2">
-              Or continue with
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <Button
-              variant="outline"
-              className="w-full border-gray-300 text-body hover:bg-gray-100 cursor-pointer"
-              onClick={() => signIn("github")}
-            >
-              <Github className="mr-2 h-4 w-4" />
-              GitHub
-            </Button>
-            <Button
-              variant="outline"
-              className="w-full border-gray-300 text-body hover:bg-gray-100 cursor-pointer"
-              onClick={() => signIn("google")}
-            >
-              <Chrome className="mr-2 h-4 w-4" />
-              Google
-            </Button>
-          </div>
-        </CardContent>
-        <CardFooter>
-          <p className="text-center text-sm text-body w-full">
-            Don't have an account?{" "}
-            <Link href="/auth/register" className="text-link">
-              Sign up
-            </Link>
-          </p>
-        </CardFooter>
-      </Card>
+      {/* CONTENT */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24">
+        <div className="flex justify-center items-center min-h-[calc(100vh-10rem)]">
+          <Card className="w-full max-w-md mx-4">
+            <CardHeader className="space-y-1">
+              <CardTitle className="text-2xl text-center">
+                Welcome back
+              </CardTitle>
+              <CardDescription className="text-center">
+                Enter your credentials to continue
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="name@company.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                {error && <p className="text-red-500 text-sm">{error}</p>}
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? "Signing in..." : "Sign In"}
+                </Button>
+                <div className="relative my-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-300"></div>
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                      Or continue with
+                    </span>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => {
+                      signIn("google", {
+                        callbackUrl: "/api/auth/role-redirect",
+                      });
+                    }}
+                    disabled={loading}
+                  >
+                    Google
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => {
+                      signIn("github", {
+                        callbackUrl: "/api/auth/role-redirect",
+                      });
+                    }}
+                    disabled={loading}
+                  >
+                    GitHub
+                  </Button>
+                </div>
+              </form>
+              <div className="mt-4 text-center text-sm">
+                Don't have an account?{" "}
+                <Link href="/auth/signup" className="underline">
+                  Sign up
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

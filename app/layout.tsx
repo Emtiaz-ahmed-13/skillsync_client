@@ -1,11 +1,10 @@
-import { NextAuthSessionProvider } from "@/components/session-provider";
-import { ThemeProvider } from "@/components/theme-provider";
 import type { Metadata } from "next";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-
 import { Inter, Roboto_Mono } from "next/font/google";
+
+import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
+
+import SessionProviderWrapper from "../components/session-provider-wrapper";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -27,23 +26,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${robotoMono.variable} antialiased bg-white text-gray-900`}
+        className={`${inter.variable} ${robotoMono.variable} antialiased bg-background text-foreground`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <NextAuthSessionProvider>{children}</NextAuthSessionProvider>
-          <ToastContainer position="top-right" autoClose={3000} />
-        </ThemeProvider>
+        <SessionProviderWrapper>{children}</SessionProviderWrapper>
       </body>
     </html>
   );

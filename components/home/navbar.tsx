@@ -1,8 +1,9 @@
-import { MobileMenu } from "@/components/home/mobile-menu";
-import { UserProfileDropdown } from "@/components/home/user-profile-dropdown";
-import { Button } from "@/components/ui/button";
+import { useNotifications } from "@/lib/notifications";
 import { Bell, Search, ShoppingCart, Zap } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
+import { Button } from "../ui/button";
+import { MobileMenu } from "./mobile-menu";
 
 interface NavItem {
   name: string;
@@ -14,8 +15,11 @@ interface NavItem {
 }
 
 export function Navbar() {
-  // This would typically come from user session context
-  const isAuthenticated = false; // For now, we'll assume the user is not authenticated
+  const { data: session, status } = useSession();
+  const isAuthenticated = status === "authenticated";
+
+  // Determine if user is authenticated for UI purposes
+  const isUserAuthenticated = isAuthenticated && session?.user !== undefined;
 
   const navItems: NavItem[] = [
     { name: "Features", href: "#features" },
@@ -34,23 +38,14 @@ export function Navbar() {
     },
   ];
 
-  const notifications = [
-    {
-      id: 1,
-      title: "New message from client",
-      description: "John Smith sent you a message about the website project",
-      time: "2 min ago",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Milestone completed",
-      description:
-        "Your milestone for the mobile app project has been approved",
-      time: "1 hour ago",
-      read: true,
-    },
-  ];
+  const {
+    notifications,
+    unreadCount,
+    loading,
+    error,
+    markAsRead,
+    markAllAsRead,
+  } = useNotifications();
 
   // This would typically come from a shopping cart context
   const cartItems = 1; // For now, we'll assume there is 1 item in the cart
@@ -154,36 +149,63 @@ export function Navbar() {
                 className="relative text-secondary hover:text-purple-700 hover:bg-purple-500/10"
               >
                 <Bell className="w-5 h-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-purple-700 rounded-full"></span>
+                {isAuthenticated && unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
               </Button>
               <div className="absolute right-0 mt-2 w-80 bg-white border border-purple-500/20 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <div className="p-4 border-b border-purple-500/20">
+                <div className="p-4 border-b border-purple-500/20 flex justify-between items-center">
                   <h3 className="font-medium text-purple-700">Notifications</h3>
+                  {notifications.length > 0 && (
+                    <button
+                      onClick={() => markAllAsRead()}
+                      className="text-xs text-purple-700 hover:underline"
+                    >
+                      Mark all as read
+                    </button>
+                  )}
                 </div>
                 <div className="max-h-96 overflow-y-auto">
-                  {notifications.map((notification) => (
-                    <div
-                      key={notification.id}
-                      className={`p-4 border-b border-purple-500/10 hover:bg-purple-500/5 cursor-pointer ${
-                        !notification.read ? "bg-purple-500/5" : ""
-                      }`}
-                    >
-                      <div className="flex justify-between">
-                        <h4 className="font-medium text-purple-700">
-                          {notification.title}
-                        </h4>
-                        {!notification.read && (
-                          <span className="w-2 h-2 bg-purple-700 rounded-full"></span>
-                        )}
-                      </div>
-                      <p className="text-sm text-body mt-1">
-                        {notification.description}
-                      </p>
-                      <p className="text-xs text-muted mt-2">
-                        {notification.time}
-                      </p>
+                  {loading ? (
+                    <div className="p-4 text-center text-sm text-muted-foreground">
+                      Loading notifications...
                     </div>
-                  ))}
+                  ) : error ? (
+                    <div className="p-4 text-center text-sm text-red-500">
+                      Error loading notifications
+                    </div>
+                  ) : notifications.length === 0 ? (
+                    <div className="p-4 text-center text-sm text-muted-foreground">
+                      No notifications
+                    </div>
+                  ) : (
+                    notifications.map((notification) => (
+                      <div
+                        key={notification.id}
+                        className={`p-4 border-b border-purple-500/10 hover:bg-purple-500/5 cursor-pointer ${
+                          !notification.read ? "bg-purple-500/5" : ""
+                        }`}
+                        onClick={() => markAsRead(notification.id)}
+                      >
+                        <div className="flex justify-between">
+                          <h4 className="font-medium text-purple-700">
+                            {notification.title}
+                          </h4>
+                          {!notification.read && (
+                            <span className="w-2 h-2 bg-purple-700 rounded-full"></span>
+                          )}
+                        </div>
+                        <p className="text-sm text-body mt-1">
+                          {notification.description}
+                        </p>
+                        <p className="text-xs text-muted mt-2">
+                          {notification.time}
+                        </p>
+                      </div>
+                    ))
+                  )}
                 </div>
                 <div className="p-4 text-center">
                   <button className="text-sm text-purple-700 hover:underline">
@@ -193,8 +215,22 @@ export function Navbar() {
               </div>
             </div>
 
-            {isAuthenticated ? (
-              <UserProfileDropdown />
+            {isUserAuthenticated ? (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-secondary hidden md:block">
+                  {session.user?.name || session.user?.email}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-secondary hover:text-purple-700 hover:bg-purple-500/10 font-medium"
+                  onClick={async () => {
+                    await signOut({ callbackUrl: "/" });
+                  }}
+                >
+                  Logout
+                </Button>
+              </div>
             ) : (
               <>
                 <Button
@@ -210,7 +246,7 @@ export function Navbar() {
                   className="bg-purple-700 text-white hover:bg-purple-800 font-medium text-sm px-4"
                   asChild
                 >
-                  <Link href="/auth/register">Get Started</Link>
+                  <Link href="/auth/signup">Get Started</Link>
                 </Button>
               </>
             )}

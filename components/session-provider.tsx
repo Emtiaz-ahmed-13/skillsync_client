@@ -4,17 +4,17 @@ import { SessionProvider, useSession } from "next-auth/react";
 import { useEffect } from "react";
 
 function SessionUpdater() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   useEffect(() => {
-    // Save accessToken to localStorage when session changes
-    if (session?.accessToken) {
-      localStorage.setItem("accessToken", session.accessToken);
-    } else if (session === null) {
-      // Clear accessToken when user logs out
-      localStorage.removeItem("accessToken");
+    if (status === "authenticated" && session?.accessToken) {
+      sessionStorage.setItem("accessToken", session.accessToken);
     }
-  }, [session]);
+
+    if (status === "unauthenticated") {
+      sessionStorage.removeItem("accessToken");
+    }
+  }, [session?.accessToken, status]);
 
   return null;
 }
@@ -25,7 +25,7 @@ export function NextAuthSessionProvider({
   children: React.ReactNode;
 }) {
   return (
-    <SessionProvider>
+    <SessionProvider refetchOnWindowFocus={false}>
       <SessionUpdater />
       {children}
     </SessionProvider>

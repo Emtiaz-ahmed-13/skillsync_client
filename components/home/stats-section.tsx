@@ -33,18 +33,21 @@ export function StatsSection() {
   ];
 
   return (
-    <section className="py-16 border-y border-gray-200 bg-white">
+    <section className="py-16 bg-gradient-to-b from-secondary to-background">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {stats.map((stat, i) => (
-            <div key={i} className="text-center space-y-3">
+            <div
+              key={i}
+              className="text-center space-y-3 p-6 bg-card rounded-xl shadow-sm border border-border hover:shadow-md transition-shadow"
+            >
               <div className="flex justify-center">
-                <stat.icon className="w-6 h-6 text-primary-heading" />
+                <stat.icon className="w-6 h-6 text-primary" />
               </div>
-              <div className="text-2xl font-bold text-primary-heading">
+              <div className="text-2xl font-bold text-foreground">
                 {stat.value}
               </div>
-              <div className="text-sm text-secondary uppercase tracking-wide">
+              <div className="text-sm text-muted-foreground uppercase tracking-wide">
                 {stat.label}
               </div>
             </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { LogOut, Settings, User } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,13 +8,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { LogOut, Settings, User } from "lucide-react";
-import { signOut } from "next-auth/react";
+} from "../../components/ui/dropdown-menu";
 
 export function UserProfileDropdown() {
-  const handleLogout = async () => {
-    await signOut({ callbackUrl: "/" });
+  const handleLogout = () => {
+    // Add your logout functionality here
+    console.log("Logging out...");
+    window.location.href = "/";
   };
 
   return (
@@ -44,13 +45,13 @@ export function UserProfileDropdown() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-gray-200" />
         <DropdownMenuItem asChild>
-          <a href="/profile" className="cursor-pointer">
+          <a href="#" className="cursor-pointer">
             <User className="mr-2 h-4 w-4" />
             <span>Profile</span>
           </a>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <a href="/settings" className="cursor-pointer">
+          <a href="#" className="cursor-pointer">
             <Settings className="mr-2 h-4 w-4" />
             <span>Settings</span>
           </a>
