@@ -1,5 +1,5 @@
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import FreelancerDashboardClient from "@/components/auth/freelancer-dashboard";
+import FreelancerDashboardClient from "@/components/features/dashboard/freelancer-dashboard";
 import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Navbar } from "@/components/home/navbar";
+import { Navbar } from "@/components/shared/navbar";
 import { BackgroundRippleEffect } from "@/components/ui/background-ripple-effect";
 import { Badge } from "@/components/ui/badge";
 import {

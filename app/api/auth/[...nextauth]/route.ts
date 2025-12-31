@@ -1,7 +1,5 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import GitHubProvider from "next-auth/providers/github";
-import GoogleProvider from "next-auth/providers/google";
 
 const authOptions = {
   providers: [
@@ -36,6 +34,7 @@ const authOptions = {
               body: JSON.stringify({
                 email: credentials.email,
                 password: credentials.password,
+                role: credentials.role, // Include selected role for potential backend validation
               }),
             }
           );
@@ -80,78 +79,45 @@ const authOptions = {
           }
         } catch (error) {
           console.error("Error during authentication:", error);
-          return null;
-        }
-      },
-    }),
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-      async profile(profile) {
-        // Create or update user in your backend
-        try {
-          const response = await fetch(
-            "http://localhost:5001/api/v1/auth/google",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                name: profile.name,
-                email: profile.email,
-                image: profile.picture,
-                provider: "google",
-              }),
-            }
-          );
 
-          if (response.ok) {
-            const data = await response.json();
-            return {
-              id: data.user?.id,
-              name: data.user?.name,
-              email: data.user?.email,
-              role: data.user?.role || "client", // Default to client for social login
-            };
-          } else {
-            return null;
-          }
-        } catch (error) {
-          return null;
-        }
-      },
-    }),
-    GitHubProvider({
-      clientId: process.env.GITHUB_CLIENT_ID || "",
-      clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
-      async profile(profile) {
-        // Create or update user in your backend
-        try {
-          const response = await fetch(
-            "http://localhost:5001/api/v1/auth/github",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                name: profile.name,
-                email: profile.email,
-                image: profile.avatar_url,
-                provider: "github",
-              }),
-            }
-          );
+          // Return mock user data for development when backend is not available
+          if (process.env.NODE_ENV === "development") {
+            console.log(
+              "Backend not available, using mock user data for development"
+            );
 
-          if (response.ok) {
-            const data = await response.json();
-            return {
-              id: data.user?.id,
-              name: data.user?.name,
-              email: data.user?.email,
-              role: data.user?.role || "client", // Default to client for social login
+            // Mock user data based on email
+            const mockUsers = {
+              "admin@example.com": {
+                id: "mock-admin-id",
+                name: "Admin User",
+                email: "admin@example.com",
+                role: "admin",
+                accessToken: "mock-jwt-token-admin",
+              },
+              "client@example.com": {
+                id: "mock-client-id",
+                name: "Client User",
+                email: "client@example.com",
+                role: "client",
+                accessToken: "mock-jwt-token-client",
+              },
+              "freelancer@example.com": {
+                id: "mock-freelancer-id",
+                name: "Freelancer User",
+                email: "freelancer@example.com",
+                role: "freelancer",
+                accessToken: "mock-jwt-token-freelancer",
+              },
             };
-          } else {
-            return null;
+
+            const mockUser =
+              mockUsers[credentials.email as keyof typeof mockUsers];
+            if (mockUser) {
+              return mockUser;
+            }
           }
-        } catch (error) {
+
           return null;
         }
       },
@@ -190,7 +156,8 @@ const authOptions = {
         // If it's a relative URL, allow it
         if (url.startsWith("/")) {
           // Prevent redirect loops by checking if URL contains auth paths
-          if (url.includes("/auth/")) {
+          // But allow role-redirect to pass through for role-based redirection
+          if (url.includes("/auth/") && !url.includes("role-redirect")) {
             return `${baseUrl}/dashboard`;
           }
           return `${baseUrl}${url}`;

@@ -1,5 +1,5 @@
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import EnhancedProjectDetailsClient from "@/components/auth/enhanced-project-details";
+import EnhancedProjectDetailsClient from "@/components/features/projects/enhanced-project-details";
 import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
 
@@ -19,9 +19,9 @@ interface Session {
 export default async function ProjectDetailsPage({
   params,
 }: {
-  params: { id: Promise<string> };
+  params: Promise<{ id: string }>; // params is a Promise in App Router
 }) {
-  const id = await params.id;
+  const { id } = await params;
   const session = (await getServerSession(authOptions)) as Session | null;
 
   if (!session || session.user?.role !== "freelancer") {

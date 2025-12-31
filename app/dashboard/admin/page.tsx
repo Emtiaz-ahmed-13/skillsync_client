@@ -1,4 +1,4 @@
-import AdminDashboardClient from "@/components/auth/admin-dashboard";
+import AdminDashboardClient from "@/components/features/dashboard/admin-dashboard";
 
 export default function AdminDashboardPage() {
   return <AdminDashboardClient />;

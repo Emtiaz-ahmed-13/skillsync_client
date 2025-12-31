@@ -1,5 +1,5 @@
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import FreelancerProfileUpdateClient from "@/components/auth/freelancer-profile-update";
+import FreelancerProfileUpdateClient from "@/components/features/users/freelancer-profile-update";
 import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
 

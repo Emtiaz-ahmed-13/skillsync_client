@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import { cn } from "@/lib/utils";
 import {
   motion,
   useAnimationFrame,
@@ -7,10 +7,9 @@ import {
   useMotionValue,
   useTransform,
 } from "framer-motion";
-import { useRef } from "react";
-import { cn } from "@/lib/utils";
+import React, { useRef } from "react";
 
-export function MovingBorderButton({
+export function Button({
   borderRadius = "1.75rem",
   children,
   as: Component = "button",
@@ -32,7 +31,7 @@ export function MovingBorderButton({
   return (
     <Component
       className={cn(
-        "bg-transparent relative text-xl h-14 w-48 p-[1px] overflow-hidden",
+        "bg-transparent relative w-fit p-[1px] overflow-hidden",
         containerClassName
       )}
       style={{
@@ -56,7 +55,7 @@ export function MovingBorderButton({
 
       <div
         className={cn(
-          "relative bg-card border border-border/50 backdrop-blur-xl text-foreground flex items-center justify-center w-full h-full text-sm antialiased font-medium",
+          "relative bg-primary text-primary-foreground flex items-center justify-center w-full h-full text-sm antialiased font-medium",
           className
         )}
         style={{
