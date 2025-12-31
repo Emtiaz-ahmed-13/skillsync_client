@@ -66,7 +66,7 @@ export default function FreelancerProfileClient({
   useEffect(() => {
     if (status === "authenticated") {
       if (user?.role !== "freelancer") {
-        // Redirect to correct dashboard if user is not a freelancer
+        
         switch (user?.role) {
           case "client":
             router.push("/dashboard/client");
@@ -89,7 +89,8 @@ export default function FreelancerProfileClient({
 
       try {
         const response = await fetch(
-          `http://localhost:5001/api/v1/profile/me`,
+          `${process.env.NEXT_PUBLIC_API_URL}/profile/me`
+          || `localhost:5001/api/v1/profile/me`,
           {
             headers: {
               Authorization: `Bearer ${user.accessToken}`,
@@ -117,7 +118,6 @@ export default function FreelancerProfileClient({
             });
           }
         } else {
-          // If profile doesn't exist, initialize with user data
           setFormData({
             name: user.name || "",
             bio: "",
@@ -153,12 +153,8 @@ export default function FreelancerProfileClient({
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setResumeFile(file);
-
-      // Create a preview URL for the file
       const previewUrl = URL.createObjectURL(file);
       setResumePreview(previewUrl);
-
-      // Clean up the preview URL when component unmounts or file changes
       return () => URL.revokeObjectURL(previewUrl);
     }
   };
@@ -169,25 +165,21 @@ export default function FreelancerProfileClient({
 
     try {
       let resumeUrl = null;
-
-      // Upload resume if provided
       if (resumeFile) {
         const formDataUpload = new FormData();
         formDataUpload.append("file", resumeFile);
         formDataUpload.append("fileType", "resume");
-        // Add optional parameters that the backend might require
-        formDataUpload.append("projectId", ""); // Empty string if not associated with a project
-        // Don't include milestoneId to avoid BSONError
+    
+        formDataUpload.append("projectId", ""); 
 
         try {
           const uploadResponse = await fetch(
-            "http://localhost:5001/api/v1/files",
+            `${process.env.NEXT_PUBLIC_API_URL}/files`,
             {
               method: "POST",
               headers: {
                 Authorization: `Bearer ${user?.accessToken || ""}`,
-                // Don't set Content-Type header when using FormData
-                // The browser will set it automatically with the correct boundary
+              
               },
               body: formDataUpload,
             }
@@ -213,7 +205,6 @@ export default function FreelancerProfileClient({
         }
       }
 
-      // Prepare profile data
       const profileData = {
         bio: formData.bio,
         skills: formData.skills
@@ -229,13 +220,13 @@ export default function FreelancerProfileClient({
         hourlyRate: Number(formData.hourlyRate),
       };
 
-      // Add resume URL if available
       if (resumeUrl) {
         Object.assign(profileData, { resume: resumeUrl });
       }
 
       const response = await fetch(
-        "http://localhost:5001/api/v1/profile/me/freelancer",
+        `${process.env.NEXT_PUBLIC_API_URL}/profile/me/freelancer`
+        || `localhost:5001/api/v1/profile/me/freelancer`,
         {
           method: "PATCH",
           headers: {
@@ -250,7 +241,7 @@ export default function FreelancerProfileClient({
         const data = await response.json();
         if (data.success) {
           toast.success("Profile updated successfully!");
-          // Update session if needed
+      
           await update();
         } else {
           toast.error(data.message || "Failed to update profile");
@@ -276,7 +267,7 @@ export default function FreelancerProfileClient({
   }
 
   if (status === "unauthenticated") {
-    return null; // Redirect effect will handle this
+    return null; 
   }
 
   return (

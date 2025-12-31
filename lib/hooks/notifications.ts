@@ -48,7 +48,7 @@ export const useNotifications = () => {
     try {
       setLoading(true);
       const response = await fetch(
-        "http://localhost:5001/api/v1/notifications",
+        `${process.env.NEXT_PUBLIC_API_URL}/notifications`,
         {
           headers: {
             Authorization: `Bearer ${session.user.accessToken}`,
@@ -94,7 +94,7 @@ export const useNotifications = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:5001/api/v1/notifications/unread-count",
+        `${process.env.NEXT_PUBLIC_API_URL}/notifications/unread-count`,
         {
           headers: {
             Authorization: `Bearer ${session.user.accessToken}`,
@@ -124,7 +124,7 @@ export const useNotifications = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5001/api/v1/notifications/${id}/read`,
+        `${process.env.NEXT_PUBLIC_API_URL}/notifications/${id}/read`,
         {
           method: "PUT",
           headers: {
@@ -159,7 +159,7 @@ export const useNotifications = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:5001/api/v1/notifications/mark-all-read",
+        `${process.env.NEXT_PUBLIC_API_URL}/notifications/mark-all-read`,
         {
           method: "PUT",
           headers: {

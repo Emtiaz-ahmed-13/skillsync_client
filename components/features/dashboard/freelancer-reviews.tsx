@@ -74,7 +74,9 @@ export function FreelancerReviews() {
 
                   if (projectIdStr) {
                     const projectResponse = await fetch(
-                      `http://localhost:5001/api/v1/projects/${projectIdStr}`,
+                      `${process.env.NEXT_PUBLIC_API_URL}/projects/${projectIdStr}`
+                      ||
+                      `localhost:5001/api/v1/projects/${projectIdStr}`,
                       {
                         headers: {
                           Authorization: `Bearer ${accessToken}`,
@@ -87,27 +89,22 @@ export function FreelancerReviews() {
                       if (projectData.success && projectData.data) {
                         projectTitle = projectData.data.title;
                         
-                        // Try to get client name from project owner
+                       
                         const owner = projectData.data.ownerId;
                         if (owner && typeof owner === 'object' && (owner as any).name) {
                           clientName = (owner as any).name;
                         } else if (owner && typeof owner === 'object' && (owner as any).email) {
-                           // Fallback to name from email if name missing
+                          
                            clientName = (owner as any).email.split('@')[0];
                         }
                       }
                     }
                   }
-                  
-                  // If client name still unknown, try fetching reviewer if possible
-                  // (Assuming reviewerId is the client)
+                
                   if (clientName === "Unknown Client" && review.reviewerId) {
                      const reviewerIdStr = typeof review.reviewerId === 'object' 
                         ? (review.reviewerId as any)._id 
                         : review.reviewerId;
-                        
-                     // We might not have a public user endpoint, but let's try profile if available
-                     // or skip if complex. The project owner method is most reliable for now.
                   }
 
                 } catch (err) {
@@ -155,8 +152,6 @@ export function FreelancerReviews() {
       </div>
     );
   };
-
-  // Calculate average rating
   const averageRating = reviews.length > 0
     ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)
     : "0.0";

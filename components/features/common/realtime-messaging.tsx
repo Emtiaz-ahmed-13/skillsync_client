@@ -370,8 +370,16 @@ export default function RealtimeMessaging({ projectId }: { projectId: string }) 
                                 const senderId = typeof message.senderId === 'object' ? message.senderId._id : message.senderId;
                                 const isMe = senderId === user.id;
                                 // Check if previous message was from same sender to group visually
-                                const isSequence = index > 0 && 
-                                    (typeof messages[index-1].senderId === 'object' ? messages[index-1].senderId._id : messages[index-1].senderId) === senderId;
+                                const prevMessage = messages[index - 1];
+                                const prevSenderId =
+                                  index > 0 && prevMessage
+                                    ? typeof prevMessage.senderId === "object"
+                                      ? prevMessage.senderId._id
+                                      : prevMessage.senderId
+                                    : null;
+
+                                const isSequence =
+                                  index > 0 && prevSenderId === senderId;
                                 
                                 return (
                                     <div

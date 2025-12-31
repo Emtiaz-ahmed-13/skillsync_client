@@ -63,7 +63,7 @@ export default function LoginClient() {
             variant="outline"
             className="w-full py-6 text-sm font-semibold border-input bg-background/50 hover:bg-accent hover:text-accent-foreground transition-all duration-300 rounded-xl group"
             onClick={() => {
-              window.location.href = "http://localhost:5001/api/v1/auth/google";
+              window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
             }}
           >
             <svg

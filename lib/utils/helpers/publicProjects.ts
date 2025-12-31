@@ -1,7 +1,7 @@
 export async function getPublicProjectCount(): Promise<number> {
   try {
     const response = await fetch(
-      "http://localhost:5001/api/v1/projects/approved"
+      `${process.env.NEXT_PUBLIC_API_URL}/projects/approved`
     );
 
     if (response.ok) {

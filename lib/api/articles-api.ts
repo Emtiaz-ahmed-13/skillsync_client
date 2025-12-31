@@ -43,7 +43,7 @@ export interface CreateArticleRequest {
 
 // API base URL - use environment variable or default to backend
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api/v1";
+  process.env.NEXT_PUBLIC_API_URL || "https://skillsync-server-kohl.vercel.app/api/v1";
 
 // Helper function to generate headers with auth token if available
 const getHeaders = () => {
@@ -87,7 +87,7 @@ export const getArticles = async (
     }
 
     const response = await fetch(
-      `${API_BASE_URL}/articles/getAllArticles?${params.toString()}`,
+      `${API_BASE_URL}/articles/getAllArticles?${params.toString()}`|| `localhost:5001/api/v1/articles/getAllArticles?${params.toString()}`,
       {
         method: "GET",
         headers: getHeaders(),
@@ -95,7 +95,7 @@ export const getArticles = async (
     );
 
     if (!response.ok) {
-      // Don't throw an error for server issues, return empty data instead
+
       console.warn(
         `Failed to fetch articles: ${response.status} ${response.statusText}`
       );
@@ -144,7 +144,7 @@ export const getArticles = async (
 // 2. Get article by ID
 export const getArticleById = async (id: string) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/articles/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/articles/${id}`|| `localhost:5001/api/v1/articles/${id}`, {
       method: "GET",
       headers: getHeaders(),
     });
@@ -182,10 +182,15 @@ export const getArticleById = async (id: string) => {
 // 3. Get featured articles
 export const getFeaturedArticles = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/articles/featured`, {
-      method: "GET",
-      headers: getHeaders(),
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/articles/featured` ||
+        `localhost:5001/api/v1/articles/featured`,
+      {
+        method: "GET",
+        headers: getHeaders(),
+      }
+    );
+    
 
     if (!response.ok) {
       // Don't throw an error for server issues, return empty data instead
@@ -208,7 +213,6 @@ export const getFeaturedArticles = async () => {
     };
   } catch (error) {
     console.error("Error fetching featured articles:", error);
-    // Return success: false but with empty data instead of throwing
     return {
       success: false,
       message:
@@ -224,7 +228,7 @@ export const getFeaturedArticles = async () => {
 export const getArticlesByCategory = async (category: string) => {
   try {
     const response = await fetch(
-      `${API_BASE_URL}/articles/category/${encodeURIComponent(category)}`,
+      `${API_BASE_URL}/articles/category/${encodeURIComponent(category)}`|| `localhost:3000/api/v1/articles/category/${encodeURIComponent(category)}`,
       {
         method: "GET",
         headers: getHeaders(),
@@ -269,7 +273,7 @@ export const getArticlesByCategory = async (category: string) => {
 export const getArticlesByAuthor = async (authorId: string) => {
   try {
     const response = await fetch(
-      `${API_BASE_URL}/articles/author/${encodeURIComponent(authorId)}`,
+      `${API_BASE_URL}/articles/author/${encodeURIComponent(authorId)}`|| `localhost:3000/api/v1/articles/author/${encodeURIComponent(authorId)}`,
       {
         method: "GET",
         headers: getHeaders(),
@@ -444,7 +448,8 @@ export const deleteArticle = async (id: string) => {
 // 9. Increment article view count
 export const incrementArticleView = async (id: string) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/articles/${id}/view`, {
+    const response = await fetch(`${API_BASE_URL}/articles/${id}/view`
+      || `localhost:3000/api/v1/articles/${id}/view`, {
       method: "POST",
       headers: getHeaders(),
     });
@@ -484,7 +489,8 @@ export const incrementArticleView = async (id: string) => {
 // 10. Like article
 export const likeArticle = async (id: string) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/articles/${id}/like`, {
+    const response = await fetch(`${API_BASE_URL}/articles/${id}/like`
+      || `localhost:3000/api/v1/articles/${id}/like`, {
       method: "POST",
       headers: getHeaders(),
     });
@@ -526,7 +532,8 @@ export const getPopularArticles = async (limit: number = 5) => {
     params.append("limit", limit.toString());
 
     const response = await fetch(
-      `${API_BASE_URL}/articles/popular?${params.toString()}`,
+      `${API_BASE_URL}/articles/popular?${params.toString()}`
+      || `localhost:3000/api/v1/articles/popular?${params.toString()}`,
       {
         method: "GET",
         headers: getHeaders(),
@@ -576,7 +583,8 @@ export const getRelatedArticles = async (
     params.append("limit", limit.toString());
 
     const response = await fetch(
-      `${API_BASE_URL}/articles/${currentArticleId}/related?${params.toString()}`,
+      `${API_BASE_URL}/articles/${currentArticleId}/related?${params.toString()}`
+      || `localhost:3000/api/v1/articles/${currentArticleId}/related?${params.toString()}`,
       {
         method: "GET",
         headers: getHeaders(),
@@ -627,7 +635,8 @@ export const getPendingArticles = async (
     params.append("limit", limit.toString());
 
     const response = await fetch(
-      `${API_BASE_URL}/articles/pending/list?${params.toString()}`,
+      `${API_BASE_URL}/articles/pending/list?${params.toString()}`
+      || `localhost:5001/api/v1/articles/pending/list?${params.toString()}`,
       {
         method: "GET",
         headers: {
@@ -680,7 +689,8 @@ export const getPendingArticles = async (
 // 14. Approve article (Admin only)
 export const approveArticle = async (id: string, accessToken: string) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/articles/${id}/approve`, {
+    const response = await fetch(`${API_BASE_URL}/articles/${id}/approve`
+      || `localhost:5001/api/v1/articles/${id}/approve`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -722,7 +732,8 @@ export const rejectArticle = async (
   rejectionReason?: string
 ) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/articles/${id}/reject`, {
+    const response = await fetch(`${API_BASE_URL}/articles/${id}/reject`
+      || `localhost:5001/api/v1/articles/${id}/reject`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",

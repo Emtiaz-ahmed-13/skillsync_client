@@ -84,16 +84,12 @@ export function ClientProposals({
     try {
       setLoading(true);
 
-      // Get all projects for this client
       const projectsResponse = await getProjects();
       if (projectsResponse.success && projectsResponse.data) {
-        // Ensure clientProjects is an array before iterating
         const rawProjects = projectsResponse.data;
         const clientProjects = Array.isArray(rawProjects)
           ? (rawProjects as Project[])
           : [];
-
-        // For each project, get its proposals
         const allProposals: Proposal[] = [];
         for (const project of clientProjects) {
           const proposalsResponse = await getProposalsByProject(project._id);
@@ -105,7 +101,6 @@ export function ClientProposals({
 
         setProposals(allProposals);
 
-        // Create project mapping
         const projectMap: Record<string, Project> = {};
         clientProjects.forEach((project) => {
           projectMap[project._id] = project;
@@ -125,7 +120,7 @@ export function ClientProposals({
     try {
       const result = await acceptProposal(proposalId);
       if (result.success) {
-        // Find the proposal to get resume info before updating status
+     
         const proposalToAccept = proposals.find((p) => p._id === proposalId);
 
         setProposals((prev) =>
@@ -134,8 +129,6 @@ export function ClientProposals({
           )
         );
         toast.success("Proposal accepted successfully");
-
-        // Check if the freelancer has a resume and notify user
         if (proposalToAccept?.resumeUrl) {
           const shouldViewResume = confirm(
             "Would you like to view the freelancer's resume now?"

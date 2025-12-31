@@ -93,7 +93,9 @@ export default function ProjectDetailsClient({
     const fetchProject = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5001/api/v1/projects/${projectId}`
+          `${
+            process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api/v1"
+          }/projects/${projectId}`
         );
 
         if (response.ok) {
@@ -139,7 +141,6 @@ export default function ProjectDetailsClient({
     setBidSubmitting(true);
 
     try {
-      // Prepare form data for bid submission with optional resume
       const formData = new FormData();
       formData.append("projectId", project!._id);
       formData.append("amount", bidAmount.toString());
@@ -149,13 +150,16 @@ export default function ProjectDetailsClient({
         formData.append("resume", resumeFile);
       }
 
-      const response = await fetch("http://localhost:5001/api/v1/bids", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${user.accessToken}`,
-        },
-        body: formData,
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api/v1"}/bids`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${user.accessToken}`,
+          },
+          body: formData,
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();

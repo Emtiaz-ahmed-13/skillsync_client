@@ -3,11 +3,11 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
@@ -154,7 +154,10 @@ export default function SprintPlan({ projectId, project }: SprintPlanProps) {
         // Try to get existing sprints, but handle 404 gracefully
         try {
           // Use the correct endpoint for sprint planning
-          const response = await fetch(`/api/v1/sprint-planning/${projectId}`, {
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/sprint-planning/${projectId}` ||
+              `localhost:5001/api/v1/sprint-planning/${projectId}`,
+            {
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },
@@ -165,11 +168,11 @@ export default function SprintPlan({ projectId, project }: SprintPlanProps) {
             if (result.success && result.data && result.data.sprints) {
               setSprints(result.data.sprints);
             } else {
-              // If no existing plan, initialize empty sprints
+        
               initializeSprints();
             }
           } else {
-            // If API call fails (e.g., 404), initialize with default sprints
+           
             initializeSprints();
           }
         } catch (error) {
@@ -177,7 +180,6 @@ export default function SprintPlan({ projectId, project }: SprintPlanProps) {
             "Failed to load existing sprints, initializing default sprints:",
             error
           );
-          // If API call fails (e.g., 404), initialize with default sprints
           initializeSprints();
         }
       } catch (error) {
@@ -197,10 +199,10 @@ export default function SprintPlan({ projectId, project }: SprintPlanProps) {
 
     for (let i = 0; i < 3; i++) {
       const startDate = new Date(today);
-      startDate.setDate(today.getDate() + i * 14); // Each sprint starts 14 days after the previous
+      startDate.setDate(today.getDate() + i * 14); 
 
       const endDate = new Date(startDate);
-      endDate.setDate(startDate.getDate() + 14); // Each sprint lasts 14 days
+      endDate.setDate(startDate.getDate() + 14); 
 
       newSprints.push({
         _id: `sprint-${i + 1}`,
@@ -302,8 +304,6 @@ export default function SprintPlan({ projectId, project }: SprintPlanProps) {
     };
 
     setSprints([...sprints, newSprint]);
-
-    // Reset form
     setNewSprintTitle("");
     setNewSprintDescription("");
     setNewSprintStartDate("");
@@ -334,8 +334,6 @@ export default function SprintPlan({ projectId, project }: SprintPlanProps) {
     });
 
     setSprints(updatedSprints);
-
-    // Reset form
     setNewFeatureTitle("");
     setNewFeatureDescription("");
     setSelectedSprintForFeature(null);
@@ -352,10 +350,9 @@ export default function SprintPlan({ projectId, project }: SprintPlanProps) {
         toast.error("Authentication required. Please log in.");
         return;
       }
-
-      // Call the backend API to generate a manual sprint plan
       const response = await fetch(
-        `/api/v1/sprint-planning/generate/${projectId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/sprint-planning/generate/${projectId}` ||
+          `localhost:5001/api/v1/sprint-planning/generate/${projectId}`,
         {
           method: "POST",
           headers: {
@@ -418,7 +415,8 @@ export default function SprintPlan({ projectId, project }: SprintPlanProps) {
 
       // Use the correct endpoint for creating sprint plan
       const response = await fetch(
-        `/api/v1/sprint-planning/generate/${projectId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/sprint-planning/generate/${projectId}` ||
+          `localhost:5001/api/v1/sprint-planning/generate/${projectId}`,
         {
           method: "POST",
           headers: {

@@ -29,17 +29,15 @@ export default function ChatClient() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const currentUser = session?.user as any;
 
-  // Scroll to bottom of chat
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Fetch conversations
   useEffect(() => {
     const fetchConversations = async () => {
       if (!currentUser?.accessToken) return;
       try {
-        const response = await fetch("http://localhost:5001/api/v1/chat/conversations", {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/conversations`, {
           headers: {
             Authorization: `Bearer ${currentUser.accessToken}`,
           },
@@ -47,18 +45,16 @@ export default function ChatClient() {
         if (response.ok) {
           const data = await response.json();
           setConversations(data.data);
-          
-          // Check for userId in URL params to auto-select
           const searchParams = new URLSearchParams(window.location.search);
           const userIdParam = searchParams.get('userId');
           if (userIdParam) {
-             // If user is already in conversations, select them
+  
              const existingUser = data.data.find((u: User) => u._id === userIdParam);
              if (existingUser) {
                  setSelectedUser(existingUser);
              } else {
                  // If not, fetch their details temporarily seamlessly
-                 const userRes = await fetch(`http://localhost:5001/api/v1/auth/users/${userIdParam}`, {
+                 const userRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/users/${userIdParam}`, {
                     headers: { Authorization: `Bearer ${currentUser.accessToken}` }
                  });
                  if (userRes.ok) {
@@ -78,14 +74,12 @@ export default function ChatClient() {
     };
     fetchConversations();
   }, [currentUser]);
-
-  // Fetch chat history when selecting a user
   useEffect(() => {
     const fetchHistory = async () => {
       if (!selectedUser || !currentUser?.accessToken) return;
       
       try {
-        const response = await fetch(`http://localhost:5001/api/v1/chat/history/${selectedUser._id}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/history/${selectedUser._id}`, {
              headers: {
                 Authorization: `Bearer ${currentUser.accessToken}`,
               },
@@ -110,8 +104,7 @@ export default function ChatClient() {
     sendMessage(selectedUser._id, newMessage);
     setNewMessage("");
   };
-  
-  // Filter messages for current conversation
+
   const currentMessages = messages.filter(
       msg => 
         (msg.senderId._id === selectedUser?._id && msg.receiverId._id === currentUser?.id) ||
@@ -124,7 +117,6 @@ export default function ChatClient() {
       
       <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 h-[calc(100vh-80px)]">
          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 h-full">
-            {/* Sidebar - Conversations */}
             <Card className="md:col-span-1 p-4 h-full flex flex-col">
                 <h2 className="text-xl font-bold mb-4">Messages</h2>
                 <Separator className="mb-4" />
@@ -158,8 +150,7 @@ export default function ChatClient() {
                     </div>
                 </ScrollArea>
             </Card>
-            
-            {/* Main Chat Area */}
+      
              <Card className="md:col-span-3 p-4 h-full flex flex-col">
                 {selectedUser ? (
                     <>

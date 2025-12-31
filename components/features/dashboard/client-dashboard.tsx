@@ -64,8 +64,6 @@ export default function ClientDashboardClient() {
     totalSpent: 0,
     pendingReviews: 0,
   });
-
-  // Project creation state
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
   const [projectTitle, setProjectTitle] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
@@ -75,12 +73,10 @@ export default function ClientDashboardClient() {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  // Projects state
   const [projects, setProjects] = useState<Project[]>([]);
   const [projectsLoading, setProjectsLoading] = useState(true);
 
-  // Bids state
+ 
   const [bids, setBids] = useState([]);
   const [bidsLoading, setBidsLoading] = useState(true);
 
@@ -88,7 +84,7 @@ export default function ClientDashboardClient() {
     if (status === "authenticated" && session?.user) {
       const user = session.user as { role?: string };
       if (user.role !== "client") {
-        // Redirect to correct dashboard if user is not a client
+        
         switch (user.role) {
           case "freelancer":
             router.push("/dashboard/freelancer");
@@ -106,7 +102,6 @@ export default function ClientDashboardClient() {
   }, [session, status, router]);
 
   useEffect(() => {
-    // Fetch user's projects from the backend
     const fetchProjects = async () => {
       if (status === "authenticated" && session?.user) {
         try {
@@ -124,7 +119,9 @@ export default function ClientDashboardClient() {
           }
 
           const response = await fetch(
-            `http://localhost:5001/api/v1/projects/owner/${userId}`,
+            `${process.env.NEXT_PUBLIC_API_URL}/projects/owner/${userId}`
+            ||
+            `localhost:5001/api/v1/projects/owner/${userId}`,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -142,13 +139,11 @@ export default function ClientDashboardClient() {
               console.log("Setting projects:", data.data);
               setProjects(data.data);
 
-              // Calculate stats from the projects data
+            
               const totalProjects = data.data.length;
               const activeProjects = data.data.filter(
                 (p) => p.status !== "completed"
               ).length;
-
-              // Calculate total spent (sum of budgets)
               const totalSpent = data.data.reduce(
                 (sum, project) =>
                   sum + (project.budget || project.minimumBid || 0),
@@ -204,7 +199,9 @@ export default function ClientDashboardClient() {
                   const projectId = project._id || project.id;
 
                   const bidsResponse = await fetch(
-                    `http://localhost:5001/api/v1/bids/project/${projectId}`,
+                    `${process.env.NEXT_PUBLIC_API_URL}/bids/project/${projectId}`
+                    ||
+                    `localhost:5001/api/v1/bids/project/${projectId}`,
                     {
                       headers: {
                         Authorization: `Bearer ${accessToken}`,
@@ -317,7 +314,9 @@ export default function ClientDashboardClient() {
         technology: techList,
       };
 
-      const response = await fetch("http://localhost:5001/api/v1/projects", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/projects`
+        ||
+        `localhost:5001/api/v1/projects`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -338,7 +337,7 @@ export default function ClientDashboardClient() {
           formData.append("projectId", createdProject._id || createdProject.id);
 
           const fileResponse = await fetch(
-            "http://localhost:5001/api/v1/files",
+            `${process.env.NEXT_PUBLIC_API_URL}/files`,
             {
               method: "POST",
               headers: {
@@ -363,9 +362,7 @@ export default function ClientDashboardClient() {
         setMinimumBid("");
         setBudget("");
         setTechnologies("");
-        setFile(null); // Reset file state as well
-
-        // Refresh projects to include the new one
+        setFile(null);
         const fetchProjects = async () => {
           if (status === "authenticated" && session?.user) {
             try {
@@ -382,7 +379,9 @@ export default function ClientDashboardClient() {
               }
 
               const projectsResponse = await fetch(
-                `http://localhost:5001/api/v1/projects/owner/${userId}`,
+                `${process.env.NEXT_PUBLIC_API_URL}/projects/owner/${userId}`
+                ||
+                `localhost:5001/api/v1/projects/owner/${userId}`,
                 {
                   headers: {
                     Authorization: `Bearer ${accessToken}`,
@@ -408,11 +407,7 @@ export default function ClientDashboardClient() {
                     0
                   );
 
-                  // Calculate pending reviews based on work submissions that need review
-                  // First, get all project IDs
                   const projectIds = data.data.map((p) => p._id || p.id);
-
-                  // Then fetch work submissions for all projects
                   let pendingReviews = 0;
                   for (const projectId of projectIds) {
                     try {
@@ -424,7 +419,7 @@ export default function ClientDashboardClient() {
                         workSubmissionsResponse.data &&
                         Array.isArray(workSubmissionsResponse.data)
                       ) {
-                        // Count submissions that are pending review
+                  
                         const pendingSubmissions = (
                           workSubmissionsResponse.data as WorkSubmission[]
                         ).filter(
@@ -462,15 +457,12 @@ export default function ClientDashboardClient() {
         };
 
         fetchProjects();
-
-        // Create notification for admin about new project
         try {
           const user = session?.user as { id?: string; accessToken?: string };
           const accessToken = user?.accessToken;
 
           if (accessToken) {
-            // The notification will be created automatically by the backend when a project is created
-            // The backend should handle creating the notification for admins
+        
             console.log(
               "Project created successfully, admin notification should be handled by backend"
             );
@@ -479,15 +471,14 @@ export default function ClientDashboardClient() {
           console.error("Error creating notification:", notificationErr);
         }
       } else {
-        // Try to get error details from response
         let errorData;
         let errorText = "";
 
         try {
-          // First, try to read the response as text to see if it's HTML or a meaningful error
+        
           const responseText = await response.text();
 
-          // Check if response is HTML (indicating a server error page)
+      
           if (
             responseText.includes("<!DOCTYPE") ||
             responseText.includes("<html")
@@ -547,7 +538,9 @@ export default function ClientDashboardClient() {
       }
 
       const response = await fetch(
-        `http://localhost:5001/api/v1/bids/${bidId}/status`,
+        `${process.env.NEXT_PUBLIC_API_URL}/bids/${bidId}/status`
+        ||
+        `localhost:5001/api/v1/bids/${bidId}/status`,
         {
           method: "PUT",
           headers: {
@@ -602,7 +595,9 @@ export default function ClientDashboardClient() {
         }
 
         const response = await fetch(
-          `http://localhost:5001/api/v1/projects/owner/${userId}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/projects/owner/${userId}`
+          ||
+          `localhost:5001/api/v1/projects/owner/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -681,7 +676,9 @@ export default function ClientDashboardClient() {
                 const projectId = project._id || project.id;
 
                 const bidsResponse = await fetch(
-                  `http://localhost:5001/api/v1/bids/project/${projectId}`,
+                  `${process.env.NEXT_PUBLIC_API_URL}/bids/project/${projectId}`
+                  ||
+                  `localhost:5001/api/v1/bids/project/${projectId}`,
                   {
                     headers: {
                       Authorization: `Bearer ${accessToken}`,
@@ -736,7 +733,9 @@ export default function ClientDashboardClient() {
       }
 
       const response = await fetch(
-        `http://localhost:5001/api/v1/bids/${bidId}/status`,
+        `${process.env.NEXT_PUBLIC_API_URL}/bids/${bidId}/status`
+        ||
+        `localhost:5001/api/v1/bids/${bidId}/status`,
         {
           method: "PUT",
           headers: {

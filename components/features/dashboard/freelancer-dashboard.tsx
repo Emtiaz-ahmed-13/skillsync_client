@@ -24,21 +24,21 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-// Define types for our data
+
 interface Project {
   id: string;
-  _id: string; // Keeps both for backward compatibility, but prefers strings
+  _id: string; 
   title: string;
   description: string;
   minimumBid: number;
   budget: number;
   technology: string[];
   status: string;
-  ownerId: string | { name: string; email: string }; // Updated to handle populated object
+  ownerId: string | { name: string; email: string }; 
   createdAt: string;
   updatedAt: string;
   progress?: number;
-  realProjectId?: string; // Added for linking to details page
+  realProjectId?: string;
 }
 
 interface Bid {
@@ -101,7 +101,7 @@ export default function FreelancerDashboardClient() {
   const [approvedProjects, setApprovedProjects] = useState<Project[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
   const [loadingBids, setLoadingBids] = useState(true);
-  const [refreshTrigger, setRefreshTrigger] = useState(0); // State to trigger refresh
+  const [refreshTrigger, setRefreshTrigger] = useState(0); 
 
 
 
@@ -141,7 +141,9 @@ export default function FreelancerDashboardClient() {
         try {
           // Fetch freelancer's profile to get their ID
           const profileResponse = await fetch(
-            `http://localhost:5001/api/v1/profile/me`,
+            `${process.env.NEXT_PUBLIC_API_URL}/profile/me`
+            ||
+            `localhost:5001/api/v1/profile/me`,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -160,7 +162,9 @@ export default function FreelancerDashboardClient() {
 
           // Fetch freelancer's bids first (needed for earnings calculation)
           const bidsResponse = await fetch(
-            `http://localhost:5001/api/v1/bids/my`,
+            `${process.env.NEXT_PUBLIC_API_URL}/bids/my`
+            ||
+            `localhost:5001/api/v1/bids/my`,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -178,33 +182,31 @@ export default function FreelancerDashboardClient() {
               Array.isArray(bidsData.data)
             ) {
               bids = bidsData.data;
-
-              // Fetch project titles for each bid
               bidsWithProjectTitles = await Promise.all(
                 bids.map(async (bid: Bid) => {
                   try {
-                    // Handle case where projectId is populated object
+                  
                     const projectIdStr = typeof bid.projectId === 'object' && bid.projectId !== null 
                       ? (bid.projectId as any)._id || (bid.projectId as any).id
                       : bid.projectId;
 
-                    // If projectId is an object (populated), we might already have the title!
                     if (typeof bid.projectId === 'object' && bid.projectId !== null) {
                        const projectObj = bid.projectId as any;
-                       // Attempt to get owner details if not present
+                 
                        let clientName = "Unknown Client";
                        if (projectObj.ownerId) {
                           if (typeof projectObj.ownerId === 'object') {
                              clientName = projectObj.ownerId.name || "Unknown Client";
                           } else {
-                             // If ownerId is just a string, we might need to fetch the project again to get populated owner
-                             // But let's check if the current fetch logic handles it.
+                             
                           }
                        }
                     }
 
                     const projectResponse = await fetch(
-                      `http://localhost:5001/api/v1/projects/${projectIdStr}`,
+                      `${process.env.NEXT_PUBLIC_API_URL}/projects/${projectIdStr}`
+                      ||
+                      `localhost:5001/api/v1/projects/${projectIdStr}`,
                       {
                         headers: {
                           Authorization: `Bearer ${accessToken}`,
@@ -228,8 +230,6 @@ export default function FreelancerDashboardClient() {
                   } catch (error) {
                     console.error("Error fetching project for bid:", error);
                   }
-
-                  // Default Fallback using existing bid data
                   const fallbackTitle = (bid.projectId && typeof bid.projectId === 'object' && (bid.projectId as any).title) 
                     ? (bid.projectId as any).title 
                     : "Unknown Project";
@@ -237,29 +237,25 @@ export default function FreelancerDashboardClient() {
                   return {
                     ...bid,
                     projectTitle: fallbackTitle,
-                    // If we failed to fetch, we can't get owner name unless it was in the bid (which it isn't usually)
-                    // But if bid.projectId was populated, we might catch it above.
                   };
                 })
               );
 
               setBids(bidsWithProjectTitles);
 
-              // Update pending bids count
+           
               const pendingBidsCount = bidsWithProjectTitles.filter(
                 (b: Bid) => b.status === "pending"
               ).length;
               setStats((prev) => ({ ...prev, pendingBids: pendingBidsCount }));
             }
           }
-
-          // Calculate stats from bids since we might not have an assigned projects endpoint
           const acceptedBids = bidsWithProjectTitles.filter(
             (b: Bid) => b.status === "accepted"
           );
           const activeProjectsCount = acceptedBids.length;
 
-          // Calculate total earnings from accepted bids
+        
           const totalEarnings = bidsWithProjectTitles.reduce((sum, bid) => {
             if (bid.status === "accepted") {
               return sum + bid.amount;
@@ -267,17 +263,17 @@ export default function FreelancerDashboardClient() {
             return sum;
           }, 0);
 
-          // First, get active projects from accepted bids
           const activeProjectsFromBids = await Promise.all(
             acceptedBids.map(async (bid) => {
               try {
-                // Handle case where projectId is populated object
                 const projectIdStr = typeof bid.projectId === 'object' && bid.projectId !== null 
                   ? (bid.projectId as any)._id || (bid.projectId as any).id
                   : bid.projectId;
 
                 const projectResponse = await fetch(
-                  `http://localhost:5001/api/v1/projects/${projectIdStr}`,
+                  `${process.env.NEXT_PUBLIC_API_URL}/projects/${projectIdStr}`
+                  ||
+                  `localhost:5001/api/v1/projects/${projectIdStr}`,
                   {
                     headers: {
                       Authorization: `Bearer ${accessToken}`,
@@ -306,7 +302,7 @@ export default function FreelancerDashboardClient() {
                       minimumBid: projectData.data.minimumBid || 0,
                       budget: projectData.data.budget || 0,
                       technology: projectData.data.technology || [],
-                      status: projectData.data.status || "in-progress", // Use project status if available
+                      status: projectData.data.status || "in-progress", 
                       ownerId: projectData.data.ownerId || "",
                       createdAt: projectData.data.createdAt || bid.createdAt,
                       updatedAt: projectData.data.updatedAt || bid.updatedAt,
@@ -322,14 +318,9 @@ export default function FreelancerDashboardClient() {
                 );
               }
 
-
-
-              // Default Fallback using existing bid data
               const fallbackTitle = (bid.projectId && typeof bid.projectId === 'object' && (bid.projectId as any).title) 
                 ? (bid.projectId as any).title 
                 : bid.projectTitle || "Unknown Project";
-
-              // Return with default values if fetch fails
               return {
                 id:
                   bid.projectId && bid._id
@@ -345,7 +336,7 @@ export default function FreelancerDashboardClient() {
                 minimumBid: 0,
                 budget: 0,
                 technology: [],
-                status: "in-progress", // Consider accepted bids as active projects
+                status: "in-progress", 
                 ownerId: "",
                 createdAt: bid.createdAt,
                 updatedAt: bid.updatedAt,
@@ -355,11 +346,12 @@ export default function FreelancerDashboardClient() {
             })
           );
 
-          // Then, fetch projects directly assigned to the freelancer
           let assignedProjects = [];
           try {
             const assignedProjectsResponse = await fetch(
-              `http://localhost:5001/api/v1/projects/freelancer/${freelancerId}`,
+              `${process.env.NEXT_PUBLIC_API_URL}/projects/freelancer/${freelancerId}`
+              ||
+              `localhost:5001/api/v1/projects/freelancer/${freelancerId}`,
               {
                 headers: {
                   Authorization: `Bearer ${accessToken}`,
@@ -400,15 +392,12 @@ export default function FreelancerDashboardClient() {
             console.error("Error fetching assigned projects:", error);
           }
 
-          // Combine both sources of projects and remove duplicates
           const allActiveProjects = [
             ...activeProjectsFromBids,
             ...assignedProjects,
           ].filter(
             (project) => project && project.title && project.title !== ""
-          ); // Filter out projects with empty titles or null projects
-
-          // Remove duplicates based on _id
+          );
           const uniqueProjectsMap = new Map();
           allActiveProjects.forEach((project) => {
             if (project && project._id) {
@@ -417,15 +406,17 @@ export default function FreelancerDashboardClient() {
           });
           const uniqueProjects = Array.from(uniqueProjectsMap.values());
 
-          // Check sprint status for each project to determine progress and completion
+     
           const enhancedProjects = await Promise.all(
             uniqueProjects.map(async (project) => {
               try {
-                // Skip if no real ID
+          
                 if (!project.realProjectId) return project;
 
                 const submissionsResponse = await fetch(
-                  `http://localhost:5001/api/v1/work-submissions/project/${project.realProjectId}`,
+                  `${process.env.NEXT_PUBLIC_API_URL}/work-submissions/project/${project.realProjectId}`
+                  ||
+                  `localhost:5001/api/v1/work-submissions/project/${project.realProjectId}`,
                   {
                     headers: {
                       Authorization: `Bearer ${accessToken}`,
@@ -441,7 +432,7 @@ export default function FreelancerDashboardClient() {
                       (sub: any) => sub.status === "approved"
                     ).length;
 
-                    // If 3 or more sprints approved, mark as completed
+                  
                     if (approvedSprints >= 3) {
                       return {
                         ...project,
@@ -449,7 +440,7 @@ export default function FreelancerDashboardClient() {
                         progress: 100,
                       };
                     } else if (approvedSprints > 0) {
-                      // Update progress based on sprints (approx 33% per sprint)
+                    
                       const calculatedProgress = Math.round(
                         (approvedSprints / 3) * 100
                       );
@@ -472,8 +463,6 @@ export default function FreelancerDashboardClient() {
               return project;
             })
           );
-
-          // Sort active projects by most recent
           const sortedActiveProjects = enhancedProjects.sort((a, b) => {
             const dateA = new Date(a.updatedAt || a.createdAt);
             const dateB = new Date(b.updatedAt || b.createdAt);
@@ -489,9 +478,10 @@ export default function FreelancerDashboardClient() {
             totalEarnings: totalEarnings,
           }));
 
-          // Fetch approved projects
           const approvedResponse = await fetch(
-            `http://localhost:5001/api/v1/projects/approved`,
+            `${process.env.NEXT_PUBLIC_API_URL}/projects/approved`
+            ||
+            `localhost:5001/api/v1/projects/approved`,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -507,10 +497,9 @@ export default function FreelancerDashboardClient() {
               approvedData.data.projects &&
               Array.isArray(approvedData.data.projects)
             ) {
-              // Show all approved projects to freelancers (not just matching skills)
+        
               const allApprovedProjects = approvedData.data.projects;
 
-              // Get the latest 4 projects
               const sortedProjects = allApprovedProjects
                 .sort(
                   (a: Project, b: Project) =>
@@ -526,7 +515,7 @@ export default function FreelancerDashboardClient() {
           setLoadingBids(false);
         } catch (err) {
           console.error("Error fetching freelancer stats:", err);
-          // Set default values
+     
           setStats({
             totalProjects: 0,
             activeProjects: 0,
@@ -556,7 +545,7 @@ export default function FreelancerDashboardClient() {
   }
 
   if (status === "unauthenticated") {
-    return null; // Redirect effect will handle this
+    return null; 
   }
 
   return (

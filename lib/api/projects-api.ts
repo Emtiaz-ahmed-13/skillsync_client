@@ -1,6 +1,6 @@
 // API service for handling projects
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api/v1";
+  process.env.NEXT_PUBLIC_API_URL || "https://skillsync-server-kohl.vercel.app/api/v1";
 
 interface Project {
   _id: string;
@@ -62,7 +62,8 @@ export const getProjectById = async (
   projectId: string
 ): Promise<ProjectResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/projects/${projectId}`, {
+    const response = await fetch(`${API_BASE_URL}/projects/${projectId}`
+      || `localhost:5001/api/v1/projects/${projectId}`, {
       method: "GET",
       headers: getHeaders(),
     });
@@ -87,7 +88,8 @@ export const createProject = async (
   deadline: string
 ): Promise<ProjectResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/projects`, {
+    const response = await fetch(`${API_BASE_URL}/projects`
+      || `localhost:5001/api/v1/projects`, {
       method: "POST",
       headers: getHeaders(),
       body: JSON.stringify({
@@ -116,7 +118,8 @@ export const updateProject = async (
   updates: Partial<Project>
 ): Promise<ProjectResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/projects/${projectId}`, {
+    const response = await fetch(`${API_BASE_URL}/projects/${projectId}`
+      || `localhost:5001/api/v1/projects/${projectId}`, {
       method: "PUT",
       headers: getHeaders(),
       body: JSON.stringify(updates),
@@ -139,7 +142,8 @@ export const deleteProject = async (
   projectId: string
 ): Promise<ProjectResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/projects/${projectId}`, {
+    const response = await fetch(`${API_BASE_URL}/projects/${projectId}`
+      || `localhost:5001/api/v1/projects/${projectId}`, {
       method: "DELETE",
       headers: getHeaders(),
     });

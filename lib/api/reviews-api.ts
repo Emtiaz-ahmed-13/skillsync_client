@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api/v1";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://skillsync-server-kohl.vercel.app/api/v1";
 
 interface ApiResponse<T> {
   success: boolean;
@@ -39,7 +39,8 @@ export const createReview = async (
   accessToken: string
 ): Promise<ApiResponse<Review>> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/reviews`, {
+    const response = await fetch(`${API_BASE_URL}/reviews`
+      || `localhost:5001/api/v1/reviews`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -87,7 +88,8 @@ export const getReviewById = async (
       headers.Authorization = `Bearer ${accessToken}`;
     }
 
-    const response = await fetch(`${API_BASE_URL}/reviews/${reviewId}`, {
+    const response = await fetch(`${API_BASE_URL}/reviews/${reviewId}`
+      || `localhost:5001/api/v1/reviews/${reviewId}`, {
       method: "GET",
       headers,
     });
@@ -134,7 +136,8 @@ export const getReviewsByUser = async (
     }
 
     const response = await fetch(
-      `${API_BASE_URL}/reviews/user/${userId}?limit=${limit}&page=${page}`,
+      `${API_BASE_URL}/reviews/user/${userId}?limit=${limit}&page=${page}`
+      || `localhost:5001/api/v1/reviews/user/${userId}?limit=${limit}&page=${page}`,
       {
         method: "GET",
         headers,
@@ -180,7 +183,8 @@ export const getReviewsByProject = async (
       headers.Authorization = `Bearer ${accessToken}`;
     }
 
-    const response = await fetch(`${API_BASE_URL}/reviews/project/${projectId}`, {
+    const response = await fetch(`${API_BASE_URL}/reviews/project/${projectId}`
+      || `localhost:5001/api/v1/reviews/project/${projectId}`, {
       method: "GET",
       headers,
     });
@@ -216,7 +220,8 @@ export const deleteReview = async (
   accessToken: string
 ): Promise<ApiResponse<null>> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/reviews/${reviewId}`, {
+    const response = await fetch(`${API_BASE_URL}/reviews/${reviewId}`
+      || `localhost:5001/api/v1/reviews/${reviewId}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",

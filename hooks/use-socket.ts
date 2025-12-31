@@ -30,7 +30,7 @@ export const useSocket = () => {
     if (!user?.accessToken) return;
 
     // Use the backend URL
-    const SOCKET_URL = "http://localhost:5001";
+    const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || "https://skillsync-server-kohl.vercel.app";
 
     socket = io(SOCKET_URL, {
       auth: {

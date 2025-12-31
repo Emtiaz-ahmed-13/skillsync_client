@@ -4,11 +4,11 @@ import { Navbar } from "@/components/shared/navbar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -119,7 +119,9 @@ export default function EnhancedProjectDetailsClient({
       try {
         // Fetch project details
         const projectResponse = await fetch(
-          `http://localhost:5001/api/v1/projects/${projectId}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/projects/${projectId}`
+          ||
+          `localhost:5001/api/v1/projects/${projectId}`,
           {
             headers: {
               Authorization: `Bearer ${user?.accessToken || ""}`,
@@ -138,9 +140,10 @@ export default function EnhancedProjectDetailsClient({
           setError("Failed to fetch project");
         }
 
-        // Fetch bids for this project
         const bidsResponse = await fetch(
-          `http://localhost:5001/api/v1/bids/project/${projectId}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/bids/project/${projectId}`
+          ||
+          `localhost:5001/api/v1/bids/project/${projectId}`,
           {
             headers: {
               Authorization: `Bearer ${user?.accessToken || ""}`,
@@ -180,7 +183,6 @@ export default function EnhancedProjectDetailsClient({
   const handleSubmitBid = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Check if freelancer already has a bid
     if (freelancerBid) {
       toast.error("You have already placed a bid on this project");
       return;
@@ -190,8 +192,6 @@ export default function EnhancedProjectDetailsClient({
       toast.error("Please fill all required fields");
       return;
     }
-
-    // Validate proposal length (at least 10 characters)
     if (bidMessage.length < 10) {
       toast.error("Proposal must be at least 10 characters long");
       return;
@@ -220,13 +220,13 @@ export default function EnhancedProjectDetailsClient({
         resumeFormData.append("projectId", project!._id);
 
         const resumeUploadResponse = await fetch(
-          "http://localhost:5001/api/v1/files",
+          `${process.env.NEXT_PUBLIC_API_URL}/files`
+          ||
+          `localhost:5001/api/v1/files`,
           {
             method: "POST",
             headers: {
               Authorization: `Bearer ${user.accessToken}`,
-              // Don't set Content-Type header when using FormData
-              // The browser will set it automatically with the correct boundary
             },
             body: resumeFormData,
           }
@@ -245,8 +245,6 @@ export default function EnhancedProjectDetailsClient({
         const resumeUploadResult = await resumeUploadResponse.json();
         console.log("Resume upload result:", resumeUploadResult);
       }
-
-      // Prepare bid data
       const bidData = {
         projectId: project!._id,
         amount: Number(bidAmount),
@@ -254,7 +252,10 @@ export default function EnhancedProjectDetailsClient({
       };
 
       // Submit the bid
-      const response = await fetch("http://localhost:5001/api/v1/bids", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/bids`
+        ||
+        `localhost:5001/api/v1/bids`,
+         {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -266,10 +267,12 @@ export default function EnhancedProjectDetailsClient({
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
-          // Send notification to project owner
+    
           try {
             const notificationResponse = await fetch(
-              `http://localhost:5001/api/v1/notifications`,
+              `${process.env.NEXT_PUBLIC_API_URL}/notifications`
+              ||
+              `localhost:5001/api/v1/notifications`,
               {
                 method: "POST",
                 headers: {
@@ -277,13 +280,13 @@ export default function EnhancedProjectDetailsClient({
                   Authorization: `Bearer ${user.accessToken}`,
                 },
                 body: JSON.stringify({
-                  recipientId: project?.ownerId, // Send notification to project owner
+                  recipientId: project?.ownerId, 
                   title: "New Bid Received",
                   message: `A freelancer has submitted a bid on your project: ${project?.title}`,
                   type: "bid_submitted",
                   data: {
                     projectId: project?._id,
-                    bidId: data.data?._id || data.data?.id, // Use the bid ID from the response
+                    bidId: data.data?._id || data.data?.id, 
                     bidderName: user.name,
                   },
                 }),
@@ -291,7 +294,7 @@ export default function EnhancedProjectDetailsClient({
             );
 
             if (!notificationResponse.ok) {
-              // Don't fail the bid submission if notification fails
+
               const notificationErrorData = await notificationResponse.text();
               console.error(
                 "Failed to send notification to project owner:",
@@ -300,11 +303,8 @@ export default function EnhancedProjectDetailsClient({
               );
             }
           } catch (notificationError) {
-            // Don't fail the bid submission if notification fails
             console.error("Error sending notification:", notificationError);
           }
-
-          // Update the freelancer's bid in state
           const newBid: Bid = {
             id: data.data?._id || data.data?.id,
             projectId: project!._id,
@@ -321,13 +321,9 @@ export default function EnhancedProjectDetailsClient({
 
           setBidSuccess(true);
           toast.success("Bid submitted successfully!");
-
-          // Reset form after success
           setBidAmount("");
           setBidMessage("");
           setResumeFile(null);
-
-          // Reset after 3 seconds
           setTimeout(() => {
             setBidSuccess(false);
           }, 3000);
@@ -335,7 +331,6 @@ export default function EnhancedProjectDetailsClient({
           toast.error(data.message || "Failed to submit bid");
         }
       } else {
-        // Try to get error details from response
         let errorData;
         let errorText = "Failed to submit bid";
 
@@ -348,7 +343,6 @@ export default function EnhancedProjectDetailsClient({
           ) {
             errorText = `Server error: ${response.status}`;
           } else {
-            // Try to parse as JSON
             try {
               errorData = JSON.parse(responseText);
               errorText = errorData.message || `Error: ${response.status}`;

@@ -3,34 +3,34 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
-    createReview,
-    getReviewsByUser,
-    Review,
+  createReview,
+  getReviewsByUser,
+  Review,
 } from "@/lib/api/reviews-api";
 import { motion } from "framer-motion";
 import {
-    Calendar,
-    MessageSquare,
-    Send,
-    Star,
-    StarOff,
-    User,
+  Calendar,
+  MessageSquare,
+  Send,
+  Star,
+  StarOff,
+  User,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -73,8 +73,6 @@ export function ClientReviews() {
             setLoading(false);
             return;
           }
-
-          // Fetch reviews received by the client
           const reviewsResponse = await getReviewsByUser(
             userId,
             50,
@@ -88,7 +86,9 @@ export function ClientReviews() {
 
           // Fetch client's completed projects
           const projectsResponse = await fetch(
-            `http://localhost:5001/api/v1/projects/owner/${userId}`,
+            `${process.env.NEXT_PUBLIC_API_URL}/projects/owner/${userId}`
+            ||
+            `localhost:5001/api/v1/projects/owner/${userId}`,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -103,14 +103,16 @@ export function ClientReviews() {
               projectsData.data &&
               Array.isArray(projectsData.data)
             ) {
-              // Filter projects where all 3 sprints are approved
+          
               const projectsWithCompletedSprints = [];
               
               for (const project of projectsData.data) {
                 try {
-                  // Fetch work submissions for this project
+              
                   const submissionsResponse = await fetch(
-                    `http://localhost:5001/api/v1/work-submissions/project/${project._id}`,
+                    `${process.env.NEXT_PUBLIC_API_URL}/work-submissions/project/${project._id}`
+                    ||
+                    `localhost:5001/api/v1/work-submissions/project/${project._id}`,
                     {
                       headers: {
                         Authorization: `Bearer ${accessToken}`,
@@ -122,13 +124,12 @@ export function ClientReviews() {
                     const submissionsData = await submissionsResponse.json();
                     if (submissionsData.success && submissionsData.data) {
                       const submissions = submissionsData.data;
-                      
-                      // Count approved submissions (sprints)
+                     
                       const approvedCount = submissions.filter(
                         (sub: any) => sub.status === "approved"
                       ).length;
 
-                      // If 3 or more sprints are approved, project is ready for review
+                     
                       if (approvedCount >= 3) {
                         projectsWithCompletedSprints.push(project);
                       }
@@ -196,10 +197,11 @@ export function ClientReviews() {
         return;
       }
 
-      // Fetch the accepted bid to get the freelancer ID
       try {
         const bidsResponse = await fetch(
-          `http://localhost:5001/api/v1/bids/project/${selectedProject}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/bids/project/${selectedProject}`
+          ||
+          `localhost:5001/api/v1/bids/project/${selectedProject}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -217,8 +219,6 @@ export function ClientReviews() {
           setError("No bids found for this project");
           return;
         }
-
-        // Find the accepted bid
         const acceptedBid = bidsData.data.find(
           (bid: any) => bid.status === "accepted"
         );
@@ -227,8 +227,6 @@ export function ClientReviews() {
           setError("No accepted bid found for this project");
           return;
         }
-
-        // Get the freelancer ID from the accepted bid
         const freelancerId =
           typeof acceptedBid.freelancerId === "string"
             ? acceptedBid.freelancerId
@@ -238,8 +236,6 @@ export function ClientReviews() {
           setError("Could not find freelancer ID");
           return;
         }
-
-        // Now create the review with the real freelancer ID
         const response = await createReview(
           {
             projectId: selectedProject,

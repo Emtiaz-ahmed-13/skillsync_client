@@ -240,7 +240,9 @@ export default function AdminDashboardClient() {
 
         try {
           const statsResponse = await fetch(
-            `http://localhost:5001/api/v1/admin/analytics`,
+            `${process.env.NEXT_PUBLIC_API_URL}/admin/analytics`
+            ||
+            `localhost:5001/api/v1/admin/analytics`,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -304,7 +306,9 @@ export default function AdminDashboardClient() {
 
           // Fetch pending projects
           const projectsResponse = await fetch(
-            `http://localhost:5001/api/v1/projects/pending`,
+            `${process.env.NEXT_PUBLIC_API_URL}/projects/pending`
+            ||
+            `localhost:5001/api/v1/projects/pending`,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -312,11 +316,11 @@ export default function AdminDashboardClient() {
             }
           );
 
-          console.log("Pending projects API status:", projectsResponse.status); // Debug log
+          console.log("Pending projects API status:", projectsResponse.status); 
 
           if (projectsResponse.ok) {
             const projectsData = await projectsResponse.json();
-            console.log("Pending projects API response:", projectsData); // Debug log
+            console.log("Pending projects API response:", projectsData); 
             if (
               projectsData.success &&
               projectsData.data &&
@@ -324,7 +328,6 @@ export default function AdminDashboardClient() {
             ) {
               setPendingProjects(projectsData.data.projects);
             } else {
-              // If projectsData.data is not structured as expected, try to access projects directl
               if (Array.isArray(projectsData)) {
                 setPendingProjects(projectsData);
               } else if (
@@ -353,11 +356,8 @@ export default function AdminDashboardClient() {
             totalRevenue: 0,
             pendingTasks: 0,
           });
-
-          // Set empty array for pending projects
           setPendingProjects([]);
         } finally {
-          // Fetch recent users and active projects
           const fetchUsersAndProjects = async () => {
             if (status === "authenticated" && session?.user) {
               const user = session.user as SessionUser;
@@ -369,9 +369,11 @@ export default function AdminDashboardClient() {
               }
 
               try {
-                // Fetch recent users
+          
                 const usersResponse = await fetch(
-                  `http://localhost:5001/api/v1/admin/users`,
+                  `${process.env.NEXT_PUBLIC_API_URL}/admin/users`
+                  ||
+                  `localhost:5001/api/v1/admin/users`,
                   {
                     headers: {
                       Authorization: `Bearer ${accessToken}`,
@@ -381,21 +383,17 @@ export default function AdminDashboardClient() {
 
                 if (usersResponse.ok) {
                   const usersData = await usersResponse.json();
-
-                  // Handle different possible response structures
                   let usersArray = [];
 
                   if (usersData.success && Array.isArray(usersData.data)) {
-                    // Standard API response format: { success: true, data: [...] }
+
                     usersArray = usersData.data;
                   } else if (Array.isArray(usersData)) {
-                    // Direct array response
                     usersArray = usersData;
                   } else if (
                     usersData.data &&
                     Array.isArray(usersData.data.users)
                   ) {
-                    // Alternative format: { data: { users: [...] } }
                     usersArray = usersData.data.users;
                   } else {
                     console.error(
@@ -406,7 +404,6 @@ export default function AdminDashboardClient() {
                   }
 
                   if (usersArray.length > 0) {
-                    // Get top 5 most recent users
                     const sortedUsers = usersArray
                       .sort(
                         (a, b) =>
@@ -436,8 +433,6 @@ export default function AdminDashboardClient() {
               } finally {
                 setLoadingUsers(false);
               }
-
-              // Fetch pending articles
               try {
                 const articlesResult = await getPendingArticles(accessToken, 1, 10);
                 if (articlesResult.success && articlesResult.data?.articles) {
@@ -491,7 +486,9 @@ export default function AdminDashboardClient() {
 
     try {
       const response = await fetch(
-        `http://localhost:5001/api/v1/projects/${projectId}/approve`,
+        `${process.env.NEXT_PUBLIC_API_URL}/projects/${projectId}/approve`
+        ||
+        `localhost:5001/api/v1/projects/${projectId}/approve`,
         {
           method: "PUT",
           headers: {
@@ -536,7 +533,6 @@ export default function AdminDashboardClient() {
       const result = await approveArticle(articleId, accessToken);
 
       if (result.success) {
-        // Remove from pending list
         setPendingArticles((prev) => prev.filter((a) => a._id !== articleId));
         toast.success("Article approved and published successfully!");
       } else {
@@ -564,7 +560,6 @@ export default function AdminDashboardClient() {
       const result = await rejectArticle(articleId, accessToken, reason);
 
       if (result.success) {
-        // Remove from pending list
         setPendingArticles((prev) => prev.filter((a) => a._id !== articleId));
         toast.success("Article rejected successfully");
       } else {

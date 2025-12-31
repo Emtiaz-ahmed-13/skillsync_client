@@ -98,7 +98,8 @@ export default function FreelancerProjectsClient({
       try {
         // Fetch freelancer's profile to get their skills
         const profileResponse = await fetch(
-          `http://localhost:5001/api/v1/profile/me`,
+          `${process.env.NEXT_PUBLIC_API_URL}/profile/me`
+          ||`localhost:5001/api/v1/profile/me`,
           {
             headers: {
               Authorization: `Bearer ${user?.accessToken || ""}`,
@@ -115,7 +116,8 @@ export default function FreelancerProjectsClient({
         }
 
         const response = await fetch(
-          "http://localhost:5001/api/v1/projects/approved",
+          `${process.env.NEXT_PUBLIC_API_URL}/projects/approved`
+          ||`localhost:5001/api/v1/projects/approved`,
           {
             headers: {
               Authorization: `Bearer ${user?.accessToken || ""}`,
@@ -126,12 +128,9 @@ export default function FreelancerProjectsClient({
         if (response.ok) {
           const data = await response.json();
           if (data.success && data.data && data.data.projects) {
-            // Show all approved projects to freelancers (not just matching skills)
             const allProjects = data.data.projects;
 
             setProjects(allProjects);
-
-            // Extract all unique technologies from all projects
             const techSet = new Set<string>();
             allProjects.forEach((project: Project) => {
               project.technology.forEach((tech) => techSet.add(tech));
@@ -153,7 +152,6 @@ export default function FreelancerProjectsClient({
   }, []);
 
   useEffect(() => {
-    // Filter projects based on search term and selected technology
     let result = projects;
 
     if (searchTerm) {
@@ -320,6 +318,8 @@ export default function FreelancerProjectsClient({
                       onClick={() =>
                         router.push(
                           `/dashboard/freelancer/projects/${project._id}`
+                          ||
+                          `localhost:5001/api/v1/projects/${project._id}`
                         )
                       }
                     >

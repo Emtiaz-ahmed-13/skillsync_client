@@ -30,8 +30,6 @@ export function MobileMenu() {
     { code: "fr", name: "Français" },
     { code: "de", name: "Deutsch" },
   ];
-
-  
   const cartItems = 1; 
 
   return (

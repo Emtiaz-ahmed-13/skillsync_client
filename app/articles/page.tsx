@@ -49,7 +49,6 @@ export default async function BlogPage() {
     <>
       <Navbar />
       <div className="min-h-screen bg-background">
-      {/* Hero Section */}
       <section className="py-16 md:py-24 bg-gradient-to-br from-primary/5 to-secondary/5">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center space-y-6">
@@ -67,8 +66,6 @@ export default async function BlogPage() {
             <div className="flex justify-center pt-4">
               <BlogHeaderActions />
             </div>
-
-  
             <div className="mt-10 flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />

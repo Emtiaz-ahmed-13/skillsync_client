@@ -1,6 +1,6 @@
 // API service for handling project proposals
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api/v1";
+  process.env.NEXT_PUBLIC_API_URL || "https://skillsync-server-kohl.vercel.app/api/v1";
 
 interface Proposal {
   _id: string;
@@ -26,13 +26,11 @@ interface ProposalResponse {
   data?: Proposal | Proposal[] | null;
 }
 
-// Helper function to generate headers with auth token
 const getHeaders = () => {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
 
-  // Add authorization header if token exists in localStorage
   if (typeof window !== "undefined") {
     const token = localStorage.getItem("token");
     if (token) {
@@ -49,7 +47,8 @@ export const getProposalsByProject = async (
 ): Promise<ProposalResponse> => {
   try {
     const response = await fetch(
-      `${API_BASE_URL}/bids?projectId=${projectId}`,
+      `${API_BASE_URL}/bids?projectId=${projectId}`
+      || `localhost:5001/api/v1/bids?projectId=${projectId}`,
       {
         method: "GET",
         headers: getHeaders(),
@@ -71,7 +70,8 @@ export const getProposalsByProject = async (
 // Get proposals for a freelancer (freelancer view)
 export const getProposalsByFreelancer = async (): Promise<ProposalResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/bids/freelancer`, {
+    const response = await fetch(`${API_BASE_URL}/bids/freelancer`
+      || `localhost:5001/api/v1/bids/freelancer`, {
       method: "GET",
       headers: getHeaders(),
     });
@@ -125,7 +125,8 @@ export const acceptProposal = async (
   proposalId: string
 ): Promise<ProposalResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/bids/${proposalId}/accept`, {
+    const response = await fetch(`${API_BASE_URL}/bids/${proposalId}/accept`
+      || `localhost:5001/api/v1/bids/${proposalId}/accept`, {
       method: "PUT",
       headers: getHeaders(),
     });
@@ -147,7 +148,8 @@ export const rejectProposal = async (
   proposalId: string
 ): Promise<ProposalResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/bids/${proposalId}/reject`, {
+    const response = await fetch(`${API_BASE_URL}/bids/${proposalId}/reject`
+      || `localhost:5001/api/v1/bids/${proposalId}/reject`, {
       method: "PUT",
       headers: getHeaders(),
     });
@@ -169,7 +171,8 @@ export const getProposalById = async (
   proposalId: string
 ): Promise<ProposalResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/bids/${proposalId}`, {
+    const response = await fetch(`${API_BASE_URL}/bids/${proposalId}`
+      || `localhost:5001/api/v1/bids/${proposalId}`, {
       method: "GET",
       headers: getHeaders(),
     });

@@ -92,7 +92,7 @@ export default function FreelancerProfileUpdateClient({
     }
 
     try {
-      const response = await fetch("http://localhost:5001/api/v1/profile/me", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/profile/me` || `localhost:5001/api/v1/profile/me`, {
         headers: {
           Authorization: `Bearer ${user.accessToken}`,
         },
@@ -138,25 +138,21 @@ export default function FreelancerProfileUpdateClient({
 
     try {
       let resumeUrl = null;
-
-      // Upload resume if provided
       if (resumeFile) {
         const formData = new FormData();
         formData.append("file", resumeFile);
         formData.append("fileType", "resume");
-        // Add optional parameters that the backend might require
-        formData.append("projectId", ""); // Empty string if not associated with a project
-        // Don't include milestoneId to avoid BSONError
+  
+        formData.append("projectId", ""); 
 
         try {
           const uploadResponse = await fetch(
-            "http://localhost:5001/api/v1/files",
+            `${process.env.NEXT_PUBLIC_API_URL}/files` || `localhost:5001/api/v1/files`,
             {
               method: "POST",
               headers: {
                 Authorization: `Bearer ${user?.accessToken || ""}`,
-                // Don't set Content-Type header when using FormData
-                // The browser will set it automatically with the correct boundary
+               
               },
               body: formData,
             }
@@ -181,8 +177,6 @@ export default function FreelancerProfileUpdateClient({
           return;
         }
       }
-
-      // Prepare profile data - only freelancer-specific fields
       const profileData: {
         bio?: string;
         skills?: string[];
@@ -200,12 +194,12 @@ export default function FreelancerProfileUpdateClient({
         experience: profile.experience || "",
       };
 
-      // Update freelancer profile
       const requestBody = resumeUrl
         ? { ...profileData, resume: resumeUrl }
         : profileData;
       const response = await fetch(
-        "http://localhost:5001/api/v1/profile/me/freelancer",
+        `${process.env.NEXT_PUBLIC_API_URL}/profile/me/freelancer`
+        || `localhost:5001/api/v1/profile/me/freelancer`,
         {
           method: "PATCH",
           headers: {
@@ -220,7 +214,6 @@ export default function FreelancerProfileUpdateClient({
         const result = await response.json();
         if (result.success) {
           toast.success("Profile updated successfully!");
-          // Update session with new profile data
           await update({
             ...session,
             user: {
@@ -271,7 +264,7 @@ export default function FreelancerProfileUpdateClient({
   }
 
   if (status === "unauthenticated") {
-    return null; // Redirect effect will handle this
+    return null; 
   }
 
   if (loading) {

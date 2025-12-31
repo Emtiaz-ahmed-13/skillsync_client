@@ -4,21 +4,21 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import {
-    WorkSubmission as ApiWorkSubmission,
-    createWorkSubmission,
-    createWorkSubmissionNotification,
-    getProjectSprints,
-    getWorkSubmissionsBySprint,
+  WorkSubmission as ApiWorkSubmission,
+  createWorkSubmission,
+  createWorkSubmissionNotification,
+  getProjectSprints,
+  getWorkSubmissionsBySprint,
 } from "@/lib/api/work-submission-api";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
@@ -73,8 +73,6 @@ export default function WorkSubmission({
   const [workSubmissions, setWorkSubmissions] = useState<ApiWorkSubmission[]>(
     []
   );
-
-  /* ---------------- LOAD SPRINTS ---------------- */
   useEffect(() => {
     const loadSprints = async () => {
       try {
@@ -98,8 +96,6 @@ export default function WorkSubmission({
 
     loadSprints();
   }, [projectId, session]);
-
-  /* ---------------- SPRINT CHANGE ---------------- */
   useEffect(() => {
     if (!selectedSprint) return;
 
@@ -121,7 +117,6 @@ export default function WorkSubmission({
     loadSubmissions(selectedSprint);
   }, [selectedSprint, sprints]);
 
-  /* ---------------- LOAD SUBMISSIONS ---------------- */
   const loadSubmissions = async (sprintId: string) => {
     const token = (session?.user as any)?.accessToken;
     if (!token) return;
@@ -129,8 +124,6 @@ export default function WorkSubmission({
     const res = await getWorkSubmissionsBySprint(sprintId, token);
     setWorkSubmissions(res.success ? res.data || [] : []);
   };
-
-  /* ---------------- VALIDATION ---------------- */
   const validateForm = () => {
     if (!githubLink.trim()) {
       toast.error("GitHub repository link is required");
@@ -157,21 +150,17 @@ export default function WorkSubmission({
     return true;
   };
 
-  /* ---------------- SUBMIT WORK ---------------- */
   const handleSubmit = async () => {
     if (!selectedSprint) return;
 
     const sprint = sprints.find((s) => s._id === selectedSprint);
     if (!sprint) return;
 
-    // Check for incomplete features (Warning only, implemented in UI)
+    
     if (
         sprint.features.length > 0 &&
         !sprint.features.every(f => f.status === "completed")
-    ) {
-        // We allow submission but the UI shows a warning.
-        // Optional: We could add a confirm dialog here.
-    }
+    ) 
 
     if (workSubmissions.some((s) => s.sprintId === selectedSprint)) {
       toast.error("You already submitted work for this sprint.");
@@ -231,12 +220,10 @@ export default function WorkSubmission({
     });
   };
 
-  /* ---------------- UI ---------------- */
   if (loading) return <p>Loading...</p>;
 
   const selectedSprintData = sprints.find((s) => s._id === selectedSprint);
 
-  // Calculate overall project statistics
   const totalSprints = sprints.length;
   const completedSprintsCount = sprints.filter(s => s.status === "completed").length;
   const totalFeaturesCount = sprints.reduce((sum, s) => sum + s.features.length, 0);

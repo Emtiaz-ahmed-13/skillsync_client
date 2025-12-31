@@ -5,12 +5,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
@@ -65,7 +65,7 @@ export default function ActiveProjectsClient() {
         try {
           // Fetch freelancer's bids to find active projects
           const bidsResponse = await fetch(
-            `http://localhost:5001/api/v1/bids/my`,
+            `${process.env.NEXT_PUBLIC_API_URL}/bids/my` || `localhost:5001/api/v1/bids/my`,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -93,7 +93,8 @@ export default function ActiveProjectsClient() {
                   : bid.projectId;
 
                 const projectResponse = await fetch(
-                  `http://localhost:5001/api/v1/projects/${projectIdStr}`,
+                  `${process.env.NEXT_PUBLIC_API_URL}/projects/${projectIdStr}`
+                  || `localhost:5001/api/v1/projects/${projectIdStr}`,
                   {
                     headers: {
                       Authorization: `Bearer ${accessToken}`,
@@ -156,11 +157,7 @@ export default function ActiveProjectsClient() {
                 progress: 0,
               };
             })
-          );
-          
-          // Also fetch assigned projects (if endpoint existed, but for now just use bids)
-           // If we had the other endpoint we would merge here like in dashboard
-           
+          );   
           const uniqueProjectsMap = new Map();
           activeProjectsFromBids.forEach((project) => {
              if (project && project.title && project.title !== "Unknown Project") {

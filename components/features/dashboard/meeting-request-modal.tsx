@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,8 +43,6 @@ export function MeetingRequestModal({
       setLink("");
       setError("");
     } catch (err) {
-      // Error is handled by parent or displayed here if passed down, 
-      // but simple validation covers most user errors.
       console.error(err);
     }
   };

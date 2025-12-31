@@ -35,7 +35,6 @@ export function ArticlesSection() {
     <>
       <Navbar />
       <section className="relative py-24 lg:py-32 bg-gradient-to-b from-background via-background to-muted/20">
-      {/* Enhanced Decorative background */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-24 left-1/4 h-96 w-96 rounded-full bg-primary/5 blur-3xl animate-pulse" />
         <div className="absolute top-1/2 right-1/4 h-96 w-96 rounded-full bg-primary/5 blur-3xl animate-pulse delay-1000" />
@@ -43,7 +42,6 @@ export function ArticlesSection() {
       </div>
 
       <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Enhanced Header */}
         <div className="text-center max-w-4xl mx-auto mb-20 space-y-6">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
             <TrendingUp className="h-4 w-4 text-primary" />
@@ -59,8 +57,6 @@ export function ArticlesSection() {
             curated to help you excel in your career.
           </p>
         </div>
-
-        {/* Enhanced Loading State */}
         {loading && (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3].map((index) => (

@@ -4,16 +4,17 @@ import { Navbar } from "@/components/shared/navbar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface Project {
   id: string;
@@ -121,7 +122,7 @@ export default function FreelancerTasksClient({
 
       // Fetch freelancer's accepted bids (projects they're working on)
       const bidsResponse = await fetch(
-        `http://localhost:5001/api/v1/bids/freelancer/${user.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/bids/freelancer/${user.id}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -149,7 +150,7 @@ export default function FreelancerTasksClient({
           // Fetch project details for each accepted bid
           const projectPromises = bidsToProcess.map(async (bid: Bid) => {
             const projectResponse = await fetch(
-              `http://localhost:5001/api/v1/projects/${bid.projectId}`,
+              `${process.env.NEXT_PUBLIC_API_URL}/projects/${bid.projectId}`,
               {
                 headers: {
                   Authorization: `Bearer ${accessToken}`,
@@ -176,7 +177,7 @@ export default function FreelancerTasksClient({
           const allSprints: Sprint[] = [];
           for (const project of validProjects) {
             const sprintsResponse = await fetch(
-              `http://localhost:5001/api/v1/sprints/project/${project._id}`,
+              `${process.env.NEXT_PUBLIC_API_URL}/sprints/project/${project._id}`,
               {
                 headers: {
                   Authorization: `Bearer ${accessToken}`,
@@ -324,7 +325,7 @@ export default function FreelancerTasksClient({
                   <Button
                     className="w-full py-6 text-base"
                     onClick={() => {
-                      // TODO: Implement timeline estimation functionality
+      
                       toast.info(
                         "Project Timeline Estimation functionality will be implemented here"
                       );
