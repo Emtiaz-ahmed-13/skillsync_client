@@ -25,9 +25,8 @@ const authOptions = {
         }
 
         try {
-          // Call your backend API for authentication
           const response = await fetch(
-            "http://localhost:5001/api/v1/auth/login",
+            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api/v1"}/auth/login`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -194,4 +193,5 @@ const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
 
 // Export auth options separately for server-side use
-export { authOptions };
+  export { authOptions };
+

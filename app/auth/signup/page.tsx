@@ -3,11 +3,11 @@
 import { Navbar } from "@/components/shared/navbar";
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,7 +47,7 @@ export default function SignupPage() {
         formData.append("file", profileImage);
       }
 
-      const response = await fetch("http://localhost:5001/api/v1/auth/signup", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/signup` || "http://localhost:5001/api/v1/auth/signup", {
         method: "POST",
         body: formData,
       });
@@ -55,7 +55,6 @@ export default function SignupPage() {
       const data = await response.json();
 
       if (response.ok) {
-        // Redirect to login page after successful signup
         router.push("/auth/login");
       } else {
         // Handle error response
@@ -97,7 +96,7 @@ export default function SignupPage() {
                 variant="outline"
                 className="w-full py-4 text-sm font-semibold mb-4"
                 onClick={() => {
-                  window.location.href = "http://localhost:5001/api/v1/auth/google";
+                  window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google` || "http://localhost:5001/api/v1/auth/google";
                 }}
               >
                 <svg
