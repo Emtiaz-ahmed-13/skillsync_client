@@ -47,7 +47,7 @@ export default function SignupPage() {
         formData.append("file", profileImage);
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/signup` || "http://localhost:5001/api/v1/auth/signup", {
+      const response = await fetch("/api/v1/auth/signup", {
         method: "POST",
         body: formData,
       });
@@ -96,7 +96,7 @@ export default function SignupPage() {
                 variant="outline"
                 className="w-full py-4 text-sm font-semibold mb-4"
                 onClick={() => {
-                  window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google` || "http://localhost:5001/api/v1/auth/google";
+                  window.location.href = "/api/v1/auth/google";
                 }}
               >
                 <svg
