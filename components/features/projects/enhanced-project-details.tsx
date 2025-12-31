@@ -119,9 +119,7 @@ export default function EnhancedProjectDetailsClient({
       try {
         // Fetch project details
         const projectResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/projects/${projectId}`
-          ||
-          `localhost:5001/api/v1/projects/${projectId}`,
+          `/api/v1/projects/${projectId}`,
           {
             headers: {
               Authorization: `Bearer ${user?.accessToken || ""}`,
@@ -141,9 +139,7 @@ export default function EnhancedProjectDetailsClient({
         }
 
         const bidsResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/bids/project/${projectId}`
-          ||
-          `localhost:5001/api/v1/bids/project/${projectId}`,
+          `/api/v1/bids/project/${projectId}`,
           {
             headers: {
               Authorization: `Bearer ${user?.accessToken || ""}`,
@@ -220,9 +216,7 @@ export default function EnhancedProjectDetailsClient({
         resumeFormData.append("projectId", project!._id);
 
         const resumeUploadResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/files`
-          ||
-          `localhost:5001/api/v1/files`,
+          "/api/v1/files",
           {
             method: "POST",
             headers: {
@@ -252,9 +246,7 @@ export default function EnhancedProjectDetailsClient({
       };
 
       // Submit the bid
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/bids`
-        ||
-        `localhost:5001/api/v1/bids`,
+      const response = await fetch("/api/v1/bids",
          {
         method: "POST",
         headers: {
@@ -270,9 +262,7 @@ export default function EnhancedProjectDetailsClient({
     
           try {
             const notificationResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_API_URL}/notifications`
-              ||
-              `localhost:5001/api/v1/notifications`,
+              "/api/v1/notifications",
               {
                 method: "POST",
                 headers: {
@@ -280,13 +270,13 @@ export default function EnhancedProjectDetailsClient({
                   Authorization: `Bearer ${user.accessToken}`,
                 },
                 body: JSON.stringify({
-                  recipientId: project?.ownerId, 
+                  recipientId: project?.ownerId,
                   title: "New Bid Received",
                   message: `A freelancer has submitted a bid on your project: ${project?.title}`,
                   type: "bid_submitted",
                   data: {
                     projectId: project?._id,
-                    bidId: data.data?._id || data.data?.id, 
+                    bidId: data.data?._id || data.data?.id,
                     bidderName: user.name,
                   },
                 }),

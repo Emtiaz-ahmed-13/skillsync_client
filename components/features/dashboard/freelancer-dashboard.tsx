@@ -141,9 +141,7 @@ export default function FreelancerDashboardClient() {
         try {
           // Fetch freelancer's profile to get their ID
           const profileResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/profile/me`
-            ||
-            `localhost:5001/api/v1/profile/me`,
+            "/api/v1/profile/me",
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -162,9 +160,7 @@ export default function FreelancerDashboardClient() {
 
           // Fetch freelancer's bids first (needed for earnings calculation)
           const bidsResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/bids/my`
-            ||
-            `localhost:5001/api/v1/bids/my`,
+            "/api/v1/bids/my",
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -204,9 +200,7 @@ export default function FreelancerDashboardClient() {
                     }
 
                     const projectResponse = await fetch(
-                      `${process.env.NEXT_PUBLIC_API_URL}/projects/${projectIdStr}`
-                      ||
-                      `localhost:5001/api/v1/projects/${projectIdStr}`,
+                      `/api/v1/projects/${projectIdStr}`,
                       {
                         headers: {
                           Authorization: `Bearer ${accessToken}`,
@@ -349,9 +343,7 @@ export default function FreelancerDashboardClient() {
           let assignedProjects = [];
           try {
             const assignedProjectsResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_API_URL}/projects/freelancer/${freelancerId}`
-              ||
-              `localhost:5001/api/v1/projects/freelancer/${freelancerId}`,
+              `/api/v1/projects/freelancer/${freelancerId}`,
               {
                 headers: {
                   Authorization: `Bearer ${accessToken}`,
@@ -414,9 +406,7 @@ export default function FreelancerDashboardClient() {
                 if (!project.realProjectId) return project;
 
                 const submissionsResponse = await fetch(
-                  `${process.env.NEXT_PUBLIC_API_URL}/work-submissions/project/${project.realProjectId}`
-                  ||
-                  `localhost:5001/api/v1/work-submissions/project/${project.realProjectId}`,
+                  `/api/v1/work-submissions/project/${project.realProjectId}`,
                   {
                     headers: {
                       Authorization: `Bearer ${accessToken}`,
@@ -479,9 +469,7 @@ export default function FreelancerDashboardClient() {
           }));
 
           const approvedResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/projects/approved`
-            ||
-            `localhost:5001/api/v1/projects/approved`,
+            "/api/v1/projects/approved",
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,

@@ -76,9 +76,7 @@ export default function ClientProjectsClient() {
       if (!accessToken || !userId) return;
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/projects/owner/${userId}`
-        ||
-        `localhost:5001/api/v1/projects/owner/${userId}`,
+        `/api/v1/projects/owner/${userId}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,

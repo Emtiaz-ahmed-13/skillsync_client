@@ -57,7 +57,7 @@ export default function RealtimeMessaging({ projectId }: { projectId: string }) 
 
       try {
         // 1. Fetch Project Details
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/projects/${projectId}`, {
+        const res = await fetch(`/api/v1/projects/${projectId}`, {
           headers: { Authorization: `Bearer ${user.accessToken}` },
         });
         const data = await res.json();
@@ -69,7 +69,7 @@ export default function RealtimeMessaging({ projectId }: { projectId: string }) 
           const ownerId = typeof project.ownerId === 'object' ? project.ownerId._id : project.ownerId;
           
           // 2. Fetch Project Bids to find the Freelancer
-          const bidsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/bids/project/${projectId}`, {
+          const bidsRes = await fetch(`/api/v1/bids/project/${projectId}`, {
               headers: { Authorization: `Bearer ${user.accessToken}` },
           });
           const bidsData = await bidsRes.json();
@@ -85,7 +85,7 @@ export default function RealtimeMessaging({ projectId }: { projectId: string }) 
 
 
           // 3. Fetch Conversations
-          const conversationsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/conversations`, {
+          const conversationsRes = await fetch("/api/v1/chat/conversations", {
             headers: { Authorization: `Bearer ${user.accessToken}` },
           });
           const conversationsData = await conversationsRes.json();
@@ -178,7 +178,7 @@ export default function RealtimeMessaging({ projectId }: { projectId: string }) 
       setLoading(true);
       const user = session?.user as any;
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/history/${activeParticipant._id}`, {
+        const res = await fetch(`/api/v1/chat/history/${activeParticipant._id}`, {
           headers: { Authorization: `Bearer ${user.accessToken}` },
         });
         const data = await res.json();

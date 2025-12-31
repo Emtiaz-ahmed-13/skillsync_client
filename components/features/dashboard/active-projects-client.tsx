@@ -65,7 +65,7 @@ export default function ActiveProjectsClient() {
         try {
           // Fetch freelancer's bids to find active projects
           const bidsResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/bids/my` || `localhost:5001/api/v1/bids/my`,
+            "/api/v1/bids/my",
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -93,8 +93,7 @@ export default function ActiveProjectsClient() {
                   : bid.projectId;
 
                 const projectResponse = await fetch(
-                  `${process.env.NEXT_PUBLIC_API_URL}/projects/${projectIdStr}`
-                  || `localhost:5001/api/v1/projects/${projectIdStr}`,
+                  `/api/v1/projects/${projectIdStr}`,
                   {
                     headers: {
                       Authorization: `Bearer ${accessToken}`,

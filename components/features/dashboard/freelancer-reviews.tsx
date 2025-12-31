@@ -74,9 +74,7 @@ export function FreelancerReviews() {
 
                   if (projectIdStr) {
                     const projectResponse = await fetch(
-                      `${process.env.NEXT_PUBLIC_API_URL}/projects/${projectIdStr}`
-                      ||
-                      `localhost:5001/api/v1/projects/${projectIdStr}`,
+                      `/api/v1/projects/${projectIdStr}`,
                       {
                         headers: {
                           Authorization: `Bearer ${accessToken}`,

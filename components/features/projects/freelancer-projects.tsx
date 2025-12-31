@@ -98,8 +98,7 @@ export default function FreelancerProjectsClient({
       try {
         // Fetch freelancer's profile to get their skills
         const profileResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/profile/me`
-          ||`localhost:5001/api/v1/profile/me`,
+          "/api/v1/profile/me",
           {
             headers: {
               Authorization: `Bearer ${user?.accessToken || ""}`,
@@ -116,8 +115,7 @@ export default function FreelancerProjectsClient({
         }
 
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/projects/approved`
-          ||`localhost:5001/api/v1/projects/approved`,
+          "/api/v1/projects/approved",
           {
             headers: {
               Authorization: `Bearer ${user?.accessToken || ""}`,

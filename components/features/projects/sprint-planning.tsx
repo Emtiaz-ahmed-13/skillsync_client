@@ -155,8 +155,7 @@ export default function SprintPlan({ projectId, project }: SprintPlanProps) {
         try {
           // Use the correct endpoint for sprint planning
           const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/sprint-planning/${projectId}` ||
-              `localhost:5001/api/v1/sprint-planning/${projectId}`,
+            `/api/v1/sprint-planning/${projectId}`,
             {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -351,8 +350,7 @@ export default function SprintPlan({ projectId, project }: SprintPlanProps) {
         return;
       }
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/sprint-planning/generate/${projectId}` ||
-          `localhost:5001/api/v1/sprint-planning/generate/${projectId}`,
+        `/api/v1/sprint-planning/generate/${projectId}`,
         {
           method: "POST",
           headers: {
@@ -415,8 +413,7 @@ export default function SprintPlan({ projectId, project }: SprintPlanProps) {
 
       // Use the correct endpoint for creating sprint plan
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/sprint-planning/generate/${projectId}` ||
-          `localhost:5001/api/v1/sprint-planning/generate/${projectId}`,
+        `/api/v1/sprint-planning/generate/${projectId}`,
         {
           method: "POST",
           headers: {

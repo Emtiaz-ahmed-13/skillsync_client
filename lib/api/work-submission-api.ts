@@ -56,8 +56,7 @@ export const createWorkSubmission = async (
   accessToken: string
 ) => {
   const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/work-submissions`
-      || `localhost:5001/api/v1/work-submissions`,
+      "/api/v1/work-submissions",
     {
       method: "POST",
       headers: {
@@ -76,8 +75,7 @@ export const getWorkSubmissionsByProject = async (
   accessToken: string
 ) => {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/work-submissions/project/${projectId}`
-    || `localhost:5001/api/v1/work-submissions/project/${projectId}`,
+    `/api/v1/work-submissions/project/${projectId}`,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -93,8 +91,7 @@ export const getWorkSubmissionsBySprint = async (
   accessToken: string
 ) => {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/work-submissions/sprint/${sprintId}`
-    || `localhost:5001/api/v1/work-submissions/sprint/${sprintId}`,
+    `/api/v1/work-submissions/sprint/${sprintId}`,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -110,8 +107,7 @@ export const getWorkSubmissionsByFreelancer = async (
   accessToken: string
 ) => {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/work-submissions/freelancer/${freelancerId}`
-    || `localhost:5001/api/v1/work-submissions/freelancer/${freelancerId}`,
+    `/api/v1/work-submissions/freelancer/${freelancerId}`,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -127,8 +123,7 @@ export const getWorkSubmissionById = async (
   accessToken: string
 ) => {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/work-submissions/${id}`
-    || `localhost:5001/api/v1/work-submissions/${id}`,
+    `/api/v1/work-submissions/${id}`,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -145,7 +140,7 @@ export const updateWorkSubmission = async (
   accessToken: string
 ) => {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/work-submissions/${id}`,
+    `/api/v1/work-submissions/${id}`,
     {
       method: "PATCH",
       headers: {
@@ -165,8 +160,7 @@ export const updateWorkSubmissionStatus = async (
   accessToken: string
 ) => {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/work-submissions/${id}/status`
-    || `localhost:5001/api/v1/work-submissions/${id}/status`,
+    `/api/v1/work-submissions/${id}/status`,
     {
       method: "PATCH",
       headers: {
@@ -182,8 +176,7 @@ export const updateWorkSubmissionStatus = async (
 
 export const deleteWorkSubmission = async (id: string, accessToken: string) => {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/work-submissions/${id}`
-    || `localhost:5001/api/v1/work-submissions/${id}`,
+    `/api/v1/work-submissions/${id}`,
     {
       method: "DELETE",
       headers: {
@@ -203,8 +196,7 @@ export const createWorkSubmissionNotification = async (
 ) => {
   try {
     const projectResponse = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/projects/${projectId}`
-      || `localhost:5001/api/v1/projects/${projectId}`,
+      `/api/v1/projects/${projectId}`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -218,7 +210,7 @@ export const createWorkSubmissionNotification = async (
         const ownerId = projectData.data.ownerId;
 
         const notificationResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/notifications`,
+          "/api/v1/notifications",
           {
             method: "POST",
             headers: {
@@ -289,8 +281,7 @@ export const getProjectSprints = async (
 ): Promise<ApiResponse<Sprint[]>> => {
   try {
     const response = await fetch(
-     `${process.env.NEXT_PUBLIC_API_URL}/sprint-planning/${projectId}`
-     || `localhost:5001/api/v1/sprint-planning/${projectId}`,
+     `/api/v1/sprint-planning/${projectId}`,
       {
         method: "GET",
         headers: {
@@ -360,8 +351,7 @@ export const createProjectSprints = async (
   try {
     // Try to create sprint plan using the correct endpoint
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/sprint-planning/create/${projectId}`
-      || `localhost:5001/api/v1/sprint-planning/create/${projectId}`,
+      `/api/v1/sprint-planning/create/${projectId}`,
       {
         method: "POST",
         headers: {
@@ -384,8 +374,7 @@ export const createProjectSprints = async (
 
       // Try to generate AI sprint plan
       const aiResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/ai-sprints/generate-plan`
-        || `localhost:5001/api/v1/ai-sprints/generate-plan`,
+        "/api/v1/ai-sprints/generate-plan",
         {
           method: "POST",
           headers: {
@@ -459,8 +448,7 @@ export const updateSprintStatus = async (
 ) => {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/sprint-planning/${sprintId}`
-      || `localhost:5001/api/v1/sprint-planning/${sprintId}`,
+      `/api/v1/sprint-planning/${sprintId}`,
       {
         method: "PATCH", // Using PATCH for partial update of status
         headers: {

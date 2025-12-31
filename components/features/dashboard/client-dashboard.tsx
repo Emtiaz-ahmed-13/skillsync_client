@@ -119,9 +119,7 @@ export default function ClientDashboardClient() {
           }
 
           const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/projects/owner/${userId}`
-            ||
-            `localhost:5001/api/v1/projects/owner/${userId}`,
+            `/api/v1/projects/owner/${userId}`,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -199,9 +197,7 @@ export default function ClientDashboardClient() {
                   const projectId = project._id || project.id;
 
                   const bidsResponse = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL}/bids/project/${projectId}`
-                    ||
-                    `localhost:5001/api/v1/bids/project/${projectId}`,
+                    `/api/v1/bids/project/${projectId}`,
                     {
                       headers: {
                         Authorization: `Bearer ${accessToken}`,
@@ -314,9 +310,7 @@ export default function ClientDashboardClient() {
         technology: techList,
       };
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/projects`
-        ||
-        `localhost:5001/api/v1/projects`, {
+      const response = await fetch("/api/v1/projects", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -337,7 +331,7 @@ export default function ClientDashboardClient() {
           formData.append("projectId", createdProject._id || createdProject.id);
 
           const fileResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/files`,
+            "/api/v1/files",
             {
               method: "POST",
               headers: {
@@ -538,9 +532,7 @@ export default function ClientDashboardClient() {
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/bids/${bidId}/status`
-        ||
-        `localhost:5001/api/v1/bids/${bidId}/status`,
+        `/api/v1/bids/${bidId}/status`,
         {
           method: "PUT",
           headers: {
@@ -733,9 +725,7 @@ export default function ClientDashboardClient() {
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/bids/${bidId}/status`
-        ||
-        `localhost:5001/api/v1/bids/${bidId}/status`,
+        `/api/v1/bids/${bidId}/status`,
         {
           method: "PUT",
           headers: {

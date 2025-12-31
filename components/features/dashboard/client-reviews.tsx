@@ -86,9 +86,7 @@ export function ClientReviews() {
 
           // Fetch client's completed projects
           const projectsResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/projects/owner/${userId}`
-            ||
-            `localhost:5001/api/v1/projects/owner/${userId}`,
+            `/api/v1/projects/owner/${userId}`,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -110,9 +108,7 @@ export function ClientReviews() {
                 try {
               
                   const submissionsResponse = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL}/work-submissions/project/${project._id}`
-                    ||
-                    `localhost:5001/api/v1/work-submissions/project/${project._id}`,
+                    `/api/v1/work-submissions/project/${project._id}`,
                     {
                       headers: {
                         Authorization: `Bearer ${accessToken}`,
@@ -199,9 +195,7 @@ export function ClientReviews() {
 
       try {
         const bidsResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/bids/project/${selectedProject}`
-          ||
-          `localhost:5001/api/v1/bids/project/${selectedProject}`,
+          `/api/v1/bids/project/${selectedProject}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,

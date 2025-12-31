@@ -93,9 +93,7 @@ export default function ProjectDetailsClient({
     const fetchProject = async () => {
       try {
         const response = await fetch(
-          `${
-            process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api/v1"
-          }/projects/${projectId}`
+          `/api/v1/projects/${projectId}`
         );
 
         if (response.ok) {
@@ -151,7 +149,7 @@ export default function ProjectDetailsClient({
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api/v1"}/bids`,
+        "/api/v1/bids",
         {
           method: "POST",
           headers: {

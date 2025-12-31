@@ -37,7 +37,7 @@ export default function ChatClient() {
     const fetchConversations = async () => {
       if (!currentUser?.accessToken) return;
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/conversations`, {
+        const response = await fetch("/api/v1/chat/conversations", {
           headers: {
             Authorization: `Bearer ${currentUser.accessToken}`,
           },
@@ -54,7 +54,7 @@ export default function ChatClient() {
                  setSelectedUser(existingUser);
              } else {
                  // If not, fetch their details temporarily seamlessly
-                 const userRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/users/${userIdParam}`, {
+                 const userRes = await fetch(`/api/v1/auth/users/${userIdParam}`, {
                     headers: { Authorization: `Bearer ${currentUser.accessToken}` }
                  });
                  if (userRes.ok) {
@@ -79,7 +79,7 @@ export default function ChatClient() {
       if (!selectedUser || !currentUser?.accessToken) return;
       
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/history/${selectedUser._id}`, {
+        const response = await fetch(`/api/v1/chat/history/${selectedUser._id}`, {
              headers: {
                 Authorization: `Bearer ${currentUser.accessToken}`,
               },

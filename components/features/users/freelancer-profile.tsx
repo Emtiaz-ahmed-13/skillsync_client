@@ -89,8 +89,7 @@ export default function FreelancerProfileClient({
 
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/profile/me`
-          || `localhost:5001/api/v1/profile/me`,
+          "/api/v1/profile/me",
           {
             headers: {
               Authorization: `Bearer ${user.accessToken}`,
@@ -174,7 +173,7 @@ export default function FreelancerProfileClient({
 
         try {
           const uploadResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/files`,
+            "/api/v1/files",
             {
               method: "POST",
               headers: {
@@ -225,8 +224,7 @@ export default function FreelancerProfileClient({
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/profile/me/freelancer`
-        || `localhost:5001/api/v1/profile/me/freelancer`,
+        "/api/v1/profile/me/freelancer",
         {
           method: "PATCH",
           headers: {
