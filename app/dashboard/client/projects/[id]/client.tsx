@@ -41,6 +41,7 @@ interface Bid {
     hourlyRate?: number;
     skills?: string[];
   };
+  resumeUrl?: string;
 }
 
 interface Feature {
@@ -516,8 +517,8 @@ export default function ClientProjectDetailsClient({ id }: { id: string }) {
                     <div>
                       <h4 className="text-sm font-semibold mb-3 text-foreground">Required Technologies</h4>
                       <div className="flex flex-wrap gap-2">
-                        {project.technology.map((tech) => (
-                          <Badge key={tech} variant="secondary" className="px-3 py-1 bg-purple-500/10 text-purple-600 hover:bg-purple-500/20 border-purple-200/20">
+                        {project.technology.map((tech, index) => (
+                          <Badge key={`tech-${index}`} variant="secondary" className="px-3 py-1 bg-purple-500/10 text-purple-600 hover:bg-purple-500/20 border-purple-200/20">
                             {tech}
                           </Badge>
                         ))}
@@ -584,10 +585,10 @@ export default function ClientProjectDetailsClient({ id }: { id: string }) {
                                      </div>
                                      <div>
                                         <h3 className="font-semibold text-base">
-                                            {bid.freelancer ? bid.freelancer.name : (typeof bid.freelancerId === 'object' ? (bid.freelancerId as any).name : "Unknown Freelancer")}
+                                            {bid.freelancer ? bid.freelancer.name : (bid.freelancerId && typeof bid.freelancerId === 'object' ? (bid.freelancerId as any).name : "Unknown Freelancer")}
                                         </h3>
                                         <p className="text-xs text-muted-foreground">
-                                           {bid.freelancer ? bid.freelancer.email : (typeof bid.freelancerId === 'object' ? (bid.freelancerId as any).email : "No email")}
+                                           {bid.freelancer ? bid.freelancer.email : (bid.freelancerId && typeof bid.freelancerId === 'object' ? (bid.freelancerId as any).email : "No email")}
                                         </p>
                                      </div>
                                      <Badge variant={
@@ -614,16 +615,38 @@ export default function ClientProjectDetailsClient({ id }: { id: string }) {
                                <div className="flex md:flex-col gap-2 md:min-w-[120px] justify-start md:justify-center">
                                   {bid.status === "pending" && (
                                     <>
+                                        {bid.resumeUrl && (
+                                          <Button 
+                                            size="sm" 
+                                            variant="outline" 
+                                            onClick={() => window.open(bid.resumeUrl, "_blank")}
+                                            className="w-full border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
+                                          >
+                                            <span className="mr-1">📄</span> Resume
+                                          </Button>
+                                        )}
                                         <Button size="sm" onClick={() => bidId && handleAcceptBid(bidId)} className="w-full bg-green-600 hover:bg-green-700 text-white">Accept</Button>
                                         <Button size="sm" variant="outline" onClick={() => bidId && handleRejectBid(bidId)} className="w-full text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20">Reject</Button>
                                     </>
                                   )}
-                                  {bid.status === "accepted" && (
-                                      <div className="flex flex-col items-center justify-center h-full text-green-600 bg-green-500/10 rounded-lg p-2">
-                                          <span className="text-xl mb-1">✓</span>
-                                          <span className="text-xs font-semibold">Selection</span>
-                                      </div>
-                                  )}
+                                   {bid.status === "accepted" && (
+                                       <div className="flex flex-col gap-2 w-full">
+                                          {bid.resumeUrl && (
+                                            <Button 
+                                              size="sm" 
+                                              variant="outline" 
+                                              onClick={() => window.open(bid.resumeUrl, "_blank")}
+                                              className="w-full border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
+                                            >
+                                              <span className="mr-1">📄</span> Resume
+                                            </Button>
+                                          )}
+                                          <div className="flex flex-col items-center justify-center h-full text-green-600 bg-green-500/10 rounded-lg p-2">
+                                              <span className="text-xl mb-1">✓</span>
+                                              <span className="text-xs font-semibold">Selection</span>
+                                          </div>
+                                       </div>
+                                   )}
                                </div>
                             </div>
                          </div>
@@ -662,7 +685,7 @@ export default function ClientProjectDetailsClient({ id }: { id: string }) {
                               <div>
                                  <div className="flex items-center gap-2 mb-1">
                                     <h3 className="font-semibold text-lg text-foreground">
-                                        {submission.sprint ? submission.sprint.title : (typeof submission.sprintId === 'object' ? (submission.sprintId as any).title : "Sprint Work")}
+                                        {submission.sprint ? submission.sprint.title : (submission.sprintId && typeof submission.sprintId === 'object' ? (submission.sprintId as any)?.title : "Sprint Work")}
                                     </h3>
                                     <Badge className={
                                        submission.status === "approved" ? "bg-green-500 hover:bg-green-600" :

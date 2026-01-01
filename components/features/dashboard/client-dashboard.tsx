@@ -5,39 +5,40 @@ import { Navbar } from "@/components/shared/navbar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  getWorkSubmissionsByProject,
-  WorkSubmission,
+    getWorkSubmissionsByProject,
+    WorkSubmission,
 } from "@/lib/api/work-submission-api";
 import { useNotifications } from "@/lib/hooks/notifications";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface Project {
   _id: string;
@@ -323,6 +324,7 @@ export default function ClientDashboardClient() {
 
       if (response.ok) {
         projectResponseData = await response.json();
+        toast.success("Project created successfully!");
 
         if (file) {
           const createdProject = projectResponseData.data;

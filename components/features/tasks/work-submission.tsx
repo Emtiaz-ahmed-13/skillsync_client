@@ -4,21 +4,21 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  WorkSubmission as ApiWorkSubmission,
-  createWorkSubmission,
-  createWorkSubmissionNotification,
-  getProjectSprints,
-  getWorkSubmissionsBySprint,
+    WorkSubmission as ApiWorkSubmission,
+    createWorkSubmission,
+    createWorkSubmissionNotification,
+    getProjectSprints,
+    getWorkSubmissionsBySprint,
 } from "@/lib/api/work-submission-api";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
@@ -416,13 +416,80 @@ export default function WorkSubmission({
                                 {/* Feature Checklist */}
                                 <div className="space-y-3">
                                     <label className="text-sm font-medium text-foreground">Features Included</label>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        {selectedSprintData.features.map(f => (
-                                            <div key={f.id} className={`flex items-start gap-2 p-2 rounded border ${f.status === 'completed' ? 'bg-green-50 border-green-200 dark:bg-green-950/20' : 'bg-muted/50 border-transparent text-muted-foreground'}`}>
-                                                <div className={`mt-0.5 w-4 h-4 rounded-full flex items-center justify-center border ${f.status === 'completed' ? 'border-green-600 bg-green-600 text-white' : 'border-muted-foreground'}`}>
-                                                    {f.status === 'completed' && <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                                    <div className="grid grid-cols-1 gap-3">
+                                        {selectedSprintData.features.map((f, idx) => (
+                                            <div key={f.id} className={`flex items-center justify-between gap-3 p-3 rounded-lg border transition-all ${
+                                                f.status === 'completed' ? 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800' : 
+                                                f.status === 'in-progress' ? 'bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800' :
+                                                'bg-muted/50 border-border'
+                                            }`}>
+                                                <div className="flex items-start gap-3 flex-1">
+                                                    <div className={`mt-0.5 w-5 h-5 rounded-full flex items-center justify-center border-2 ${
+                                                        f.status === 'completed' ? 'border-green-600 bg-green-600 text-white' : 
+                                                        f.status === 'in-progress' ? 'border-blue-600 bg-blue-600 text-white' :
+                                                        'border-muted-foreground'
+                                                    }`}>
+                                                        {f.status === 'completed' && <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                                                        {f.status === 'in-progress' && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <span className={`text-sm font-medium block ${f.status === 'completed' ? 'line-through text-muted-foreground' : ''}`}>{f.title}</span>
+                                                        {f.description && <p className="text-xs text-muted-foreground mt-0.5">{f.description}</p>}
+                                                    </div>
                                                 </div>
-                                                <span className="text-sm">{f.title}</span>
+                                                <div className="flex gap-1.5">
+                                                    <button
+                                                        onClick={async () => {
+                                                            const updatedSprints = [...sprints];
+                                                            const sprintIdx = updatedSprints.findIndex(s => s._id === selectedSprint);
+                                                            if (sprintIdx !== -1) {
+                                                                updatedSprints[sprintIdx].features[idx].status = "pending";
+                                                                setSprints(updatedSprints);
+                                                                toast.success("Feature marked as pending");
+                                                            }
+                                                        }}
+                                                        className={`w-7 h-7 rounded-full ring-2 ring-offset-2 transition-all hover:scale-110 ${
+                                                            f.status === 'pending' 
+                                                            ? 'bg-yellow-400 ring-yellow-400 shadow-md' 
+                                                            : 'bg-muted ring-transparent hover:bg-yellow-200 hover:ring-yellow-300'
+                                                        }`}
+                                                        title="Mark as Pending"
+                                                    />
+                                                    <button
+                                                        onClick={async () => {
+                                                            const updatedSprints = [...sprints];
+                                                            const sprintIdx = updatedSprints.findIndex(s => s._id === selectedSprint);
+                                                            if (sprintIdx !== -1) {
+                                                                updatedSprints[sprintIdx].features[idx].status = "in-progress";
+                                                                setSprints(updatedSprints);
+                                                                toast.success("Feature marked as in progress");
+                                                            }
+                                                        }}
+                                                        className={`w-7 h-7 rounded-full ring-2 ring-offset-2 transition-all hover:scale-110 ${
+                                                            f.status === 'in-progress' 
+                                                            ? 'bg-blue-400 ring-blue-400 shadow-md' 
+                                                            : 'bg-muted ring-transparent hover:bg-blue-200 hover:ring-blue-300'
+                                                        }`}
+                                                        title="Mark as In Progress"
+                                                    />
+                                                    <button
+                                                        onClick={async () => {
+                                                            const updatedSprints = [...sprints];
+                                                            const sprintIdx = updatedSprints.findIndex(s => s._id === selectedSprint);
+                                                            if (sprintIdx !== -1) {
+                                                                updatedSprints[sprintIdx].features[idx].status = "completed";
+                                                                setSprints(updatedSprints);
+                                                                toast.success("Feature marked as completed! ✓");
+                                                            }
+                                                        }}
+                                                        className={`w-7 h-7 rounded-full ring-2 ring-offset-2 transition-all hover:scale-110 ${
+                                                            f.status === 'completed' 
+                                                            ? 'bg-green-400 ring-green-400 shadow-md' 
+                                                            : 'bg-muted ring-transparent hover:bg-green-200 hover:ring-green-300'
+                                                        }`}
+                                                        title="Mark as Completed"
+                                                    />
+                                                </div>
                                             </div>
                                         ))}
                                     </div>

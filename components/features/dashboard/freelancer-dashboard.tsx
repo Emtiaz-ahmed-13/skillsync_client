@@ -4,25 +4,27 @@ import { Navbar } from "@/components/shared/navbar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { FreelancerReviews } from "./freelancer-reviews";
 
 
 interface Project {
@@ -711,330 +713,341 @@ export default function FreelancerDashboardClient() {
             </Card>
           </motion.div>
 
-          {/* Main Content Grid */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8"
-          >
-            {/* Active Projects */}
-            <Card className="hover:shadow-lg transition-shadow duration-300">
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <CardTitle className="text-xl font-semibold">
-                      Active Projects
-                    </CardTitle>
-                    <CardDescription className="text-sm mt-1">
-                      You have {activeProjects.length} active projects
-                      {activeProjects.length > 4 && " (showing latest 4)"}
-                    </CardDescription>
-                  </div>
-                  <div className="flex gap-2">
-                    {activeProjects.length > 4 && (
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => router.push("/dashboard/freelancer/active-projects")}
-                      >
-                        View All
-                      </Button>
-                    )}
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={refreshData}
-                        className="text-sm"
-                    >
-                        <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4 mr-2"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                        />
-                        </svg>
-                        Refresh
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="font-semibold">Project</TableHead>
-                        <TableHead className="font-semibold">Client</TableHead>
-                        <TableHead className="font-semibold">Status</TableHead>
-                        <TableHead className="font-semibold">
-                          Progress
-                        </TableHead>
-                        <TableHead className="font-semibold">Action</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {activeProjects
-                        .slice(0, 4) // Show only the latest 4 projects
-                        .map((project) => (
-                          <TableRow
-                            key={
-                              typeof project._id === "string"
-                                ? project._id
-                                : typeof project.id === "string"
-                                ? project.id
-                                : `project-${
-                                    project.title || "unknown"
-                                  }-${Date.now()}-${Math.random()}`
-                            }
-                            className="hover:bg-muted/50"
+          {/* Tabs Section */}
+          <Tabs defaultValue="projects" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 lg:w-[400px] mb-8">
+              <TabsTrigger value="projects">Projects & Bids</TabsTrigger>
+              <TabsTrigger value="reviews">Reviews & Feedback</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="projects" className="space-y-8">
+              {/* Main Content Grid */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+              >
+                {/* Active Projects */}
+                <Card className="hover:shadow-lg transition-shadow duration-300">
+                  <CardHeader>
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <CardTitle className="text-xl font-semibold">
+                          Active Projects
+                        </CardTitle>
+                        <CardDescription className="text-sm mt-1">
+                          You have {activeProjects.length} active projects
+                          {activeProjects.length > 4 && " (showing latest 4)"}
+                        </CardDescription>
+                      </div>
+                      <div className="flex gap-2">
+                        {activeProjects.length > 4 && (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => router.push("/dashboard/freelancer/active-projects")}
                           >
-                            <TableCell className="font-medium">
-                              {project.title}
-                            </TableCell>
-                            <TableCell>
-                              <span className="text-muted-foreground">
-                                {typeof project.ownerId === 'object' && project.ownerId !== null 
-                                  ? (project.ownerId as any).name 
-                                  : "Unknown Client"}
-                              </span>
-                            </TableCell>
-                            <TableCell>
-                              <Badge
-                                variant={
-                                  project.status === "in-progress"
-                                    ? "default"
-                                    : project.status === "pending"
-                                    ? "secondary"
-                                    : project.status === "completed"
-                                    ? "outline"
-                                    : "destructive"
-                                }
-                                className="text-xs"
-                              >
-                                {project.status}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center space-x-2">
-                                <Progress
-                                  value={project.progress || 0}
-                                  className="h-2 w-20"
-                                />
-                                <span className="text-sm font-medium">
-                                  {project.progress || 0}%
-                                </span>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                  router.push(
-                                    `/dashboard/freelancer/projects/${
-                                      project.realProjectId ||
-                                      (typeof project._id === "string" && !project._id.includes("-")
-                                        ? project._id
-                                        : "")
-                                    }`
-                                  )
-                                }
-                              >
-                                Details
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                    </TableBody>
-                  </Table>
-                </div>
-                {activeProjects.length === 0 && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p>No active projects yet.</p>
-                    <p className="text-sm mt-1">
-                      Your accepted projects will appear here.
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Recent Bids */}
-            <Card className="hover:shadow-lg transition-shadow duration-300">
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                    <div>
-                    <CardTitle className="text-xl font-semibold">
-                        Recent Bids
-                    </CardTitle>
-                    <CardDescription className="text-sm mt-1">
-                        Your recent project bids
-                        {bids.length > 4 && " (showing latest 4)"}
-                    </CardDescription>
-                    </div>
-                    {bids.length > 4 && (
-                        <Button 
-                        variant="outline"
-                        size="sm" 
-                        onClick={() => router.push("/dashboard/freelancer/bids")}
-                        >
-                        View All
-                        </Button>
-                    )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="font-semibold">Project</TableHead>
-                        <TableHead className="font-semibold">Client</TableHead>
-                        <TableHead className="font-semibold">Amount</TableHead>
-                        <TableHead className="font-semibold">Status</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {bids.slice(0, 4).map((bid) => (
-                        <TableRow
-                          key={
-                            typeof bid._id === "string"
-                              ? bid._id
-                              : typeof bid.id === "string"
-                              ? bid.id
-                              : `bid-${
-                                  bid.projectTitle || "unknown"
-                                }-${Date.now()}-${Math.random()}`
-                          }
-                          className="hover:bg-muted/50"
-                        >
-                          <TableCell className="font-medium">
-                            {bid.projectTitle || "Unknown Project"}
-                          </TableCell>
-                          <TableCell>
-                            <span className="text-muted-foreground">
-                              {bid.clientName || "Unknown Client"}
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            <span className="font-medium">${bid.amount}</span>
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              variant={
-                                bid.status === "accepted"
-                                  ? "default"
-                                  : bid.status === "pending"
-                                  ? "secondary"
-                                  : "destructive"
-                              }
-                              className="text-xs"
-                            >
-                              {bid.status}
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-                {bids.length === 0 && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p>No recent bids yet.</p>
-                    <p className="text-sm mt-1">
-                      Your submitted bids will appear here.
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Latest Approved Projects */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="grid grid-cols-1 gap-6 mb-8"
-          >
-            <Card className="hover:shadow-lg transition-shadow duration-300">
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold">
-                  Latest Approved Projects
-                </CardTitle>
-                <CardDescription className="text-sm mt-1">
-                  Recently approved projects for freelancers
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loadingProjects ? (
-                  <div className="flex justify-center items-center h-32">
-                    <p className="text-muted-foreground">Loading projects...</p>
-                  </div>
-                ) : approvedProjects.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {approvedProjects.map((project) => (
-                      <div
-                        key={project.id}
-                        className="border rounded-lg p-4 hover:shadow-md transition-shadow bg-card"
-                      >
-                        <h3 className="font-semibold text-lg mb-2">
-                          {project.title}
-                        </h3>
-                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                          {project.description}
-                        </p>
-                        <div className="flex justify-between items-center mb-3">
-                          <span className="text-sm font-medium">
-                            Budget: ${project.budget}
-                          </span>
-                          <Badge variant="outline" className="text-xs">
-                            {project.status}
-                          </Badge>
-                        </div>
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {project.technology.slice(0, 3).map((tech, index) => (
-                            <Badge
-                              key={index}
-                              variant="secondary"
-                              className="text-xs"
-                            >
-                              {tech}
-                            </Badge>
-                          ))}
-                        </div>
+                            View All
+                          </Button>
+                        )}
                         <Button
-                          className="w-full py-2"
-                          onClick={() =>
-                            router.push(
-                              `/dashboard/freelancer/projects/${project._id}`
-                            )
-                          }
+                            variant="outline"
+                            size="sm"
+                            onClick={refreshData}
+                            className="text-sm"
                         >
-                          View Details
+                            <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4 mr-2"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                            />
+                            </svg>
+                            Refresh
                         </Button>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p>No approved projects available.</p>
-                    <p className="text-sm mt-1">
-                      Projects will appear here when approved by admins.
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="font-semibold">Project</TableHead>
+                            <TableHead className="font-semibold">Client</TableHead>
+                            <TableHead className="font-semibold">Status</TableHead>
+                            <TableHead className="font-semibold">
+                              Progress
+                            </TableHead>
+                            <TableHead className="font-semibold">Action</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {activeProjects
+                            .slice(0, 4) // Show only the latest 4 projects
+                            .map((project) => (
+                              <TableRow
+                                key={
+                                  typeof project._id === "string"
+                                    ? project._id
+                                    : typeof project.id === "string"
+                                    ? project.id
+                                    : `project-${
+                                        project.title || "unknown"
+                                      }-${Date.now()}-${Math.random()}`
+                                }
+                                className="hover:bg-muted/50"
+                              >
+                                <TableCell className="font-medium">
+                                  {project.title}
+                                </TableCell>
+                                <TableCell>
+                                  <span className="text-muted-foreground">
+                                    {typeof project.ownerId === 'object' && project.ownerId !== null 
+                                      ? (project.ownerId as any).name 
+                                      : "Unknown Client"}
+                                  </span>
+                                </TableCell>
+                                <TableCell>
+                                  <Badge
+                                    variant={
+                                      project.status === "in-progress"
+                                        ? "default"
+                                        : project.status === "pending"
+                                        ? "secondary"
+                                        : project.status === "completed"
+                                        ? "outline"
+                                        : "destructive"
+                                    }
+                                    className="text-xs"
+                                  >
+                                    {project.status}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex items-center space-x-2">
+                                    <Progress
+                                      value={project.progress || 0}
+                                      className="h-2 w-20"
+                                    />
+                                    <span className="text-sm font-medium">
+                                      {project.progress || 0}%
+                                    </span>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() =>
+                                      router.push(
+                                        `/dashboard/freelancer/projects/${
+                                          project.realProjectId ||
+                                          (typeof project._id === "string" && !project._id.includes("-")
+                                            ? project._id
+                                            : "")
+                                        }`
+                                      )
+                                    }
+                                  >
+                                    Details
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                    {activeProjects.length === 0 && (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <p>No active projects yet.</p>
+                        <p className="text-sm mt-1">
+                          Your accepted projects will appear here.
+                        </p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Recent Bids */}
+                <Card className="hover:shadow-lg transition-shadow duration-300">
+                  <CardHeader>
+                    <div className="flex justify-between items-center">
+                        <div>
+                        <CardTitle className="text-xl font-semibold">
+                            Recent Bids
+                        </CardTitle>
+                        <CardDescription className="text-sm mt-1">
+                            Your recent project bids
+                            {bids.length > 4 && " (showing latest 4)"}
+                        </CardDescription>
+                        </div>
+                        {bids.length > 4 && (
+                            <Button 
+                            variant="outline"
+                            size="sm" 
+                            onClick={() => router.push("/dashboard/freelancer/bids")}
+                            >
+                            View All
+                            </Button>
+                        )}
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="font-semibold">Project</TableHead>
+                            <TableHead className="font-semibold">Client</TableHead>
+                            <TableHead className="font-semibold">Amount</TableHead>
+                            <TableHead className="font-semibold">Status</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {bids.slice(0, 4).map((bid) => (
+                            <TableRow
+                              key={
+                                typeof bid._id === "string"
+                                  ? bid._id
+                                  : typeof bid.id === "string"
+                                  ? bid.id
+                                  : `bid-${
+                                      bid.projectTitle || "unknown"
+                                    }-${Date.now()}-${Math.random()}`
+                              }
+                              className="hover:bg-muted/50"
+                            >
+                              <TableCell className="font-medium">
+                                {bid.projectTitle || "Unknown Project"}
+                              </TableCell>
+                              <TableCell>
+                                <span className="text-muted-foreground">
+                                  {bid.clientName || "Unknown Client"}
+                                </span>
+                              </TableCell>
+                              <TableCell>
+                                <span className="font-medium">${bid.amount}</span>
+                              </TableCell>
+                              <TableCell>
+                                <Badge
+                                  variant={
+                                    bid.status === "accepted"
+                                      ? "default"
+                                      : bid.status === "pending"
+                                      ? "secondary"
+                                      : "destructive"
+                                  }
+                                  className="text-xs"
+                                >
+                                  {bid.status}
+                                </Badge>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                    {bids.length === 0 && (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <p>No recent bids yet.</p>
+                        <p className="text-sm mt-1">
+                          Your submitted bids will appear here.
+                        </p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              {/* Latest Approved Projects */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="grid grid-cols-1 gap-6"
+              >
+                <Card className="hover:shadow-lg transition-shadow duration-300">
+                  <CardHeader>
+                    <CardTitle className="text-xl font-semibold">
+                      Latest Approved Projects
+                    </CardTitle>
+                    <CardDescription className="text-sm mt-1">
+                      Recently approved projects for freelancers
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {loadingProjects ? (
+                      <div className="flex justify-center items-center h-32">
+                        <p className="text-muted-foreground">Loading projects...</p>
+                      </div>
+                    ) : approvedProjects.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {approvedProjects.map((project) => (
+                          <div
+                            key={project.id}
+                            className="border rounded-lg p-4 hover:shadow-md transition-shadow bg-card"
+                          >
+                            <h3 className="font-semibold text-lg mb-2">
+                              {project.title}
+                            </h3>
+                            <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                              {project.description}
+                            </p>
+                            <div className="flex justify-between items-center mb-3">
+                              <span className="text-sm font-medium">
+                                Budget: ${project.budget}
+                              </span>
+                              <Badge variant="outline" className="text-xs">
+                                {project.status}
+                              </Badge>
+                            </div>
+                            <div className="flex flex-wrap gap-2 mb-4">
+                              {project.technology.slice(0, 3).map((tech, index) => (
+                                <Badge
+                                  key={index}
+                                  variant="secondary"
+                                  className="text-xs"
+                                >
+                                  {tech}
+                                </Badge>
+                              ))}
+                            </div>
+                            <Button
+                              className="w-full py-2"
+                              onClick={() =>
+                                router.push(
+                                  `/dashboard/freelancer/projects/${project._id}`
+                                )
+                              }
+                            >
+                              View Details
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <p>No new projects found.</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </TabsContent>
+
+            <TabsContent value="reviews">
+              <FreelancerReviews />
+            </TabsContent>
+          </Tabs>
 
 
 

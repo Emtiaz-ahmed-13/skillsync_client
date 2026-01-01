@@ -4,11 +4,11 @@ import { Navbar } from "@/components/shared/navbar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,6 +33,7 @@ interface Project {
   ownerId: string;
   createdAt: string;
   updatedAt: string;
+  files?: any[];
 }
 
 interface FreelancerUser {
@@ -207,53 +208,22 @@ export default function EnhancedProjectDetailsClient({
     setBidSubmitting(true);
 
     try {
-      // Upload resume if provided
+      const formData = new FormData();
+      formData.append("projectId", project!._id);
+      formData.append("amount", bidAmount.toString());
+      formData.append("proposal", bidMessage);
+
       if (resumeFile) {
-        const resumeFormData = new FormData();
-        resumeFormData.append("file", resumeFile);
-        resumeFormData.append("fileType", "resume");
-        // Use the project ID for the resume upload
-        resumeFormData.append("projectId", project!._id);
-
-        const resumeUploadResponse = await fetch(
-          "/api/v1/files",
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${user.accessToken}`,
-            },
-            body: resumeFormData,
-          }
-        );
-
-        if (!resumeUploadResponse.ok) {
-          const resumeUploadError = await resumeUploadResponse.json();
-          console.error("Resume upload error response:", resumeUploadError);
-          toast.error(
-            resumeUploadError.message ||
-              `Resume upload failed with status ${resumeUploadResponse.status}`
-          );
-          return;
-        }
-
-        const resumeUploadResult = await resumeUploadResponse.json();
-        console.log("Resume upload result:", resumeUploadResult);
+        formData.append("file", resumeFile);
       }
-      const bidData = {
-        projectId: project!._id,
-        amount: Number(bidAmount),
-        proposal: bidMessage,
-      };
 
       // Submit the bid
-      const response = await fetch("/api/v1/bids",
-         {
+      const response = await fetch("/api/v1/bids", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${user.accessToken}`,
         },
-        body: JSON.stringify(bidData),
+        body: formData,
       });
 
       if (response.ok) {
@@ -568,6 +538,41 @@ export default function EnhancedProjectDetailsClient({
                       ))}
                     </div>
                   </div>
+
+                  {project?.files && project.files.length > 0 && (
+                    <div className="pt-4 border-t border-border/50">
+                      <Label className="text-lg font-semibold flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                        </svg>
+                        Project Attachments
+                      </Label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                        {project.files.map((file: any, index: number) => (
+                          <a
+                            key={index}
+                            href={file.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center p-3 rounded-lg border bg-muted/10 hover:bg-muted/30 transition-colors group"
+                          >
+                            <div className="p-2 bg-background rounded border group-hover:border-primary/30 transition-colors">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                              </svg>
+                            </div>
+                            <div className="ml-3 overflow-hidden">
+                              <p className="text-sm font-medium truncate">{file.originalName || file.name}</p>
+                              <p className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(1)} KB</p>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-auto text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 

@@ -3,11 +3,11 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
@@ -752,33 +752,33 @@ export default function SprintPlan({ projectId, project }: SprintPlanProps) {
                               </div>
                               
                               <div className="flex items-center justify-between pt-2 border-t border-border/50">
-                                <div className="flex gap-1">
+                                <div className="flex gap-2">
                                     <button
                                         onClick={() => updateFeatureStatus(sprintIndex, featureIndex, "pending")}
-                                        className={`w-2 h-2 rounded-full ring-2 ring-offset-1 transition-all ${
+                                        className={`w-6 h-6 rounded-full ring-2 ring-offset-2 transition-all hover:scale-110 ${
                                             feature.status === 'pending' 
-                                            ? 'bg-yellow-400 ring-yellow-400' 
-                                            : 'bg-muted ring-transparent hover:bg-yellow-200'
+                                            ? 'bg-yellow-400 ring-yellow-400 shadow-md' 
+                                            : 'bg-muted ring-transparent hover:bg-yellow-200 hover:ring-yellow-300'
                                         }`}
-                                        title="Pending"
+                                        title="Mark as Pending"
                                     />
                                     <button
                                         onClick={() => updateFeatureStatus(sprintIndex, featureIndex, "in-progress")}
-                                        className={`w-2 h-2 rounded-full ring-2 ring-offset-1 transition-all ${
+                                        className={`w-6 h-6 rounded-full ring-2 ring-offset-2 transition-all hover:scale-110 ${
                                             feature.status === 'in-progress' 
-                                            ? 'bg-blue-400 ring-blue-400' 
-                                            : 'bg-muted ring-transparent hover:bg-blue-200'
+                                            ? 'bg-blue-400 ring-blue-400 shadow-md' 
+                                            : 'bg-muted ring-transparent hover:bg-blue-200 hover:ring-blue-300'
                                         }`}
-                                        title="In Progress"
+                                        title="Mark as In Progress"
                                     />
                                     <button
                                         onClick={() => updateFeatureStatus(sprintIndex, featureIndex, "completed")}
-                                        className={`w-2 h-2 rounded-full ring-2 ring-offset-1 transition-all ${
+                                        className={`w-6 h-6 rounded-full ring-2 ring-offset-2 transition-all hover:scale-110 ${
                                             feature.status === 'completed' 
-                                            ? 'bg-green-400 ring-green-400' 
-                                            : 'bg-muted ring-transparent hover:bg-green-200'
+                                            ? 'bg-green-400 ring-green-400 shadow-md' 
+                                            : 'bg-muted ring-transparent hover:bg-green-200 hover:ring-green-300'
                                         }`}
-                                        title="Completed"
+                                        title="Mark as Completed"
                                     />
                                 </div>
                                 <span className={`text-[10px] uppercase font-bold tracking-wider ${

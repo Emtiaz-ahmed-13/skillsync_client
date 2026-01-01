@@ -47,7 +47,7 @@ export const getProposalsByProject = async (
 ): Promise<ProposalResponse> => {
   try {
     const response = await fetch(
-      `${API_BASE_URL}/bids?projectId=${projectId}`,
+      `${API_BASE_URL}/bids/project/${projectId}`,
       {
         method: "GET",
         headers: getHeaders(),
@@ -69,7 +69,7 @@ export const getProposalsByProject = async (
 // Get proposals for a freelancer (freelancer view)
 export const getProposalsByFreelancer = async (): Promise<ProposalResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/bids/freelancer`, {
+    const response = await fetch(`${API_BASE_URL}/bids/my`, {
       method: "GET",
       headers: getHeaders(),
     });
@@ -99,7 +99,8 @@ export const submitProposal = async (
       method: "POST",
       headers: getHeaders(),
       body: JSON.stringify({
-        coverLetter,
+        projectId,
+        proposal: coverLetter,
         amount,
         timeline,
         resumeUrl,
@@ -123,9 +124,10 @@ export const acceptProposal = async (
   proposalId: string
 ): Promise<ProposalResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/bids/${proposalId}/accept`, {
+    const response = await fetch(`${API_BASE_URL}/bids/${proposalId}/status`, {
       method: "PUT",
       headers: getHeaders(),
+      body: JSON.stringify({ status: "accepted" }),
     });
 
     const result = await response.json();
@@ -145,9 +147,10 @@ export const rejectProposal = async (
   proposalId: string
 ): Promise<ProposalResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/bids/${proposalId}/reject`, {
+    const response = await fetch(`${API_BASE_URL}/bids/${proposalId}/status`, {
       method: "PUT",
       headers: getHeaders(),
+      body: JSON.stringify({ status: "rejected" }),
     });
 
     const result = await response.json();
