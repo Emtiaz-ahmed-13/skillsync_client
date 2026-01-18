@@ -150,30 +150,11 @@ const authOptions = {
       return session;
     },
     async redirect({ url, baseUrl }) {
-      // Only allow relative URLs or URLs on the same origin
-      try {
-        // If it's a relative URL, allow it
-        if (url.startsWith("/")) {
-          // Prevent redirect loops by checking if URL contains auth paths
-          // But allow role-redirect to pass through for role-based redirection
-          if (url.includes("/auth/") && !url.includes("role-redirect")) {
-            return `${baseUrl}/dashboard`;
-          }
-          return `${baseUrl}${url}`;
-        }
-
-        // If it's an absolute URL, check if it's on the same origin
-        const parsedUrl = new URL(url);
-        if (parsedUrl.origin === baseUrl) {
-          return url;
-        }
-      } catch (error) {
-        // If URL parsing fails, return to dashboard
-        console.error("Redirect URL parsing error:", error);
-      }
-
-      // Default to dashboard to avoid redirect loops
-      return `${baseUrl}/dashboard`;
+      // Allows relative callback URLs
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      // Allows callback URLs on the same origin
+      else if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
     },
   },
   pages: {
@@ -194,5 +175,5 @@ const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
 
 // Export auth options separately for server-side use
-  export { authOptions };
+export { authOptions };
 

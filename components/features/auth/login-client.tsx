@@ -42,8 +42,7 @@ export default function LoginClient() {
         email: email,
         password: password,
         role: role,
-        callbackUrl: "/dashboard",
-        redirect: true,
+        redirect: false,
       });
 
       if (result?.error) {
@@ -55,8 +54,8 @@ export default function LoginClient() {
           );
         }
       } else if (result?.ok) {
-        console.log("LoginClient - Login successful, pushing to:", callbackUrl);
-        window.location.href = callbackUrl;
+        console.log("LoginClient - Login successful, redirecting to /dashboard");
+        window.location.href = "/dashboard";
       }
     } catch (err) {
       setError("An error occurred. Please try again.");
