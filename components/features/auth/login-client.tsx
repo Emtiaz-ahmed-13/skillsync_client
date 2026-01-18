@@ -12,14 +12,13 @@ import { useEffect, useState } from "react";
 export default function LoginClient() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("client"); // Default to client
+  const [role, setRole] = useState("client");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const rawCallbackUrl = searchParams.get("callbackUrl") || "/dashboard";
 
-  // Ensure callbackUrl is a relative path for router.push()
   const callbackUrl = rawCallbackUrl.startsWith("http")
     ? new URL(rawCallbackUrl).pathname
     : rawCallbackUrl;
@@ -28,10 +27,9 @@ export default function LoginClient() {
 
   useEffect(() => {
     if (status === "authenticated") {
-      console.log("LoginClient - User already authenticated, redirecting to:", callbackUrl);
-      window.location.href = callbackUrl;
+      console.log("LoginClient - User is authenticated, showing dashboard link");
     }
-  }, [status, router, callbackUrl]);
+  }, [status]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -168,20 +166,35 @@ export default function LoginClient() {
           </motion.div>
         )}
 
-        <Button
-          type="submit"
-          className="w-full py-6 text-base font-bold rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition-all duration-300"
-          disabled={loading}
-        >
-          {loading ? (
-            <div className="flex items-center justify-center gap-2">
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              <span>Signing in...</span>
+        {status === "authenticated" ? (
+          <div className="space-y-4">
+            <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 text-center">
+              <p className="text-sm font-medium text-primary mb-3">You are already signed in</p>
+              <Button
+                type="button"
+                className="w-full py-4 rounded-xl"
+                onClick={() => window.location.href = "/dashboard"}
+              >
+                Go to Dashboard
+              </Button>
             </div>
-          ) : (
-            "Continue With Email"
-          )}
-        </Button>
+          </div>
+        ) : (
+          <Button
+            type="submit"
+            className="w-full py-6 text-base font-bold rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition-all duration-300"
+            disabled={loading}
+          >
+            {loading ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span>Signing in...</span>
+              </div>
+            ) : (
+              "Continue With Email"
+            )}
+          </Button>
+        )}
       </form>
 
       <div className="mt-6 text-center text-sm text-muted-foreground">
