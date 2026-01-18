@@ -42,7 +42,8 @@ export default function LoginClient() {
         email: email,
         password: password,
         role: role,
-        redirect: false,
+        callbackUrl: "/dashboard",
+        redirect: true,
       });
 
       if (result?.error) {
@@ -166,35 +167,20 @@ export default function LoginClient() {
           </motion.div>
         )}
 
-        {status === "authenticated" ? (
-          <div className="space-y-4">
-            <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 text-center">
-              <p className="text-sm font-medium text-primary mb-3">You are already signed in</p>
-              <Button
-                type="button"
-                className="w-full py-4 rounded-xl"
-                onClick={() => window.location.href = "/dashboard"}
-              >
-                Go to Dashboard
-              </Button>
+        <Button
+          type="submit"
+          className="w-full py-6 text-base font-bold rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition-all duration-300"
+          disabled={loading}
+        >
+          {loading ? (
+            <div className="flex items-center justify-center gap-2">
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <span>Signing in...</span>
             </div>
-          </div>
-        ) : (
-          <Button
-            type="submit"
-            className="w-full py-6 text-base font-bold rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition-all duration-300"
-            disabled={loading}
-          >
-            {loading ? (
-              <div className="flex items-center justify-center gap-2">
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                <span>Signing in...</span>
-              </div>
-            ) : (
-              "Continue With Email"
-            )}
-          </Button>
-        )}
+          ) : (
+            "Continue With Email"
+          )}
+        </Button>
       </form>
 
       <div className="mt-6 text-center text-sm text-muted-foreground">
