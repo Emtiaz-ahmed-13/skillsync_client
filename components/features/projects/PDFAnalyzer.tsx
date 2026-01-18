@@ -60,7 +60,7 @@ export function PDFAnalyzer() {
                 {
                     method: "POST",
                     headers: {
-                        Authorization: `Bearer ${(session as any).accessToken}`,
+                        Authorization: `Bearer ${(session as any)?.user?.accessToken}`,
                     },
                     body: formData,
                 }
