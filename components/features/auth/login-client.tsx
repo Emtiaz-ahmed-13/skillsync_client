@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function LoginClient() {
   const [email, setEmail] = useState("");
@@ -18,6 +18,14 @@ export default function LoginClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      console.log("LoginClient - User already authenticated, redirecting to:", callbackUrl);
+      router.push(callbackUrl);
+    }
+  }, [status, router, callbackUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,6 +50,7 @@ export default function LoginClient() {
           );
         }
       } else if (result?.ok) {
+        console.log("LoginClient - Login successful, pushing to:", callbackUrl);
         router.push(callbackUrl);
       }
     } catch (err) {
