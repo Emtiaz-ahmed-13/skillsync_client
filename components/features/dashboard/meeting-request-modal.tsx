@@ -53,7 +53,8 @@ export function MeetingRequestModal({
         <DialogHeader>
           <DialogTitle>Request a Meeting</DialogTitle>
           <DialogDescription>
-            Provide a Google Meet link for the freelancer to discuss this submission.
+            Provide a Google Meet link for the freelancer to discuss this
+            submission.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -72,7 +73,12 @@ export function MeetingRequestModal({
             {error && <p className="text-sm text-destructive">{error}</p>}
           </div>
           <DialogFooter className="sm:justify-end">
-            <Button type="button" variant="secondary" onClick={onClose} disabled={loading}>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={onClose}
+              disabled={loading}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>

@@ -142,21 +142,17 @@ export default function FreelancerProfileUpdateClient({
         const formData = new FormData();
         formData.append("file", resumeFile);
         formData.append("fileType", "resume");
-  
-        formData.append("projectId", ""); 
+
+        formData.append("projectId", "");
 
         try {
-          const uploadResponse = await fetch(
-            "/api/v1/files",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${user?.accessToken || ""}`,
-               
-              },
-              body: formData,
-            }
-          );
+          const uploadResponse = await fetch("/api/v1/files", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${user?.accessToken || ""}`,
+            },
+            body: formData,
+          });
 
           if (!uploadResponse.ok) {
             const uploadError = await uploadResponse.json();
@@ -197,17 +193,14 @@ export default function FreelancerProfileUpdateClient({
       const requestBody = resumeUrl
         ? { ...profileData, resume: resumeUrl }
         : profileData;
-      const response = await fetch(
-        "/api/v1/profile/me/freelancer",
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user?.accessToken || ""}`,
-          },
-          body: JSON.stringify(requestBody),
-        }
-      );
+      const response = await fetch("/api/v1/profile/me/freelancer", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user?.accessToken || ""}`,
+        },
+        body: JSON.stringify(requestBody),
+      });
 
       if (response.ok) {
         const result = await response.json();
@@ -263,7 +256,7 @@ export default function FreelancerProfileUpdateClient({
   }
 
   if (status === "unauthenticated") {
-    return null; 
+    return null;
   }
 
   if (loading) {

@@ -97,14 +97,11 @@ export default function FreelancerProjectsClient({
     const fetchProjects = async () => {
       try {
         // Fetch freelancer's profile to get their skills
-        const profileResponse = await fetch(
-          "/api/v1/profile/me",
-          {
-            headers: {
-              Authorization: `Bearer ${user?.accessToken || ""}`,
-            },
-          }
-        );
+        const profileResponse = await fetch("/api/v1/profile/me", {
+          headers: {
+            Authorization: `Bearer ${user?.accessToken || ""}`,
+          },
+        });
 
         let freelancerSkills: string[] = [];
         if (profileResponse.ok) {
@@ -114,14 +111,11 @@ export default function FreelancerProjectsClient({
           }
         }
 
-        const response = await fetch(
-          "/api/v1/projects/approved",
-          {
-            headers: {
-              Authorization: `Bearer ${user?.accessToken || ""}`,
-            },
-          }
-        );
+        const response = await fetch("/api/v1/projects/approved", {
+          headers: {
+            Authorization: `Bearer ${user?.accessToken || ""}`,
+          },
+        });
 
         if (response.ok) {
           const data = await response.json();
@@ -315,9 +309,8 @@ export default function FreelancerProjectsClient({
                       className="w-full"
                       onClick={() =>
                         router.push(
-                          `/dashboard/freelancer/projects/${project._id}`
-                          ||
-                          `localhost:5001/api/v1/projects/${project._id}`
+                          `/dashboard/freelancer/projects/${project._id}` ||
+                            `localhost:5001/api/v1/projects/${project._id}`
                         )
                       }
                     >

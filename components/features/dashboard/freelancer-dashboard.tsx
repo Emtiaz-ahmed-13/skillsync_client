@@ -4,20 +4,20 @@ import { Navbar } from "@/components/shared/navbar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
@@ -26,17 +26,16 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FreelancerReviews } from "./freelancer-reviews";
 
-
 interface Project {
   id: string;
-  _id: string; 
+  _id: string;
   title: string;
   description: string;
   minimumBid: number;
   budget: number;
   technology: string[];
   status: string;
-  ownerId: string | { name: string; email: string }; 
+  ownerId: string | { name: string; email: string };
   createdAt: string;
   updatedAt: string;
   progress?: number;
@@ -46,7 +45,7 @@ interface Project {
 interface Bid {
   id: string;
   _id: string;
-  projectId: string | {_id: string, title?: string, ownerId?: any};
+  projectId: string | { _id: string; title?: string; ownerId?: any };
   projectTitle?: string;
   clientName?: string;
   amount: number;
@@ -103,9 +102,7 @@ export default function FreelancerDashboardClient() {
   const [approvedProjects, setApprovedProjects] = useState<Project[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
   const [loadingBids, setLoadingBids] = useState(true);
-  const [refreshTrigger, setRefreshTrigger] = useState(0); 
-
-
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     if (status === "authenticated" && session?.user) {
@@ -142,14 +139,11 @@ export default function FreelancerDashboardClient() {
 
         try {
           // Fetch freelancer's profile to get their ID
-          const profileResponse = await fetch(
-            "/api/v1/profile/me",
-            {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-              },
-            }
-          );
+          const profileResponse = await fetch("/api/v1/profile/me", {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
 
           let freelancerId = user.id;
           if (profileResponse.ok) {
@@ -161,14 +155,11 @@ export default function FreelancerDashboardClient() {
           }
 
           // Fetch freelancer's bids first (needed for earnings calculation)
-          const bidsResponse = await fetch(
-            "/api/v1/bids/my",
-            {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-              },
-            }
-          );
+          const bidsResponse = await fetch("/api/v1/bids/my", {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
 
           let bids = [];
           let bidsWithProjectTitles = [];
@@ -183,22 +174,27 @@ export default function FreelancerDashboardClient() {
               bidsWithProjectTitles = await Promise.all(
                 bids.map(async (bid: Bid) => {
                   try {
-                  
-                    const projectIdStr = typeof bid.projectId === 'object' && bid.projectId !== null 
-                      ? (bid.projectId as any)._id || (bid.projectId as any).id
-                      : bid.projectId;
+                    const projectIdStr =
+                      typeof bid.projectId === "object" &&
+                      bid.projectId !== null
+                        ? (bid.projectId as any)._id ||
+                          (bid.projectId as any).id
+                        : bid.projectId;
 
-                    if (typeof bid.projectId === 'object' && bid.projectId !== null) {
-                       const projectObj = bid.projectId as any;
-                 
-                       let clientName = "Unknown Client";
-                       if (projectObj.ownerId) {
-                          if (typeof projectObj.ownerId === 'object') {
-                             clientName = projectObj.ownerId.name || "Unknown Client";
-                          } else {
-                             
-                          }
-                       }
+                    if (
+                      typeof bid.projectId === "object" &&
+                      bid.projectId !== null
+                    ) {
+                      const projectObj = bid.projectId as any;
+
+                      let clientName = "Unknown Client";
+                      if (projectObj.ownerId) {
+                        if (typeof projectObj.ownerId === "object") {
+                          clientName =
+                            projectObj.ownerId.name || "Unknown Client";
+                        } else {
+                        }
+                      }
                     }
 
                     const projectResponse = await fetch(
@@ -216,8 +212,9 @@ export default function FreelancerDashboardClient() {
                         return {
                           ...bid,
                           projectTitle: projectData.data.title,
-                            clientName: 
-                            projectData.data.ownerId && typeof projectData.data.ownerId === 'object'
+                          clientName:
+                            projectData.data.ownerId &&
+                            typeof projectData.data.ownerId === "object"
                               ? (projectData.data.ownerId as any).name
                               : "Unknown Client",
                         };
@@ -226,9 +223,12 @@ export default function FreelancerDashboardClient() {
                   } catch (error) {
                     console.error("Error fetching project for bid:", error);
                   }
-                  const fallbackTitle = (bid.projectId && typeof bid.projectId === 'object' && (bid.projectId as any).title) 
-                    ? (bid.projectId as any).title 
-                    : "Unknown Project";
+                  const fallbackTitle =
+                    bid.projectId &&
+                    typeof bid.projectId === "object" &&
+                    (bid.projectId as any).title
+                      ? (bid.projectId as any).title
+                      : "Unknown Project";
 
                   return {
                     ...bid,
@@ -239,7 +239,6 @@ export default function FreelancerDashboardClient() {
 
               setBids(bidsWithProjectTitles);
 
-           
               const pendingBidsCount = bidsWithProjectTitles.filter(
                 (b: Bid) => b.status === "pending"
               ).length;
@@ -251,7 +250,6 @@ export default function FreelancerDashboardClient() {
           );
           const activeProjectsCount = acceptedBids.length;
 
-        
           const totalEarnings = bidsWithProjectTitles.reduce((sum, bid) => {
             if (bid.status === "accepted") {
               return sum + bid.amount;
@@ -262,14 +260,14 @@ export default function FreelancerDashboardClient() {
           const activeProjectsFromBids = await Promise.all(
             acceptedBids.map(async (bid) => {
               try {
-                const projectIdStr = typeof bid.projectId === 'object' && bid.projectId !== null 
-                  ? (bid.projectId as any)._id || (bid.projectId as any).id
-                  : bid.projectId;
+                const projectIdStr =
+                  typeof bid.projectId === "object" && bid.projectId !== null
+                    ? (bid.projectId as any)._id || (bid.projectId as any).id
+                    : bid.projectId;
 
                 const projectResponse = await fetch(
-                  `${process.env.NEXT_PUBLIC_API_URL}/projects/${projectIdStr}`
-                  ||
-                  `localhost:5001/api/v1/projects/${projectIdStr}`,
+                  `${process.env.NEXT_PUBLIC_API_URL}/projects/${projectIdStr}` ||
+                    `localhost:5001/api/v1/projects/${projectIdStr}`,
                   {
                     headers: {
                       Authorization: `Bearer ${accessToken}`,
@@ -298,12 +296,13 @@ export default function FreelancerDashboardClient() {
                       minimumBid: projectData.data.minimumBid || 0,
                       budget: projectData.data.budget || 0,
                       technology: projectData.data.technology || [],
-                      status: projectData.data.status || "in-progress", 
+                      status: projectData.data.status || "in-progress",
                       ownerId: projectData.data.ownerId || "",
                       createdAt: projectData.data.createdAt || bid.createdAt,
                       updatedAt: projectData.data.updatedAt || bid.updatedAt,
                       progress: projectData.data.progress || 0,
-                      realProjectId: projectData.data._id || projectData.data.id,
+                      realProjectId:
+                        projectData.data._id || projectData.data.id,
                     };
                   }
                 }
@@ -314,30 +313,42 @@ export default function FreelancerDashboardClient() {
                 );
               }
 
-              const fallbackTitle = (bid.projectId && typeof bid.projectId === 'object' && (bid.projectId as any).title) 
-                ? (bid.projectId as any).title 
-                : bid.projectTitle || "Unknown Project";
+              const fallbackTitle =
+                bid.projectId &&
+                typeof bid.projectId === "object" &&
+                (bid.projectId as any).title
+                  ? (bid.projectId as any).title
+                  : bid.projectTitle || "Unknown Project";
               return {
                 id:
                   bid.projectId && bid._id
-                    ? `${typeof bid.projectId === 'object' ? (bid.projectId as any)._id : bid.projectId}-${bid._id}`
+                    ? `${
+                        typeof bid.projectId === "object"
+                          ? (bid.projectId as any)._id
+                          : bid.projectId
+                      }-${bid._id}`
                     : bid._id
                     ? `bid-${bid._id}`
                     : bid.id,
-                _id: `${typeof bid.projectId === 'object' ? (bid.projectId as any)._id : bid.projectId}-${
-                  bid._id || "bid"
-                }`,
+                _id: `${
+                  typeof bid.projectId === "object"
+                    ? (bid.projectId as any)._id
+                    : bid.projectId
+                }-${bid._id || "bid"}`,
                 title: fallbackTitle,
                 description: "Project description",
                 minimumBid: 0,
                 budget: 0,
                 technology: [],
-                status: "in-progress", 
+                status: "in-progress",
                 ownerId: "",
                 createdAt: bid.createdAt,
                 updatedAt: bid.updatedAt,
                 progress: 0,
-                realProjectId: typeof bid.projectId === 'string' ? bid.projectId : (bid.projectId as any)._id,
+                realProjectId:
+                  typeof bid.projectId === "string"
+                    ? bid.projectId
+                    : (bid.projectId as any)._id,
               };
             })
           );
@@ -400,11 +411,9 @@ export default function FreelancerDashboardClient() {
           });
           const uniqueProjects = Array.from(uniqueProjectsMap.values());
 
-     
           const enhancedProjects = await Promise.all(
             uniqueProjects.map(async (project) => {
               try {
-          
                 if (!project.realProjectId) return project;
 
                 const submissionsResponse = await fetch(
@@ -424,7 +433,6 @@ export default function FreelancerDashboardClient() {
                       (sub: any) => sub.status === "approved"
                     ).length;
 
-                  
                     if (approvedSprints >= 3) {
                       return {
                         ...project,
@@ -432,7 +440,6 @@ export default function FreelancerDashboardClient() {
                         progress: 100,
                       };
                     } else if (approvedSprints > 0) {
-                    
                       const calculatedProgress = Math.round(
                         (approvedSprints / 3) * 100
                       );
@@ -470,14 +477,11 @@ export default function FreelancerDashboardClient() {
             totalEarnings: totalEarnings,
           }));
 
-          const approvedResponse = await fetch(
-            "/api/v1/projects/approved",
-            {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-              },
-            }
-          );
+          const approvedResponse = await fetch("/api/v1/projects/approved", {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
 
           if (approvedResponse.ok) {
             const approvedData = await approvedResponse.json();
@@ -487,7 +491,6 @@ export default function FreelancerDashboardClient() {
               approvedData.data.projects &&
               Array.isArray(approvedData.data.projects)
             ) {
-        
               const allApprovedProjects = approvedData.data.projects;
 
               const sortedProjects = allApprovedProjects
@@ -505,7 +508,7 @@ export default function FreelancerDashboardClient() {
           setLoadingBids(false);
         } catch (err) {
           console.error("Error fetching freelancer stats:", err);
-     
+
           setStats({
             totalProjects: 0,
             activeProjects: 0,
@@ -535,7 +538,7 @@ export default function FreelancerDashboardClient() {
   }
 
   if (status === "unauthenticated") {
-    return null; 
+    return null;
   }
 
   return (
@@ -743,35 +746,39 @@ export default function FreelancerDashboardClient() {
                       </div>
                       <div className="flex gap-2">
                         {activeProjects.length > 4 && (
-                          <Button 
-                            variant="outline" 
+                          <Button
+                            variant="outline"
                             size="sm"
-                            onClick={() => router.push("/dashboard/freelancer/active-projects")}
+                            onClick={() =>
+                              router.push(
+                                "/dashboard/freelancer/active-projects"
+                              )
+                            }
                           >
                             View All
                           </Button>
                         )}
                         <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={refreshData}
-                            className="text-sm"
+                          variant="outline"
+                          size="sm"
+                          onClick={refreshData}
+                          className="text-sm"
                         >
-                            <svg
+                          <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-4 w-4 mr-2"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
-                            >
+                          >
                             <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                             />
-                            </svg>
-                            Refresh
+                          </svg>
+                          Refresh
                         </Button>
                       </div>
                     </div>
@@ -781,13 +788,21 @@ export default function FreelancerDashboardClient() {
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead className="font-semibold">Project</TableHead>
-                            <TableHead className="font-semibold">Client</TableHead>
-                            <TableHead className="font-semibold">Status</TableHead>
+                            <TableHead className="font-semibold">
+                              Project
+                            </TableHead>
+                            <TableHead className="font-semibold">
+                              Client
+                            </TableHead>
+                            <TableHead className="font-semibold">
+                              Status
+                            </TableHead>
                             <TableHead className="font-semibold">
                               Progress
                             </TableHead>
-                            <TableHead className="font-semibold">Action</TableHead>
+                            <TableHead className="font-semibold">
+                              Action
+                            </TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -811,8 +826,9 @@ export default function FreelancerDashboardClient() {
                                 </TableCell>
                                 <TableCell>
                                   <span className="text-muted-foreground">
-                                    {typeof project.ownerId === 'object' && project.ownerId !== null 
-                                      ? (project.ownerId as any).name 
+                                    {typeof project.ownerId === "object" &&
+                                    project.ownerId !== null
+                                      ? (project.ownerId as any).name
                                       : "Unknown Client"}
                                   </span>
                                 </TableCell>
@@ -851,7 +867,8 @@ export default function FreelancerDashboardClient() {
                                       router.push(
                                         `/dashboard/freelancer/projects/${
                                           project.realProjectId ||
-                                          (typeof project._id === "string" && !project._id.includes("-")
+                                          (typeof project._id === "string" &&
+                                          !project._id.includes("-")
                                             ? project._id
                                             : "")
                                         }`
@@ -881,24 +898,26 @@ export default function FreelancerDashboardClient() {
                 <Card className="hover:shadow-lg transition-shadow duration-300">
                   <CardHeader>
                     <div className="flex justify-between items-center">
-                        <div>
+                      <div>
                         <CardTitle className="text-xl font-semibold">
-                            Recent Bids
+                          Recent Bids
                         </CardTitle>
                         <CardDescription className="text-sm mt-1">
-                            Your recent project bids
-                            {bids.length > 4 && " (showing latest 4)"}
+                          Your recent project bids
+                          {bids.length > 4 && " (showing latest 4)"}
                         </CardDescription>
-                        </div>
-                        {bids.length > 4 && (
-                            <Button 
-                            variant="outline"
-                            size="sm" 
-                            onClick={() => router.push("/dashboard/freelancer/bids")}
-                            >
-                            View All
-                            </Button>
-                        )}
+                      </div>
+                      {bids.length > 4 && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            router.push("/dashboard/freelancer/bids")
+                          }
+                        >
+                          View All
+                        </Button>
+                      )}
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -906,10 +925,18 @@ export default function FreelancerDashboardClient() {
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead className="font-semibold">Project</TableHead>
-                            <TableHead className="font-semibold">Client</TableHead>
-                            <TableHead className="font-semibold">Amount</TableHead>
-                            <TableHead className="font-semibold">Status</TableHead>
+                            <TableHead className="font-semibold">
+                              Project
+                            </TableHead>
+                            <TableHead className="font-semibold">
+                              Client
+                            </TableHead>
+                            <TableHead className="font-semibold">
+                              Amount
+                            </TableHead>
+                            <TableHead className="font-semibold">
+                              Status
+                            </TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -935,7 +962,9 @@ export default function FreelancerDashboardClient() {
                                 </span>
                               </TableCell>
                               <TableCell>
-                                <span className="font-medium">${bid.amount}</span>
+                                <span className="font-medium">
+                                  ${bid.amount}
+                                </span>
                               </TableCell>
                               <TableCell>
                                 <Badge
@@ -987,7 +1016,9 @@ export default function FreelancerDashboardClient() {
                   <CardContent>
                     {loadingProjects ? (
                       <div className="flex justify-center items-center h-32">
-                        <p className="text-muted-foreground">Loading projects...</p>
+                        <p className="text-muted-foreground">
+                          Loading projects...
+                        </p>
                       </div>
                     ) : approvedProjects.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1011,15 +1042,17 @@ export default function FreelancerDashboardClient() {
                               </Badge>
                             </div>
                             <div className="flex flex-wrap gap-2 mb-4">
-                              {project.technology.slice(0, 3).map((tech, index) => (
-                                <Badge
-                                  key={index}
-                                  variant="secondary"
-                                  className="text-xs"
-                                >
-                                  {tech}
-                                </Badge>
-                              ))}
+                              {project.technology
+                                .slice(0, 3)
+                                .map((tech, index) => (
+                                  <Badge
+                                    key={index}
+                                    variant="secondary"
+                                    className="text-xs"
+                                  >
+                                    {tech}
+                                  </Badge>
+                                ))}
                             </div>
                             <Button
                               className="w-full py-2"
@@ -1048,8 +1081,6 @@ export default function FreelancerDashboardClient() {
               <FreelancerReviews />
             </TabsContent>
           </Tabs>
-
-
 
           {/* Quick Actions */}
           <motion.div

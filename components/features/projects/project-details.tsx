@@ -92,9 +92,7 @@ export default function ProjectDetailsClient({
   useEffect(() => {
     const fetchProject = async () => {
       try {
-        const response = await fetch(
-          `/api/v1/projects/${projectId}`
-        );
+        const response = await fetch(`/api/v1/projects/${projectId}`);
 
         if (response.ok) {
           const data = await response.json();
@@ -148,16 +146,13 @@ export default function ProjectDetailsClient({
         formData.append("resume", resumeFile);
       }
 
-      const response = await fetch(
-        "/api/v1/bids",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${user.accessToken}`,
-          },
-          body: formData,
-        }
-      );
+      const response = await fetch("/api/v1/bids", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${user.accessToken}`,
+        },
+        body: formData,
+      });
 
       if (response.ok) {
         const data = await response.json();

@@ -325,7 +325,6 @@ export default function FreelancerTasksClient({
                   <Button
                     className="w-full py-6 text-base"
                     onClick={() => {
-      
                       toast.info(
                         "Project Timeline Estimation functionality will be implemented here"
                       );

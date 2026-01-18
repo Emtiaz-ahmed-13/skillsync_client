@@ -8,18 +8,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  getReviewsByUser,
-  Review,
-} from "@/lib/api/reviews-api";
+import { getReviewsByUser, Review } from "@/lib/api/reviews-api";
 import { motion } from "framer-motion";
-import {
-  Calendar,
-  MessageSquare,
-  Star,
-  StarOff,
-  User,
-} from "lucide-react";
+import { Calendar, MessageSquare, Star, StarOff, User } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
@@ -60,7 +51,7 @@ export function FreelancerReviews() {
 
           if (reviewsResponse.success && reviewsResponse.data) {
             const reviewsData = reviewsResponse.data.reviews || [];
-            
+
             const reviewsWithDetails = await Promise.all(
               reviewsData.map(async (review) => {
                 let projectTitle = "Unknown Project";
@@ -68,9 +59,12 @@ export function FreelancerReviews() {
 
                 try {
                   // Safe ID extraction
-                  const projectIdStr = typeof review.projectId === 'object' && review.projectId !== null
-                    ? (review.projectId as any)._id || (review.projectId as any).id
-                    : review.projectId;
+                  const projectIdStr =
+                    typeof review.projectId === "object" &&
+                    review.projectId !== null
+                      ? (review.projectId as any)._id ||
+                        (review.projectId as any).id
+                      : review.projectId;
 
                   if (projectIdStr) {
                     const projectResponse = await fetch(
@@ -86,37 +80,43 @@ export function FreelancerReviews() {
                       const projectData = await projectResponse.json();
                       if (projectData.success && projectData.data) {
                         projectTitle = projectData.data.title;
-                        
-                       
+
                         const owner = projectData.data.ownerId;
-                        if (owner && typeof owner === 'object' && (owner as any).name) {
+                        if (
+                          owner &&
+                          typeof owner === "object" &&
+                          (owner as any).name
+                        ) {
                           clientName = (owner as any).name;
-                        } else if (owner && typeof owner === 'object' && (owner as any).email) {
-                          
-                           clientName = (owner as any).email.split('@')[0];
+                        } else if (
+                          owner &&
+                          typeof owner === "object" &&
+                          (owner as any).email
+                        ) {
+                          clientName = (owner as any).email.split("@")[0];
                         }
                       }
                     }
                   }
-                
+
                   if (clientName === "Unknown Client" && review.reviewerId) {
-                     const reviewerIdStr = typeof review.reviewerId === 'object' 
-                        ? (review.reviewerId as any)._id 
+                    const reviewerIdStr =
+                      typeof review.reviewerId === "object"
+                        ? (review.reviewerId as any)._id
                         : review.reviewerId;
                   }
-
                 } catch (err) {
                   console.error(`Error fetching details for review:`, err);
                 }
-                
+
                 return {
                   ...review,
                   projectTitle,
-                  clientName
+                  clientName,
                 };
               })
             );
-            
+
             setReviews(reviewsWithDetails);
           }
         } catch (err) {
@@ -150,9 +150,13 @@ export function FreelancerReviews() {
       </div>
     );
   };
-  const averageRating = reviews.length > 0
-    ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)
-    : "0.0";
+  const averageRating =
+    reviews.length > 0
+      ? (
+          reviews.reduce((sum, review) => sum + review.rating, 0) /
+          reviews.length
+        ).toFixed(1)
+      : "0.0";
 
   if (loading) {
     return (
@@ -226,7 +230,7 @@ export function FreelancerReviews() {
                 </div>
                 <div className="text-center">
                   <div className="text-4xl font-bold text-primary mb-2">
-                    {reviews.filter(r => r.rating === 5).length}
+                    {reviews.filter((r) => r.rating === 5).length}
                   </div>
                   <div className="text-sm text-muted-foreground">
                     5-Star Reviews
@@ -244,9 +248,10 @@ export function FreelancerReviews() {
             </CardHeader>
             <CardContent className="space-y-3">
               {[5, 4, 3, 2, 1].map((rating) => {
-                const count = reviews.filter(r => r.rating === rating).length;
-                const percentage = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
-                
+                const count = reviews.filter((r) => r.rating === rating).length;
+                const percentage =
+                  reviews.length > 0 ? (count / reviews.length) * 100 : 0;
+
                 return (
                   <div key={rating} className="flex items-center gap-3">
                     <div className="flex items-center gap-1 w-16">
@@ -281,9 +286,7 @@ export function FreelancerReviews() {
         className="space-y-4"
       >
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-foreground">
-            Client Reviews
-          </h2>
+          <h2 className="text-2xl font-bold text-foreground">Client Reviews</h2>
           <Badge variant="secondary" className="text-sm">
             {reviews.length} {reviews.length === 1 ? "Review" : "Reviews"}
           </Badge>
@@ -297,7 +300,8 @@ export function FreelancerReviews() {
                 No Reviews Yet
               </h3>
               <p className="text-muted-foreground">
-                You haven't received any reviews from clients yet. Complete projects to start receiving feedback!
+                You haven't received any reviews from clients yet. Complete
+                projects to start receiving feedback!
               </p>
             </CardContent>
           </Card>
@@ -323,11 +327,11 @@ export function FreelancerReviews() {
                           </CardTitle>
                           <div className="flex flex-col gap-0.5 mt-1">
                             <span className="text-sm font-medium text-foreground/80">
-                                {review.clientName || "Client"}
+                              {review.clientName || "Client"}
                             </span>
                             <CardDescription className="flex items-center gap-1 text-xs">
-                                <Calendar className="h-3 w-3" />
-                                {new Date(review.createdAt).toLocaleDateString()}
+                              <Calendar className="h-3 w-3" />
+                              {new Date(review.createdAt).toLocaleDateString()}
                             </CardDescription>
                           </div>
                         </div>

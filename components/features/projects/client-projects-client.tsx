@@ -3,12 +3,7 @@
 import { Navbar } from "@/components/shared/navbar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -58,12 +53,12 @@ export default function ClientProjectsClient() {
     if (status === "unauthenticated") {
       router.push("/auth/login");
     } else if (status === "authenticated" && session?.user) {
-        const user = session.user as { role?: string };
-        if (user.role !== "client") {
-            router.push("/dashboard");
-        } else {
-            fetchProjects();
-        }
+      const user = session.user as { role?: string };
+      if (user.role !== "client") {
+        router.push("/dashboard");
+      } else {
+        fetchProjects();
+      }
     }
   }, [status, session, router]);
 
@@ -75,14 +70,11 @@ export default function ClientProjectsClient() {
 
       if (!accessToken || !userId) return;
 
-      const response = await fetch(
-        `/api/v1/projects/owner/${userId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      const response = await fetch(`/api/v1/projects/owner/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -117,7 +109,7 @@ export default function ClientProjectsClient() {
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       <Navbar />
-      
+
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -151,10 +143,7 @@ export default function ClientProjectsClient() {
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
                   </div>
-                  <Select
-                    value={statusFilter}
-                    onValueChange={setStatusFilter}
-                  >
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
                     <SelectTrigger className="w-[180px]">
                       <Filter className="w-4 h-4 mr-2" />
                       <SelectValue placeholder="Filter by status" />
@@ -186,10 +175,13 @@ export default function ClientProjectsClient() {
                   <TableBody>
                     {filteredProjects.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                            {searchQuery || statusFilter !== 'all' 
-                                ? "No projects found matching your filters." 
-                                : "No projects found. Create your first project!"}
+                        <TableCell
+                          colSpan={5}
+                          className="text-center py-8 text-muted-foreground"
+                        >
+                          {searchQuery || statusFilter !== "all"
+                            ? "No projects found matching your filters."
+                            : "No projects found. Create your first project!"}
                         </TableCell>
                       </TableRow>
                     ) : (
@@ -197,10 +189,12 @@ export default function ClientProjectsClient() {
                         <TableRow key={project._id || project.id}>
                           <TableCell className="font-medium">
                             <div>
-                                <div className="font-semibold">{project.title}</div>
-                                <div className="text-xs text-muted-foreground truncate max-w-[300px]">
-                                    {project.description}
-                                </div>
+                              <div className="font-semibold">
+                                {project.title}
+                              </div>
+                              <div className="text-xs text-muted-foreground truncate max-w-[300px]">
+                                {project.description}
+                              </div>
                             </div>
                           </TableCell>
                           <TableCell>
@@ -209,7 +203,7 @@ export default function ClientProjectsClient() {
                                 project.status === "in-progress"
                                   ? "default"
                                   : project.status === "approved"
-                                  ? "secondary" 
+                                  ? "secondary"
                                   : project.status === "completed"
                                   ? "outline"
                                   : project.status === "pending"
@@ -230,7 +224,11 @@ export default function ClientProjectsClient() {
                               variant="ghost"
                               size="sm"
                               onClick={() =>
-                                router.push(`/dashboard/client/projects/${project._id || project.id}`)
+                                router.push(
+                                  `/dashboard/client/projects/${
+                                    project._id || project.id
+                                  }`
+                                )
                               }
                             >
                               View Details

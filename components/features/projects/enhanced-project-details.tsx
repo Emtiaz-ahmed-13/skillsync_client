@@ -4,11 +4,11 @@ import { Navbar } from "@/components/shared/navbar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -119,14 +119,11 @@ export default function EnhancedProjectDetailsClient({
     const fetchProjectAndBids = async () => {
       try {
         // Fetch project details
-        const projectResponse = await fetch(
-          `/api/v1/projects/${projectId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${user?.accessToken || ""}`,
-            },
-          }
-        );
+        const projectResponse = await fetch(`/api/v1/projects/${projectId}`, {
+          headers: {
+            Authorization: `Bearer ${user?.accessToken || ""}`,
+          },
+        });
 
         if (projectResponse.ok) {
           const projectData = await projectResponse.json();
@@ -139,14 +136,11 @@ export default function EnhancedProjectDetailsClient({
           setError("Failed to fetch project");
         }
 
-        const bidsResponse = await fetch(
-          `/api/v1/bids/project/${projectId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${user?.accessToken || ""}`,
-            },
-          }
-        );
+        const bidsResponse = await fetch(`/api/v1/bids/project/${projectId}`, {
+          headers: {
+            Authorization: `Bearer ${user?.accessToken || ""}`,
+          },
+        });
 
         if (bidsResponse.ok) {
           const bidsData = await bidsResponse.json();
@@ -229,32 +223,27 @@ export default function EnhancedProjectDetailsClient({
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
-    
           try {
-            const notificationResponse = await fetch(
-              "/api/v1/notifications",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${user.accessToken}`,
+            const notificationResponse = await fetch("/api/v1/notifications", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${user.accessToken}`,
+              },
+              body: JSON.stringify({
+                recipientId: project?.ownerId,
+                title: "New Bid Received",
+                message: `A freelancer has submitted a bid on your project: ${project?.title}`,
+                type: "bid_submitted",
+                data: {
+                  projectId: project?._id,
+                  bidId: data.data?._id || data.data?.id,
+                  bidderName: user.name,
                 },
-                body: JSON.stringify({
-                  recipientId: project?.ownerId,
-                  title: "New Bid Received",
-                  message: `A freelancer has submitted a bid on your project: ${project?.title}`,
-                  type: "bid_submitted",
-                  data: {
-                    projectId: project?._id,
-                    bidId: data.data?._id || data.data?.id,
-                    bidderName: user.name,
-                  },
-                }),
-              }
-            );
+              }),
+            });
 
             if (!notificationResponse.ok) {
-
               const notificationErrorData = await notificationResponse.text();
               console.error(
                 "Failed to send notification to project owner:",
@@ -451,69 +440,130 @@ export default function EnhancedProjectDetailsClient({
                     <div className="space-y-6">
                       <div className="flex items-center space-x-4 p-4 bg-muted/20 rounded-lg border border-border/50">
                         <div className="p-2.5 bg-green-100 dark:bg-green-900/30 rounded-full text-green-600 dark:text-green-400">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-6 w-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
                           </svg>
                         </div>
                         <div>
-                          <Label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Budget</Label>
+                          <Label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
+                            Budget
+                          </Label>
                           <p className="text-2xl font-bold text-foreground">
                             ${project?.budget?.toLocaleString()}
                           </p>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center space-x-4 p-4 bg-muted/20 rounded-lg border border-border/50">
-                         <div className="p-2.5 bg-blue-100 dark:bg-blue-900/30 rounded-full text-blue-600 dark:text-blue-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                            </svg>
-                         </div>
-                         <div>
-                            <Label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Minimum Bid</Label>
-                            <p className="text-2xl font-bold text-foreground">${project?.minimumBid?.toLocaleString()}</p>
-                         </div>
+                        <div className="p-2.5 bg-blue-100 dark:bg-blue-900/30 rounded-full text-blue-600 dark:text-blue-400">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-6 w-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                            />
+                          </svg>
+                        </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
+                            Minimum Bid
+                          </Label>
+                          <p className="text-2xl font-bold text-foreground">
+                            ${project?.minimumBid?.toLocaleString()}
+                          </p>
+                        </div>
                       </div>
                     </div>
 
                     <div className="space-y-6">
-                        <div className="flex items-center space-x-4 p-4 bg-muted/20 rounded-lg border border-border/50">
-                           <div className="p-2.5 bg-purple-100 dark:bg-purple-900/30 rounded-full text-purple-600 dark:text-purple-400">
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
-                           </div>
-                           <div>
-                              <Label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Status</Label>
-                              <div className="mt-1">
-                                <Badge variant={
-                                   project?.status === 'in-progress' ? 'default' :
-                                   project?.status === 'completed' ? 'secondary' :
-                                   'outline'
-                                } className="px-3 py-1 capitalize">
-                                   {project?.status?.replace('-', ' ')}
-                                </Badge>
-                              </div>
-                           </div>
+                      <div className="flex items-center space-x-4 p-4 bg-muted/20 rounded-lg border border-border/50">
+                        <div className="p-2.5 bg-purple-100 dark:bg-purple-900/30 rounded-full text-purple-600 dark:text-purple-400">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-6 w-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
                         </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
+                            Status
+                          </Label>
+                          <div className="mt-1">
+                            <Badge
+                              variant={
+                                project?.status === "in-progress"
+                                  ? "default"
+                                  : project?.status === "completed"
+                                  ? "secondary"
+                                  : "outline"
+                              }
+                              className="px-3 py-1 capitalize"
+                            >
+                              {project?.status?.replace("-", " ")}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
 
-                        <div className="flex items-center space-x-4 p-4 bg-muted/20 rounded-lg border border-border/50">
-                           <div className="p-2.5 bg-orange-100 dark:bg-orange-900/30 rounded-full text-orange-600 dark:text-orange-400">
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                              </svg>
-                           </div>
-                           <div>
-                              <Label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Posted On</Label>
-                              <p className="text-sm font-medium mt-1">
-                                {new Date(project?.createdAt || "").toLocaleDateString(undefined, {
-                                   year: 'numeric',
-                                   month: 'long',
-                                   day: 'numeric'
-                                })}
-                              </p>
-                           </div>
+                      <div className="flex items-center space-x-4 p-4 bg-muted/20 rounded-lg border border-border/50">
+                        <div className="p-2.5 bg-orange-100 dark:bg-orange-900/30 rounded-full text-orange-600 dark:text-orange-400">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-6 w-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                            />
+                          </svg>
                         </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
+                            Posted On
+                          </Label>
+                          <p className="text-sm font-medium mt-1">
+                            {new Date(
+                              project?.createdAt || ""
+                            ).toLocaleDateString(undefined, {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
@@ -525,7 +575,9 @@ export default function EnhancedProjectDetailsClient({
                   </div>
 
                   <div className="pt-2">
-                    <Label className="text-lg font-semibold">Required Skills</Label>
+                    <Label className="text-lg font-semibold">
+                      Required Skills
+                    </Label>
                     <div className="flex flex-wrap gap-2 mt-3">
                       {project?.technology.map((tech, index) => (
                         <Badge
@@ -542,8 +594,19 @@ export default function EnhancedProjectDetailsClient({
                   {project?.files && project.files.length > 0 && (
                     <div className="pt-4 border-t border-border/50">
                       <Label className="text-lg font-semibold flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5 text-primary"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                          />
                         </svg>
                         Project Attachments
                       </Label>
@@ -557,16 +620,42 @@ export default function EnhancedProjectDetailsClient({
                             className="flex items-center p-3 rounded-lg border bg-muted/10 hover:bg-muted/30 transition-colors group"
                           >
                             <div className="p-2 bg-background rounded border group-hover:border-primary/30 transition-colors">
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                                />
                               </svg>
                             </div>
                             <div className="ml-3 overflow-hidden">
-                              <p className="text-sm font-medium truncate">{file.originalName || file.name}</p>
-                              <p className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(1)} KB</p>
+                              <p className="text-sm font-medium truncate">
+                                {file.originalName || file.name}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {(file.size / 1024).toFixed(1)} KB
+                              </p>
                             </div>
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-auto text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4 ml-auto text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                              />
                             </svg>
                           </a>
                         ))}
@@ -577,182 +666,233 @@ export default function EnhancedProjectDetailsClient({
               </Card>
 
               {/* Bid Form - Only show if NO bid exists AND project is open for bidding */}
-              {!freelancerBid && (project?.status === 'approved' || project?.status === 'pending') && (
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                >
-                    <Card className="border-t-4 border-t-primary shadow-lg">
-                    <CardHeader>
-                        <CardTitle className="text-xl">Submit Your Bid</CardTitle>
-                        <CardDescription>
-                        Submit your proposal and budget for this project
-                        </CardDescription>
-                    </CardHeader>
-                    <form onSubmit={handleSubmitBid}>
-                        <CardContent className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <Label htmlFor="bid-amount" className="font-semibold">
-                                Bid Amount ($) <span className="text-red-500">*</span>
-                                </Label>
-                                <div className="mt-2 relative">
-                                    <span className="absolute left-3 top-2.5 text-muted-foreground">$</span>
-                                    <Input
-                                        id="bid-amount"
-                                        type="number"
-                                        min={project?.minimumBid}
-                                        value={bidAmount}
-                                        onChange={(e) => setBidAmount(e.target.value)}
-                                        placeholder={`${project?.minimumBid}`}
-                                        className="pl-7"
-                                        required
-                                    />
-                                </div>
-                                <p className="text-xs text-muted-foreground mt-1.5 ml-1">
-                                Minimum required: ${project?.minimumBid}
-                                </p>
-                            </div>
-
-                            <div>
-                                <Label htmlFor="resume" className="font-semibold">Upload Resume (Optional)</Label>
-                                <Input
-                                    id="resume"
-                                    type="file"
-                                    accept=".pdf,.doc,.docx"
-                                    onChange={handleFileChange}
-                                    className="mt-2 cursor-pointer"
-                                />
-                                <p className="text-xs text-muted-foreground mt-1.5 ml-1">
-                                Max 5MB (PDF, DOC, DOCX)
-                                </p>
-                            </div>
-                        </div>
-
-                        <div>
-                            <Label htmlFor="bid-proposal" className="font-semibold">
-                            Proposal <span className="text-red-500">*</span>
-                            </Label>
-                            <textarea
-                            id="bid-proposal"
-                            value={bidMessage}
-                            onChange={(e) => setBidMessage(e.target.value)}
-                            placeholder="Why are you the right fit for this project? Describe your approach..."
-                            className="w-full mt-2 p-4 border rounded-lg min-h-[150px] focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-y bg-background"
-                            required
-                            />
-                            <p className="text-xs text-muted-foreground mt-1.5 text-right">
-                            {bidMessage.length} / 10 characters minimum
-                            </p>
-                        </div>
-
-                        {bidSuccess && (
-                            <div className="p-4 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-lg flex items-center gap-2 border border-green-200 dark:border-green-800">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                </svg>
-                                Bid submitted successfully!
-                            </div>
-                        )}
-                        </CardContent>
-
-                        <div className="p-6 pt-0">
-                        <Button
-                            type="submit"
-                            className="w-full py-6 text-lg font-medium shadow-md hover:shadow-lg transition-all"
-                            disabled={bidSubmitting}
-                        >
-                            {bidSubmitting ? (
-                                <span className="flex items-center gap-2">
-                                    <svg className="animate-spin h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    Submitting...
-                                </span>
-                            ) : "Submit Proposal"}
-                        </Button>
-                        </div>
-                    </form>
-                    </Card>
-                </motion.div>
-              )}
-
-              {/* Display Freelancer's Bid if exists */}
-              {freelancerBid && (
+              {!freelancerBid &&
+                (project?.status === "approved" ||
+                  project?.status === "pending") && (
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
+                    transition={{ delay: 0.2 }}
                   >
-                    <Card className="border-l-4 border-l-primary shadow-md">
-                      <CardHeader className="bg-muted/30 pb-4">
-                        <div className="flex justify-between items-start">
-                          <div>
-                             <CardTitle className="text-xl">Bid Status</CardTitle>
-                             <CardDescription>
-                                Track the status of your proposal
-                             </CardDescription>
-                          </div>
-                          <Badge
-                            variant={
-                              freelancerBid.status === "accepted"
-                                ? "default"
-                                : freelancerBid.status === "pending"
-                                ? "secondary"
-                                : "destructive"
-                            }
-                            className="px-4 py-1.5 text-sm capitalize"
-                          >
-                            {freelancerBid.status.replace('_', ' ')}
-                          </Badge>
-                        </div>
+                    <Card className="border-t-4 border-t-primary shadow-lg">
+                      <CardHeader>
+                        <CardTitle className="text-xl">
+                          Submit Your Bid
+                        </CardTitle>
+                        <CardDescription>
+                          Submit your proposal and budget for this project
+                        </CardDescription>
                       </CardHeader>
-                      <CardContent className="pt-6 text-sm">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                          
-                          <div className="space-y-6">
-                             <div>
-                                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Bid Amount</h4>
-                                <p className="text-3xl font-bold text-foreground">
-                                  ${freelancerBid.amount.toLocaleString()}
-                                </p>
-                             </div>
-                             
-                             <div>
-                                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Submitted Date</h4>
-                                <p className="font-medium">
-                                  {new Date(freelancerBid.createdAt).toLocaleDateString([], { 
-                                     weekday: 'long', 
-                                     year: 'numeric', 
-                                     month: 'long', 
-                                     day: 'numeric' 
-                                  })}
-                                </p>
-                                <p className="text-muted-foreground text-xs">
-                                   at {new Date(freelancerBid.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                </p>
-                             </div>
+                      <form onSubmit={handleSubmitBid}>
+                        <CardContent className="space-y-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                              <Label
+                                htmlFor="bid-amount"
+                                className="font-semibold"
+                              >
+                                Bid Amount ($){" "}
+                                <span className="text-red-500">*</span>
+                              </Label>
+                              <div className="mt-2 relative">
+                                <span className="absolute left-3 top-2.5 text-muted-foreground">
+                                  $
+                                </span>
+                                <Input
+                                  id="bid-amount"
+                                  type="number"
+                                  min={project?.minimumBid}
+                                  value={bidAmount}
+                                  onChange={(e) => setBidAmount(e.target.value)}
+                                  placeholder={`${project?.minimumBid}`}
+                                  className="pl-7"
+                                  required
+                                />
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-1.5 ml-1">
+                                Minimum required: ${project?.minimumBid}
+                              </p>
+                            </div>
+
+                            <div>
+                              <Label htmlFor="resume" className="font-semibold">
+                                Upload Resume (Optional)
+                              </Label>
+                              <Input
+                                id="resume"
+                                type="file"
+                                accept=".pdf,.doc,.docx"
+                                onChange={handleFileChange}
+                                className="mt-2 cursor-pointer"
+                              />
+                              <p className="text-xs text-muted-foreground mt-1.5 ml-1">
+                                Max 5MB (PDF, DOC, DOCX)
+                              </p>
+                            </div>
                           </div>
 
                           <div>
-                             <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Proposal</h4>
-                             <div className="bg-muted/30 p-4 rounded-lg border text-muted-foreground leading-relaxed italic">
-                                "{freelancerBid.proposal}"
-                             </div>
+                            <Label
+                              htmlFor="bid-proposal"
+                              className="font-semibold"
+                            >
+                              Proposal <span className="text-red-500">*</span>
+                            </Label>
+                            <textarea
+                              id="bid-proposal"
+                              value={bidMessage}
+                              onChange={(e) => setBidMessage(e.target.value)}
+                              placeholder="Why are you the right fit for this project? Describe your approach..."
+                              className="w-full mt-2 p-4 border rounded-lg min-h-[150px] focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-y bg-background"
+                              required
+                            />
+                            <p className="text-xs text-muted-foreground mt-1.5 text-right">
+                              {bidMessage.length} / 10 characters minimum
+                            </p>
                           </div>
+
+                          {bidSuccess && (
+                            <div className="p-4 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-lg flex items-center gap-2 border border-green-200 dark:border-green-800">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-5 w-5"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                              Bid submitted successfully!
+                            </div>
+                          )}
+                        </CardContent>
+
+                        <div className="p-6 pt-0">
+                          <Button
+                            type="submit"
+                            className="w-full py-6 text-lg font-medium shadow-md hover:shadow-lg transition-all"
+                            disabled={bidSubmitting}
+                          >
+                            {bidSubmitting ? (
+                              <span className="flex items-center gap-2">
+                                <svg
+                                  className="animate-spin h-5 w-5 text-current"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <circle
+                                    className="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                  ></circle>
+                                  <path
+                                    className="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                  ></path>
+                                </svg>
+                                Submitting...
+                              </span>
+                            ) : (
+                              "Submit Proposal"
+                            )}
+                          </Button>
                         </div>
-                      </CardContent>
+                      </form>
                     </Card>
                   </motion.div>
+                )}
+
+              {/* Display Freelancer's Bid if exists */}
+              {freelancerBid && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <Card className="border-l-4 border-l-primary shadow-md">
+                    <CardHeader className="bg-muted/30 pb-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-xl">Bid Status</CardTitle>
+                          <CardDescription>
+                            Track the status of your proposal
+                          </CardDescription>
+                        </div>
+                        <Badge
+                          variant={
+                            freelancerBid.status === "accepted"
+                              ? "default"
+                              : freelancerBid.status === "pending"
+                              ? "secondary"
+                              : "destructive"
+                          }
+                          className="px-4 py-1.5 text-sm capitalize"
+                        >
+                          {freelancerBid.status.replace("_", " ")}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-6 text-sm">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-6">
+                          <div>
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                              Bid Amount
+                            </h4>
+                            <p className="text-3xl font-bold text-foreground">
+                              ${freelancerBid.amount.toLocaleString()}
+                            </p>
+                          </div>
+
+                          <div>
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                              Submitted Date
+                            </h4>
+                            <p className="font-medium">
+                              {new Date(
+                                freelancerBid.createdAt
+                              ).toLocaleDateString([], {
+                                weekday: "long",
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              })}
+                            </p>
+                            <p className="text-muted-foreground text-xs">
+                              at{" "}
+                              {new Date(
+                                freelancerBid.createdAt
+                              ).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div>
+                          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                            Proposal
+                          </h4>
+                          <div className="bg-muted/30 p-4 rounded-lg border text-muted-foreground leading-relaxed italic">
+                            "{freelancerBid.proposal}"
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
               )}
             </motion.div>
           )}
-
-
-
-
 
           {activeTab === "messaging" && (
             <motion.div
@@ -773,8 +913,6 @@ export default function EnhancedProjectDetailsClient({
               <SprintPlan projectId={projectId} project={project} />
             </motion.div>
           )}
-
-
 
           {activeTab === "work-submission" && (
             <motion.div

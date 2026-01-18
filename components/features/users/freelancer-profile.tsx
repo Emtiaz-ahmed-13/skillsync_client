@@ -66,7 +66,6 @@ export default function FreelancerProfileClient({
   useEffect(() => {
     if (status === "authenticated") {
       if (user?.role !== "freelancer") {
-        
         switch (user?.role) {
           case "client":
             router.push("/dashboard/client");
@@ -88,14 +87,11 @@ export default function FreelancerProfileClient({
       if (!user?.id || !user?.accessToken) return;
 
       try {
-        const response = await fetch(
-          "/api/v1/profile/me",
-          {
-            headers: {
-              Authorization: `Bearer ${user.accessToken}`,
-            },
-          }
-        );
+        const response = await fetch("/api/v1/profile/me", {
+          headers: {
+            Authorization: `Bearer ${user.accessToken}`,
+          },
+        });
 
         if (response.ok) {
           const data = await response.json();
@@ -168,21 +164,17 @@ export default function FreelancerProfileClient({
         const formDataUpload = new FormData();
         formDataUpload.append("file", resumeFile);
         formDataUpload.append("fileType", "resume");
-    
-        formDataUpload.append("projectId", ""); 
+
+        formDataUpload.append("projectId", "");
 
         try {
-          const uploadResponse = await fetch(
-            "/api/v1/files",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${user?.accessToken || ""}`,
-              
-              },
-              body: formDataUpload,
-            }
-          );
+          const uploadResponse = await fetch("/api/v1/files", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${user?.accessToken || ""}`,
+            },
+            body: formDataUpload,
+          });
 
           if (!uploadResponse.ok) {
             const uploadError = await uploadResponse.json();
@@ -223,23 +215,20 @@ export default function FreelancerProfileClient({
         Object.assign(profileData, { resume: resumeUrl });
       }
 
-      const response = await fetch(
-        "/api/v1/profile/me/freelancer",
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user?.accessToken || ""}`,
-          },
-          body: JSON.stringify(profileData),
-        }
-      );
+      const response = await fetch("/api/v1/profile/me/freelancer", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user?.accessToken || ""}`,
+        },
+        body: JSON.stringify(profileData),
+      });
 
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
           toast.success("Profile updated successfully!");
-      
+
           await update();
         } else {
           toast.error(data.message || "Failed to update profile");
@@ -265,7 +254,7 @@ export default function FreelancerProfileClient({
   }
 
   if (status === "unauthenticated") {
-    return null; 
+    return null;
   }
 
   return (

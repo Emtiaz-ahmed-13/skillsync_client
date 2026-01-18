@@ -3,11 +3,11 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
@@ -154,9 +154,7 @@ export default function SprintPlan({ projectId, project }: SprintPlanProps) {
         // Try to get existing sprints, but handle 404 gracefully
         try {
           // Use the correct endpoint for sprint planning
-          const response = await fetch(
-            `/api/v1/sprint-planning/${projectId}`,
-            {
+          const response = await fetch(`/api/v1/sprint-planning/${projectId}`, {
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },
@@ -167,11 +165,9 @@ export default function SprintPlan({ projectId, project }: SprintPlanProps) {
             if (result.success && result.data && result.data.sprints) {
               setSprints(result.data.sprints);
             } else {
-        
               initializeSprints();
             }
           } else {
-           
             initializeSprints();
           }
         } catch (error) {
@@ -198,10 +194,10 @@ export default function SprintPlan({ projectId, project }: SprintPlanProps) {
 
     for (let i = 0; i < 3; i++) {
       const startDate = new Date(today);
-      startDate.setDate(today.getDate() + i * 14); 
+      startDate.setDate(today.getDate() + i * 14);
 
       const endDate = new Date(startDate);
-      endDate.setDate(startDate.getDate() + 14); 
+      endDate.setDate(startDate.getDate() + 14);
 
       newSprints.push({
         _id: `sprint-${i + 1}`,
@@ -234,12 +230,16 @@ export default function SprintPlan({ projectId, project }: SprintPlanProps) {
   ) => {
     const updatedSprints = [...sprints];
     updatedSprints[sprintIndex].features[featureIndex].status = status;
-    
+
     // Auto-update sprint status based on feature completion
     const sprint = updatedSprints[sprintIndex];
-    const allCompleted = sprint.features.length > 0 && sprint.features.every(f => f.status === "completed");
-    const anyInProgress = sprint.features.some(f => f.status === "in-progress");
-    
+    const allCompleted =
+      sprint.features.length > 0 &&
+      sprint.features.every((f) => f.status === "completed");
+    const anyInProgress = sprint.features.some(
+      (f) => f.status === "in-progress"
+    );
+
     if (allCompleted) {
       updatedSprints[sprintIndex].status = "completed";
     } else if (anyInProgress) {
@@ -248,7 +248,7 @@ export default function SprintPlan({ projectId, project }: SprintPlanProps) {
       // If it was completed but now has non-completed features, set to in-progress
       updatedSprints[sprintIndex].status = "in-progress";
     }
-    
+
     setSprints(updatedSprints);
   };
 
@@ -411,7 +411,7 @@ export default function SprintPlan({ projectId, project }: SprintPlanProps) {
         projectId: projectId,
       }));
 
-      // Use the correct endpoint for creating sprint plan
+      // Use the endpoint for creating sprint plan
       const response = await fetch(
         `/api/v1/sprint-planning/generate/${projectId}`,
         {
@@ -472,19 +472,46 @@ export default function SprintPlan({ projectId, project }: SprintPlanProps) {
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Sprint Planning</h2>
           <p className="text-muted-foreground mt-1">
-            Manage development cycles for <span className="font-medium text-foreground">{project.title}</span>
+            Manage development cycles for{" "}
+            <span className="font-medium text-foreground">{project.title}</span>
           </p>
         </div>
         <div className="flex gap-3">
-          <Button onClick={generateManualPlan} variant="outline" className="gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+          <Button
+            onClick={generateManualPlan}
+            variant="outline"
+            className="gap-2"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+              />
             </svg>
             Auto-Generate Plan
           </Button>
           <Button onClick={saveSprintPlan} className="gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
+              />
             </svg>
             Save Changes
           </Button>
@@ -494,124 +521,162 @@ export default function SprintPlan({ projectId, project }: SprintPlanProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Form to add new sprint */}
         <Card className="hover:shadow-md transition-all duration-300 border-l-4 border-l-purple-500">
-            <CardHeader className="bg-muted/10 pb-4">
+          <CardHeader className="bg-muted/10 pb-4">
             <CardTitle className="text-xl flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                Add New Sprint
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-purple-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              Add New Sprint
             </CardTitle>
             <CardDescription>
-                Create a new 14-day development cycle
+              Create a new 14-day development cycle
             </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6 space-y-4">
+          </CardHeader>
+          <CardContent className="pt-6 space-y-4">
             <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Sprint Title</label>
-                <Input
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Sprint Title
+              </label>
+              <Input
                 value={newSprintTitle}
                 onChange={(e) => setNewSprintTitle(e.target.value)}
                 placeholder="e.g., Sprint 1: Core Authentication"
                 className="bg-background"
-                />
+              />
             </div>
             <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Goals & Objectives</label>
-                <Input
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Goals & Objectives
+              </label>
+              <Input
                 value={newSprintDescription}
                 onChange={(e) => setNewSprintDescription(e.target.value)}
                 placeholder="What will be achieved in this sprint?"
                 className="bg-background"
-                />
+              />
             </div>
             <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Start Date</label>
+              <div className="space-y-2">
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Start Date
+                </label>
                 <Input
-                    type="date"
-                    value={newSprintStartDate}
-                    onChange={(e) => setNewSprintStartDate(e.target.value)}
-                    className="bg-background"
+                  type="date"
+                  value={newSprintStartDate}
+                  onChange={(e) => setNewSprintStartDate(e.target.value)}
+                  className="bg-background"
                 />
-                </div>
-                <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">End Date</label>
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  End Date
+                </label>
                 <Input
-                    type="date"
-                    value={newSprintEndDate}
-                    onChange={(e) => setNewSprintEndDate(e.target.value)}
-                    className="bg-background"
+                  type="date"
+                  value={newSprintEndDate}
+                  onChange={(e) => setNewSprintEndDate(e.target.value)}
+                  className="bg-background"
                 />
-                </div>
+              </div>
             </div>
-            <Button onClick={addNewSprint} className="w-full mt-2">Create Sprint</Button>
-            </CardContent>
+            <Button onClick={addNewSprint} className="w-full mt-2">
+              Create Sprint
+            </Button>
+          </CardContent>
         </Card>
 
         {/* Form to add new feature */}
         <Card className="hover:shadow-md transition-all duration-300 border-l-4 border-l-blue-500">
-            <CardHeader className="bg-muted/10 pb-4">
+          <CardHeader className="bg-muted/10 pb-4">
             <CardTitle className="text-xl flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                Add Feature
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-blue-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                />
+              </svg>
+              Add Feature
             </CardTitle>
             <CardDescription>
-                Assign tasks to a specific sprint cycle
+              Assign tasks to a specific sprint cycle
             </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6 space-y-4">
+          </CardHeader>
+          <CardContent className="pt-6 space-y-4">
             <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Target Sprint</label>
-                <select
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Target Sprint
+              </label>
+              <select
                 value={selectedSprintForFeature ?? ""}
                 onChange={(e) =>
-                    setSelectedSprintForFeature(
+                  setSelectedSprintForFeature(
                     e.target.value ? parseInt(e.target.value) : null
-                    )
+                  )
                 }
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 h-10"
-                >
+              >
                 <option value="">Select a sprint...</option>
                 {sprints.map((sprint, index) => (
-                    <option key={sprint._id} value={index}>
+                  <option key={sprint._id} value={index}>
                     {sprint.title}
-                    </option>
+                  </option>
                 ))}
-                </select>
+              </select>
             </div>
             <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Feature Name</label>
-                <Input
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Feature Name
+              </label>
+              <Input
                 value={newFeatureTitle}
                 onChange={(e) => setNewFeatureTitle(e.target.value)}
                 placeholder="e.g., Implement OAuth Logic"
                 disabled={selectedSprintForFeature === null}
                 className="bg-background"
-                />
+              />
             </div>
             <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Description</label>
-                <Input
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Description
+              </label>
+              <Input
                 value={newFeatureDescription}
                 onChange={(e) => setNewFeatureDescription(e.target.value)}
                 placeholder="Technical details..."
                 disabled={selectedSprintForFeature === null}
                 className="bg-background"
-                />
+              />
             </div>
             <Button
-                onClick={addNewFeature}
-                className="w-full mt-2"
-                variant="outline"
-                disabled={
+              onClick={addNewFeature}
+              className="w-full mt-2"
+              variant="outline"
+              disabled={
                 selectedSprintForFeature === null || !newFeatureTitle.trim()
-                }
+              }
             >
-                Add Feature to Sprint
+              Add Feature to Sprint
             </Button>
-            </CardContent>
+          </CardContent>
         </Card>
       </div>
 
@@ -682,9 +747,11 @@ export default function SprintPlan({ projectId, project }: SprintPlanProps) {
                         <div
                           key={feature.id}
                           className={`p-4 border rounded-lg transition-all duration-200 ${
-                             feature.status === 'completed' ? 'bg-green-50/50 dark:bg-green-900/10 border-green-200 dark:border-green-800' :
-                             feature.status === 'in-progress' ? 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800' :
-                             'bg-card hover:border-primary/30'
+                            feature.status === "completed"
+                              ? "bg-green-50/50 dark:bg-green-900/10 border-green-200 dark:border-green-800"
+                              : feature.status === "in-progress"
+                              ? "bg-blue-50/50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800"
+                              : "bg-card hover:border-primary/30"
                           }`}
                         >
                           {isEditing ? (
@@ -727,66 +794,99 @@ export default function SprintPlan({ projectId, project }: SprintPlanProps) {
                             <div className="flex flex-col gap-3">
                               <div className="flex justify-between items-start gap-2">
                                 <div>
-                                    <h4 className={`font-medium text-sm ${feature.status === 'completed' ? 'line-through text-muted-foreground' : ''}`}>
+                                  <h4
+                                    className={`font-medium text-sm ${
+                                      feature.status === "completed"
+                                        ? "line-through text-muted-foreground"
+                                        : ""
+                                    }`}
+                                  >
                                     {feature.title}
-                                    </h4>
-                                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                  </h4>
+                                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                                     {feature.description}
-                                    </p>
+                                  </p>
                                 </div>
                                 <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    onClick={() =>
-                                        startEditingFeature(
-                                        sprintIndex,
-                                        featureIndex
-                                        )
-                                    }
-                                    className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  size="icon"
+                                  variant="ghost"
+                                  onClick={() =>
+                                    startEditingFeature(
+                                      sprintIndex,
+                                      featureIndex
+                                    )
+                                  }
+                                  className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                                    </svg>
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-3 w-3"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                  </svg>
                                 </Button>
                               </div>
-                              
+
                               <div className="flex items-center justify-between pt-2 border-t border-border/50">
                                 <div className="flex gap-2">
-                                    <button
-                                        onClick={() => updateFeatureStatus(sprintIndex, featureIndex, "pending")}
-                                        className={`w-6 h-6 rounded-full ring-2 ring-offset-2 transition-all hover:scale-110 ${
-                                            feature.status === 'pending' 
-                                            ? 'bg-yellow-400 ring-yellow-400 shadow-md' 
-                                            : 'bg-muted ring-transparent hover:bg-yellow-200 hover:ring-yellow-300'
-                                        }`}
-                                        title="Mark as Pending"
-                                    />
-                                    <button
-                                        onClick={() => updateFeatureStatus(sprintIndex, featureIndex, "in-progress")}
-                                        className={`w-6 h-6 rounded-full ring-2 ring-offset-2 transition-all hover:scale-110 ${
-                                            feature.status === 'in-progress' 
-                                            ? 'bg-blue-400 ring-blue-400 shadow-md' 
-                                            : 'bg-muted ring-transparent hover:bg-blue-200 hover:ring-blue-300'
-                                        }`}
-                                        title="Mark as In Progress"
-                                    />
-                                    <button
-                                        onClick={() => updateFeatureStatus(sprintIndex, featureIndex, "completed")}
-                                        className={`w-6 h-6 rounded-full ring-2 ring-offset-2 transition-all hover:scale-110 ${
-                                            feature.status === 'completed' 
-                                            ? 'bg-green-400 ring-green-400 shadow-md' 
-                                            : 'bg-muted ring-transparent hover:bg-green-200 hover:ring-green-300'
-                                        }`}
-                                        title="Mark as Completed"
-                                    />
+                                  <button
+                                    onClick={() =>
+                                      updateFeatureStatus(
+                                        sprintIndex,
+                                        featureIndex,
+                                        "pending"
+                                      )
+                                    }
+                                    className={`w-6 h-6 rounded-full ring-2 ring-offset-2 transition-all hover:scale-110 ${
+                                      feature.status === "pending"
+                                        ? "bg-yellow-400 ring-yellow-400 shadow-md"
+                                        : "bg-muted ring-transparent hover:bg-yellow-200 hover:ring-yellow-300"
+                                    }`}
+                                    title="Mark as Pending"
+                                  />
+                                  <button
+                                    onClick={() =>
+                                      updateFeatureStatus(
+                                        sprintIndex,
+                                        featureIndex,
+                                        "in-progress"
+                                      )
+                                    }
+                                    className={`w-6 h-6 rounded-full ring-2 ring-offset-2 transition-all hover:scale-110 ${
+                                      feature.status === "in-progress"
+                                        ? "bg-blue-400 ring-blue-400 shadow-md"
+                                        : "bg-muted ring-transparent hover:bg-blue-200 hover:ring-blue-300"
+                                    }`}
+                                    title="Mark as In Progress"
+                                  />
+                                  <button
+                                    onClick={() =>
+                                      updateFeatureStatus(
+                                        sprintIndex,
+                                        featureIndex,
+                                        "completed"
+                                      )
+                                    }
+                                    className={`w-6 h-6 rounded-full ring-2 ring-offset-2 transition-all hover:scale-110 ${
+                                      feature.status === "completed"
+                                        ? "bg-green-400 ring-green-400 shadow-md"
+                                        : "bg-muted ring-transparent hover:bg-green-200 hover:ring-green-300"
+                                    }`}
+                                    title="Mark as Completed"
+                                  />
                                 </div>
-                                <span className={`text-[10px] uppercase font-bold tracking-wider ${
-                                    feature.status === 'completed' ? 'text-green-600' :
-                                    feature.status === 'in-progress' ? 'text-blue-600' :
-                                    'text-yellow-600'
-                                }`}>
-                                    {feature.status.replace('-', ' ')}
+                                <span
+                                  className={`text-[10px] uppercase font-bold tracking-wider ${
+                                    feature.status === "completed"
+                                      ? "text-green-600"
+                                      : feature.status === "in-progress"
+                                      ? "text-blue-600"
+                                      : "text-yellow-600"
+                                  }`}
+                                >
+                                  {feature.status.replace("-", " ")}
                                 </span>
                               </div>
                             </div>
@@ -801,7 +901,8 @@ export default function SprintPlan({ projectId, project }: SprintPlanProps) {
                       <span className="text-foreground">{completed}</span> Done
                     </span>
                     <span>
-                      <span className="text-foreground">{inProgress}</span> Active
+                      <span className="text-foreground">{inProgress}</span>{" "}
+                      Active
                     </span>
                     <span>
                       <span className="font-medium">{pending}</span> pending

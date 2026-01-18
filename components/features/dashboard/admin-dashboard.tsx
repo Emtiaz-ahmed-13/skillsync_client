@@ -18,13 +18,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { approveArticle, getPendingArticles, rejectArticle } from "@/lib/api/articles-api";
+import {
+  approveArticle,
+  getPendingArticles,
+  rejectArticle,
+} from "@/lib/api/articles-api";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-
 
 // Types for our data
 interface User {
@@ -211,7 +214,6 @@ export default function AdminDashboardClient() {
   }, [session, status, router]);
 
   useEffect(() => {
- 
     const fetchStatsAndProjects = async () => {
       if (status === "authenticated" && session?.user) {
         const user = session.user as SessionUser;
@@ -240,9 +242,8 @@ export default function AdminDashboardClient() {
 
         try {
           const statsResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/admin/analytics`
-            ||
-            `localhost:5001/api/v1/admin/analytics`,
+            `${process.env.NEXT_PUBLIC_API_URL}/admin/analytics` ||
+              `localhost:5001/api/v1/admin/analytics`,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -265,10 +266,8 @@ export default function AdminDashboardClient() {
             let statsObj: StatsResponse = {};
 
             if (statsData.success && statsData.data) {
-      
               statsObj = statsData.data;
             } else if (statsData.totalUsers !== undefined) {
-      
               statsObj = statsData;
             } else {
               console.error("Unexpected stats API response format:", statsData);
@@ -306,9 +305,8 @@ export default function AdminDashboardClient() {
 
           // Fetch pending projects
           const projectsResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/projects/pending`
-            ||
-            `localhost:5001/api/v1/projects/pending`,
+            `${process.env.NEXT_PUBLIC_API_URL}/projects/pending` ||
+              `localhost:5001/api/v1/projects/pending`,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -316,11 +314,11 @@ export default function AdminDashboardClient() {
             }
           );
 
-          console.log("Pending projects API status:", projectsResponse.status); 
+          console.log("Pending projects API status:", projectsResponse.status);
 
           if (projectsResponse.ok) {
             const projectsData = await projectsResponse.json();
-            console.log("Pending projects API response:", projectsData); 
+            console.log("Pending projects API response:", projectsData);
             if (
               projectsData.success &&
               projectsData.data &&
@@ -369,11 +367,9 @@ export default function AdminDashboardClient() {
               }
 
               try {
-          
                 const usersResponse = await fetch(
-                  `${process.env.NEXT_PUBLIC_API_URL}/admin/users`
-                  ||
-                  `localhost:5001/api/v1/admin/users`,
+                  `${process.env.NEXT_PUBLIC_API_URL}/admin/users` ||
+                    `localhost:5001/api/v1/admin/users`,
                   {
                     headers: {
                       Authorization: `Bearer ${accessToken}`,
@@ -386,7 +382,6 @@ export default function AdminDashboardClient() {
                   let usersArray = [];
 
                   if (usersData.success && Array.isArray(usersData.data)) {
-
                     usersArray = usersData.data;
                   } else if (Array.isArray(usersData)) {
                     usersArray = usersData;
@@ -434,7 +429,11 @@ export default function AdminDashboardClient() {
                 setLoadingUsers(false);
               }
               try {
-                const articlesResult = await getPendingArticles(accessToken, 1, 10);
+                const articlesResult = await getPendingArticles(
+                  accessToken,
+                  1,
+                  10
+                );
                 if (articlesResult.success && articlesResult.data?.articles) {
                   setPendingArticles(articlesResult.data.articles);
                 } else {
@@ -467,7 +466,7 @@ export default function AdminDashboardClient() {
   }
 
   if (status === "unauthenticated") {
-    return null; 
+    return null;
   }
 
   const handleApproveProject = async (
@@ -486,9 +485,8 @@ export default function AdminDashboardClient() {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/projects/${projectId}/approve`
-        ||
-        `localhost:5001/api/v1/projects/${projectId}/approve`,
+        `${process.env.NEXT_PUBLIC_API_URL}/projects/${projectId}/approve` ||
+          `localhost:5001/api/v1/projects/${projectId}/approve`,
         {
           method: "PUT",
           headers: {
@@ -890,7 +888,9 @@ export default function AdminDashboardClient() {
                                 <span className="font-medium text-muted-foreground">
                                   Email:{" "}
                                 </span>
-                                <span className="text-xs">{article.author.email}</span>
+                                <span className="text-xs">
+                                  {article.author.email}
+                                </span>
                               </div>
                               {article.category && (
                                 <div>
@@ -904,14 +904,19 @@ export default function AdminDashboardClient() {
                             {article.tags && article.tags.length > 0 && (
                               <div className="mt-3 flex flex-wrap gap-2">
                                 {article.tags.map((tag, idx) => (
-                                  <Badge key={idx} variant="outline" className="text-xs">
+                                  <Badge
+                                    key={idx}
+                                    variant="outline"
+                                    className="text-xs"
+                                  >
                                     {tag}
                                   </Badge>
                                 ))}
                               </div>
                             )}
                             <div className="mt-3 text-xs text-muted-foreground">
-                              Submitted: {new Date(article.createdAt).toLocaleDateString()}
+                              Submitted:{" "}
+                              {new Date(article.createdAt).toLocaleDateString()}
                             </div>
                           </div>
                           <div className="flex flex-col gap-2">

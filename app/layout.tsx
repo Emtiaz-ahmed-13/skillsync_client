@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
 
-import SessionProviderWrapper from "@/components/providers/session-provider-wrapper";
+import { AuthProvider } from "@/components/providers/auth-provider";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -17,6 +17,11 @@ export const metadata: Metadata = {
   title: "SkillSync - Professional Collaboration Hub",
   description:
     "A centralized platform for freelancers and clients to collaborate efficiently",
+  icons: {
+    icon: "/skillsync.webp",
+    shortcut: "/skillsync.webp",
+    apple: "/skillsync.webp",
+  },
 };
 
 export default function RootLayout({
@@ -39,7 +44,7 @@ export default function RootLayout({
             "inset-x-0 inset-y-[-30%] h-[200%] skew-y-12 fixed -z-10"
           )}
         />
-        <SessionProviderWrapper>{children}</SessionProviderWrapper>
+        <AuthProvider>{children}</AuthProvider>
         <Toaster />
       </body>
     </html>

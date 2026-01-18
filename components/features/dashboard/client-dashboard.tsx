@@ -5,33 +5,33 @@ import { Navbar } from "@/components/shared/navbar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import {
-    getWorkSubmissionsByProject,
-    WorkSubmission,
+  getWorkSubmissionsByProject,
+  WorkSubmission,
 } from "@/lib/api/work-submission-api";
 import { useNotifications } from "@/lib/hooks/notifications";
 import { motion } from "framer-motion";
@@ -39,6 +39,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { PDFAnalyzer } from "../projects/PDFAnalyzer";
 
 interface Project {
   _id: string;
@@ -77,7 +78,6 @@ export default function ClientDashboardClient() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [projectsLoading, setProjectsLoading] = useState(true);
 
- 
   const [bids, setBids] = useState([]);
   const [bidsLoading, setBidsLoading] = useState(true);
 
@@ -85,7 +85,6 @@ export default function ClientDashboardClient() {
     if (status === "authenticated" && session?.user) {
       const user = session.user as { role?: string };
       if (user.role !== "client") {
-        
         switch (user.role) {
           case "freelancer":
             router.push("/dashboard/freelancer");
@@ -119,14 +118,11 @@ export default function ClientDashboardClient() {
             return;
           }
 
-          const response = await fetch(
-            `/api/v1/projects/owner/${userId}`,
-            {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-              },
-            }
-          );
+          const response = await fetch(`/api/v1/projects/owner/${userId}`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
 
           console.log("Projects API response status:", response.status);
 
@@ -138,7 +134,6 @@ export default function ClientDashboardClient() {
               console.log("Setting projects:", data.data);
               setProjects(data.data);
 
-            
               const totalProjects = data.data.length;
               const activeProjects = data.data.filter(
                 (p) => p.status !== "completed"
@@ -278,9 +273,9 @@ export default function ClientDashboardClient() {
       const projBudget = budget ? parseInt(budget, 10) : 0;
       const techList = technologies
         ? technologies
-            .split(",")
-            .map((t) => t.trim())
-            .filter((t) => t)
+          .split(",")
+          .map((t) => t.trim())
+          .filter((t) => t)
         : [];
       if (!title) {
         setError("Project title is required");
@@ -332,16 +327,13 @@ export default function ClientDashboardClient() {
           formData.append("file", file);
           formData.append("projectId", createdProject._id || createdProject.id);
 
-          const fileResponse = await fetch(
-            "/api/v1/files",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-              },
-              body: formData,
-            }
-          );
+          const fileResponse = await fetch("/api/v1/files", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            body: formData,
+          });
 
           if (!fileResponse.ok) {
             console.error("File upload failed:", await fileResponse.text());
@@ -375,8 +367,7 @@ export default function ClientDashboardClient() {
               }
 
               const projectsResponse = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/projects/owner/${userId}`
-                ||
+                `${process.env.NEXT_PUBLIC_API_URL}/projects/owner/${userId}` ||
                 `localhost:5001/api/v1/projects/owner/${userId}`,
                 {
                   headers: {
@@ -408,14 +399,16 @@ export default function ClientDashboardClient() {
                   for (const projectId of projectIds) {
                     try {
                       const workSubmissionsResponse =
-                        await getWorkSubmissionsByProject(projectId, accessToken);
+                        await getWorkSubmissionsByProject(
+                          projectId,
+                          accessToken
+                        );
 
                       if (
                         workSubmissionsResponse.success &&
                         workSubmissionsResponse.data &&
                         Array.isArray(workSubmissionsResponse.data)
                       ) {
-                  
                         const pendingSubmissions = (
                           workSubmissionsResponse.data as WorkSubmission[]
                         ).filter(
@@ -458,7 +451,6 @@ export default function ClientDashboardClient() {
           const accessToken = user?.accessToken;
 
           if (accessToken) {
-        
             console.log(
               "Project created successfully, admin notification should be handled by backend"
             );
@@ -471,10 +463,8 @@ export default function ClientDashboardClient() {
         let errorText = "";
 
         try {
-        
           const responseText = await response.text();
 
-      
           if (
             responseText.includes("<!DOCTYPE") ||
             responseText.includes("<html")
@@ -506,7 +496,7 @@ export default function ClientDashboardClient() {
 
         setError(
           errorData.message ||
-            `Failed to create project: ${response.status} ${response.statusText}`
+          `Failed to create project: ${response.status} ${response.statusText}`
         );
         console.error("Project creation error:", errorData);
       }
@@ -533,17 +523,14 @@ export default function ClientDashboardClient() {
         return;
       }
 
-      const response = await fetch(
-        `/api/v1/bids/${bidId}/status`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({ status: "accepted" }),
-        }
-      );
+      const response = await fetch(`/api/v1/bids/${bidId}/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ status: "accepted" }),
+      });
 
       if (response.ok) {
         const result = await response.json();
@@ -589,8 +576,7 @@ export default function ClientDashboardClient() {
         }
 
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/projects/owner/${userId}`
-          ||
+          `${process.env.NEXT_PUBLIC_API_URL}/projects/owner/${userId}` ||
           `localhost:5001/api/v1/projects/owner/${userId}`,
           {
             headers: {
@@ -670,8 +656,7 @@ export default function ClientDashboardClient() {
                 const projectId = project._id || project.id;
 
                 const bidsResponse = await fetch(
-                  `${process.env.NEXT_PUBLIC_API_URL}/bids/project/${projectId}`
-                  ||
+                  `${process.env.NEXT_PUBLIC_API_URL}/bids/project/${projectId}` ||
                   `localhost:5001/api/v1/bids/project/${projectId}`,
                   {
                     headers: {
@@ -726,17 +711,14 @@ export default function ClientDashboardClient() {
         return;
       }
 
-      const response = await fetch(
-        `/api/v1/bids/${bidId}/status`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({ status: "rejected" }),
-        }
-      );
+      const response = await fetch(`/api/v1/bids/${bidId}/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ status: "rejected" }),
+      });
 
       if (response.ok) {
         const result = await response.json();
@@ -946,10 +928,10 @@ export default function ClientDashboardClient() {
                   +
                   {stats.totalSpent > 0
                     ? Math.floor(
-                        (stats.totalSpent /
-                          Math.max(1, stats.totalSpent - 100)) *
-                          100
-                      )
+                      (stats.totalSpent /
+                        Math.max(1, stats.totalSpent - 100)) *
+                      100
+                    )
                     : 0}
                   % from last month
                 </p>
@@ -1032,10 +1014,10 @@ export default function ClientDashboardClient() {
                                 project.status === "in-progress"
                                   ? "default"
                                   : project.status === "pending"
-                                  ? "secondary"
-                                  : project.status === "completed"
-                                  ? "outline"
-                                  : "destructive"
+                                    ? "secondary"
+                                    : project.status === "completed"
+                                      ? "outline"
+                                      : "destructive"
                               }
                             >
                               {project.status}
@@ -1055,8 +1037,7 @@ export default function ClientDashboardClient() {
                               size="sm"
                               onClick={() =>
                                 router.push(
-                                  `/dashboard/client/projects/${
-                                    project._id || project.id
+                                  `/dashboard/client/projects/${project._id || project.id
                                   }`
                                 )
                               }
@@ -1081,6 +1062,22 @@ export default function ClientDashboardClient() {
 
           {/* Proposal Management Section */}
           <ClientProposals onProposalUpdate={refreshProjects} />
+
+          {/* AI Project Analysis Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            className="grid grid-cols-1 gap-6"
+          >
+            <div>
+              <h2 className="text-2xl font-bold mb-2">AI Project Analysis</h2>
+              <p className="text-muted-foreground mb-4">
+                Upload your project proposal PDF and let our AI analyze it against existing projects
+              </p>
+              <PDFAnalyzer />
+            </div>
+          </motion.div>
 
           {/* Quick Actions */}
           <motion.div
@@ -1225,7 +1222,7 @@ export default function ClientDashboardClient() {
                 <CardDescription>View and submit reviews</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button 
+                <Button
                   className="w-full"
                   onClick={() => router.push("/dashboard/client/reviews")}
                 >
