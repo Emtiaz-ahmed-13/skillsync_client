@@ -17,7 +17,13 @@ export default function LoginClient() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  const rawCallbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+
+  // Ensure callbackUrl is a relative path for router.push()
+  const callbackUrl = rawCallbackUrl.startsWith("http")
+    ? new URL(rawCallbackUrl).pathname
+    : rawCallbackUrl;
+
   const { data: session, status } = useSession();
 
   useEffect(() => {
