@@ -29,7 +29,7 @@ export default function LoginClient() {
   useEffect(() => {
     if (status === "authenticated") {
       console.log("LoginClient - User already authenticated, redirecting to:", callbackUrl);
-      router.push(callbackUrl);
+      window.location.href = callbackUrl;
     }
   }, [status, router, callbackUrl]);
 
@@ -57,7 +57,7 @@ export default function LoginClient() {
         }
       } else if (result?.ok) {
         console.log("LoginClient - Login successful, pushing to:", callbackUrl);
-        router.push(callbackUrl);
+        window.location.href = callbackUrl;
       }
     } catch (err) {
       setError("An error occurred. Please try again.");
