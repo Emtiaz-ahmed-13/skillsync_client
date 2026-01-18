@@ -26,6 +26,9 @@ export default function DashboardRedirect() {
   const router = useRouter();
 
   useEffect(() => {
+    console.log("DashboardRedirect - Status:", status);
+    console.log("DashboardRedirect - Session User:", session?.user);
+
     if (status === "authenticated" && session?.user) {
       // Redirect based on user role
       const userRole = session.user.role;
