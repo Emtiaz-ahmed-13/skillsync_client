@@ -39,7 +39,6 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { PDFAnalyzer } from "../projects/PDFAnalyzer";
 
 interface Project {
   _id: string;
@@ -273,9 +272,9 @@ export default function ClientDashboardClient() {
       const projBudget = budget ? parseInt(budget, 10) : 0;
       const techList = technologies
         ? technologies
-          .split(",")
-          .map((t) => t.trim())
-          .filter((t) => t)
+            .split(",")
+            .map((t) => t.trim())
+            .filter((t) => t)
         : [];
       if (!title) {
         setError("Project title is required");
@@ -368,7 +367,7 @@ export default function ClientDashboardClient() {
 
               const projectsResponse = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/projects/owner/${userId}` ||
-                `localhost:5001/api/v1/projects/owner/${userId}`,
+                  `localhost:5001/api/v1/projects/owner/${userId}`,
                 {
                   headers: {
                     Authorization: `Bearer ${accessToken}`,
@@ -496,7 +495,7 @@ export default function ClientDashboardClient() {
 
         setError(
           errorData.message ||
-          `Failed to create project: ${response.status} ${response.statusText}`
+            `Failed to create project: ${response.status} ${response.statusText}`
         );
         console.error("Project creation error:", errorData);
       }
@@ -577,7 +576,7 @@ export default function ClientDashboardClient() {
 
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/projects/owner/${userId}` ||
-          `localhost:5001/api/v1/projects/owner/${userId}`,
+            `localhost:5001/api/v1/projects/owner/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -657,7 +656,7 @@ export default function ClientDashboardClient() {
 
                 const bidsResponse = await fetch(
                   `${process.env.NEXT_PUBLIC_API_URL}/bids/project/${projectId}` ||
-                  `localhost:5001/api/v1/bids/project/${projectId}`,
+                    `localhost:5001/api/v1/bids/project/${projectId}`,
                   {
                     headers: {
                       Authorization: `Bearer ${accessToken}`,
@@ -928,10 +927,10 @@ export default function ClientDashboardClient() {
                   +
                   {stats.totalSpent > 0
                     ? Math.floor(
-                      (stats.totalSpent /
-                        Math.max(1, stats.totalSpent - 100)) *
-                      100
-                    )
+                        (stats.totalSpent /
+                          Math.max(1, stats.totalSpent - 100)) *
+                          100
+                      )
                     : 0}
                   % from last month
                 </p>
@@ -1014,10 +1013,10 @@ export default function ClientDashboardClient() {
                                 project.status === "in-progress"
                                   ? "default"
                                   : project.status === "pending"
-                                    ? "secondary"
-                                    : project.status === "completed"
-                                      ? "outline"
-                                      : "destructive"
+                                  ? "secondary"
+                                  : project.status === "completed"
+                                  ? "outline"
+                                  : "destructive"
                               }
                             >
                               {project.status}
@@ -1037,7 +1036,8 @@ export default function ClientDashboardClient() {
                               size="sm"
                               onClick={() =>
                                 router.push(
-                                  `/dashboard/client/projects/${project._id || project.id
+                                  `/dashboard/client/projects/${
+                                    project._id || project.id
                                   }`
                                 )
                               }
@@ -1062,22 +1062,6 @@ export default function ClientDashboardClient() {
 
           {/* Proposal Management Section */}
           <ClientProposals onProposalUpdate={refreshProjects} />
-
-          {/* AI Project Analysis Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 }}
-            className="grid grid-cols-1 gap-6"
-          >
-            <div>
-              <h2 className="text-2xl font-bold mb-2">AI Project Analysis</h2>
-              <p className="text-muted-foreground mb-4">
-                Upload your project proposal PDF and let our AI analyze it against existing projects
-              </p>
-              <PDFAnalyzer />
-            </div>
-          </motion.div>
 
           {/* Quick Actions */}
           <motion.div

@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
 
-import { AuthProvider } from "@/components/providers/auth-provider";
+import SessionProviderWrapper from "@/components/providers/session-provider-wrapper";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -44,7 +44,7 @@ export default function RootLayout({
             "inset-x-0 inset-y-[-30%] h-[200%] skew-y-12 fixed -z-10"
           )}
         />
-        <AuthProvider>{children}</AuthProvider>
+        <SessionProviderWrapper>{children}</SessionProviderWrapper>
         <Toaster />
       </body>
     </html>
