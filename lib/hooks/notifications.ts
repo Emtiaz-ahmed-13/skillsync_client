@@ -9,213 +9,121 @@ interface Notification {
   description: string;
   time: string;
   read: boolean;
-  userId: string;
   createdAt: string;
-  updatedAt: string;
-}
-
-interface SessionUser {
-  name?: string;
-  email?: string;
-  image?: string;
-  role?: string;
-  accessToken?: string;
-}
-
-interface Session {
-  user?: SessionUser;
-  expires: string;
 }
 
 export const useNotifications = () => {
-  const { data: session } = useSession() as {
-    data: Session | null;
-    status: string;
-  };
+  const { data: session } = useSession();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch notifications from API
+  const accessToken = (session?.user as { accessToken?: string })?.accessToken;
+
+  const formatDate = (dateString: string): string => {
+    const diffInSeconds = Math.floor(
+      (Date.now() - new Date(dateString).getTime()) / 1000,
+    );
+    if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    return `${Math.floor(diffInSeconds / 86400)}d ago`;
+  };
+
+  const mapNotification = (n: Record<string, unknown>): Notification => ({
+    id: String(n.id || n._id),
+    title: String(n.title || "Notification"),
+    description: String(n.message || n.description || ""),
+    read: Boolean(n.isRead ?? n.read),
+    createdAt: String(n.createdAt || new Date().toISOString()),
+    time: formatDate(String(n.createdAt || new Date().toISOString())),
+  });
+
   const fetchNotifications = async () => {
-    if (!session?.user?.accessToken) {
-      setError("No access token available");
+    if (!accessToken) {
       setLoading(false);
       return;
     }
 
     try {
       setLoading(true);
-      const response = await fetch(
-        `/api/v1/notifications`,
-        {
-          headers: {
-            Authorization: `Bearer ${session.user.accessToken}`,
-          },
-        }
-      );
+      const [listRes, countRes] = await Promise.all([
+        fetch("/api/v1/notifications?limit=20", {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+        fetch("/api/v1/notifications/unread-count", {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      ]);
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch notifications: ${response.status}`);
+      if (listRes.ok) {
+        const data = await listRes.json();
+        const list = data.data?.notifications || data.data || [];
+        const mapped = (Array.isArray(list) ? list : []).map(mapNotification);
+        setNotifications(
+          mapped.sort(
+            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+          ),
+        );
       }
 
-      const data = await response.json();
-      if (data.success && Array.isArray(data.data)) {
-        const sortedNotifications = data.data
-          .map((notif: Notification) => ({
-            ...notif,
-            time: formatDate(notif.createdAt),
-          }))
-          .sort(
-            (a: Notification, b: Notification) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          );
-
-        setNotifications(sortedNotifications);
-        setUnreadCount(sortedNotifications.filter((n) => !n.read).length);
-      } else {
-        setNotifications([]);
-        setUnreadCount(0);
+      if (countRes.ok) {
+        const countData = await countRes.json();
+        setUnreadCount(countData.data?.unreadCount ?? countData.data?.count ?? 0);
       }
     } catch (err) {
-      console.error("Error fetching notifications:", err);
-      setError(
-        err instanceof Error ? err.message : "Failed to fetch notifications"
-      );
+      setError(err instanceof Error ? err.message : "Failed to fetch notifications");
     } finally {
       setLoading(false);
     }
   };
-  const fetchUnreadCount = async () => {
-    if (!session?.user?.accessToken) {
-      return 0;
-    }
 
-    try {
-      const response = await fetch(
-        `/api/v1/notifications/unread-count`,
-        {
-          headers: {
-            Authorization: `Bearer ${session.user.accessToken}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch unread count: ${response.status}`);
-      }
-
-      const data = await response.json();
-      if (data.success) {
-        return data.data?.count || 0;
-      }
-    } catch (err) {
-      console.error("Error fetching unread count:", err);
-    }
-    return 0;
-  };
-
-  // Mark notification as read
   const markAsRead = async (id: string) => {
-    if (!session?.user?.accessToken) {
-      return false;
-    }
-
+    if (!accessToken) return false;
     try {
-      const response = await fetch(
-        `/api/v1/notifications/${id}/read`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.user.accessToken}`,
-          },
-        }
-      );
-
+      const response = await fetch(`/api/v1/notifications/${id}/read`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
       if (response.ok) {
-        // Update local state
         setNotifications((prev) =>
-          prev.map((notif) =>
-            notif.id === id ? { ...notif, read: true } : notif
-          )
+          prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
         );
         setUnreadCount((prev) => Math.max(0, prev - 1));
         return true;
       }
-      return false;
     } catch (err) {
-      console.error("Error marking notification as read:", err);
-      return false;
+      console.error(err);
     }
+    return false;
   };
 
-  // Mark all notifications as read
   const markAllAsRead = async () => {
-    if (!session?.user?.accessToken) {
-      return false;
-    }
-
+    if (!accessToken) return false;
     try {
-      const response = await fetch(
-        `/api/v1/notifications/mark-all-read`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.user.accessToken}`,
-          },
-        }
-      );
-
+      const response = await fetch("/api/v1/notifications/read-all", {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
       if (response.ok) {
-        // Update local state
-        setNotifications((prev) =>
-          prev.map((notif) => ({ ...notif, read: true }))
-        );
+        setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
         setUnreadCount(0);
         return true;
       }
-      return false;
     } catch (err) {
-      console.error("Error marking all notifications as read:", err);
-      return false;
+      console.error(err);
     }
+    return false;
   };
 
-  // Format date to relative time (e.g., "2 min ago", "1 hour ago")
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-    if (diffInSeconds < 60) {
-      return `${diffInSeconds} seconds ago`;
-    } else if (diffInSeconds < 3600) {
-      const minutes = Math.floor(diffInSeconds / 60);
-      return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
-    } else if (diffInSeconds < 86400) {
-      const hours = Math.floor(diffInSeconds / 3600);
-      return `${hours} hour${hours > 1 ? "s" : ""} ago`;
-    } else {
-      const days = Math.floor(diffInSeconds / 86400);
-      return `${days} day${days > 1 ? "s" : ""} ago`;
-    }
-  };
-
-  // Poll for new notifications every 30 seconds
   useEffect(() => {
-    if (session?.user?.accessToken) {
+    if (accessToken) {
       fetchNotifications();
-
-      const interval = setInterval(() => {
-        fetchNotifications();
-      }, 30000); // 30 seconds
-
+      const interval = setInterval(fetchNotifications, 30000);
       return () => clearInterval(interval);
     }
-  }, [session?.user?.accessToken]);
+  }, [accessToken]);
 
   return {
     notifications,

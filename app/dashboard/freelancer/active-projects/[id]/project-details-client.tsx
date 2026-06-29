@@ -48,7 +48,7 @@ export default function ProjectDetailsClient({
       // using the generic project endpoint for now
       try {
         const response = await fetch(
-          `http://localhost:5001/api/v1/projects/${projectId}`,
+          `/api/v1/projects/${projectId}`,
           {
             headers: {
               Authorization: `Bearer ${(session?.user as any)?.accessToken}`,

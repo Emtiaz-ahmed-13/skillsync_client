@@ -121,14 +121,11 @@ export default function FreelancerTasksClient({
       }
 
       // Fetch freelancer's accepted bids (projects they're working on)
-      const bidsResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/bids/freelancer/${user.id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      const bidsResponse = await fetch(`/api/v1/bids/my`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
 
       if (bidsResponse.ok) {
         const bidsData = await bidsResponse.json();
@@ -150,7 +147,7 @@ export default function FreelancerTasksClient({
           // Fetch project details for each accepted bid
           const projectPromises = bidsToProcess.map(async (bid: Bid) => {
             const projectResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_API_URL}/projects/${bid.projectId}`,
+              `/api/v1/projects/${bid.projectId}`,
               {
                 headers: {
                   Authorization: `Bearer ${accessToken}`,
@@ -177,7 +174,7 @@ export default function FreelancerTasksClient({
           const allSprints: Sprint[] = [];
           for (const project of validProjects) {
             const sprintsResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_API_URL}/sprints/project/${project._id}`,
+              `/api/v1/sprints/project/${project._id}`,
               {
                 headers: {
                   Authorization: `Bearer ${accessToken}`,
@@ -324,10 +321,36 @@ export default function FreelancerTasksClient({
                 <CardContent>
                   <Button
                     className="w-full py-6 text-base"
-                    onClick={() => {
-                      toast.info(
-                        "Project Timeline Estimation functionality will be implemented here"
+                    onClick={async () => {
+                      const project = projects.find(
+                        (p) => (p.id || p._id) === selectedProjectId,
                       );
+                      if (!project || !user.accessToken) return;
+                      try {
+                        const res = await fetch("/api/v1/ai/estimate-timeline", {
+                          method: "POST",
+                          headers: {
+                            Authorization: `Bearer ${user.accessToken}`,
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify({
+                            title: project.title,
+                            description: project.description,
+                            technologies: project.technology,
+                            taskCount: sprints.length,
+                          }),
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                          toast.success(
+                            `Estimated: ${data.data.estimatedDuration} (${data.data.confidence} confidence)`,
+                          );
+                        } else {
+                          toast.error(data.message || "Estimation failed");
+                        }
+                      } catch {
+                        toast.error("Failed to estimate timeline");
+                      }
                     }}
                   >
                     Estimate Timeline

@@ -310,7 +310,7 @@ export default function FreelancerProjectsClient({
                       onClick={() =>
                         router.push(
                           `/dashboard/freelancer/projects/${project._id}` ||
-                            `localhost:5001/api/v1/projects/${project._id}`
+                `/api/v1/projects/${project._id}`
                         )
                       }
                     >

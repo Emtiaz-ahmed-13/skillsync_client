@@ -86,7 +86,7 @@ export default function AdminUsersPage() {
 
         try {
           const response = await fetch(
-            `http://localhost:5001/api/v1/admin/users`,
+            `/api/v1/admin/users`,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,

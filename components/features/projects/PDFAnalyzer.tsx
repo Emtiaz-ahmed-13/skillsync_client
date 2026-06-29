@@ -56,7 +56,7 @@ export function PDFAnalyzer() {
 
         try {
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/ai/analyze-pdf`,
+                `/api/v1/ai/analyze-pdf`,
                 {
                     method: "POST",
                     headers: {

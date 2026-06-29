@@ -3,6 +3,8 @@
 import RealtimeMessaging from "@/components/features/common/realtime-messaging";
 import { ClientReviews } from "@/components/features/dashboard/client-reviews";
 import { MeetingRequestModal } from "@/components/features/dashboard/meeting-request-modal";
+import { ProjectPaymentsPanel } from "@/components/features/payments/project-payments-panel";
+import { ReviewPrompt } from "@/components/features/reviews/review-prompt";
 import { Navbar } from "@/components/shared/navbar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,6 +30,7 @@ interface Project {
   technology: string[];
   status: string;
   ownerId: string;
+  freelancerId?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -93,6 +96,8 @@ export default function ClientProjectDetailsClient({ id }: { id: string }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
+  const [showReview, setShowReview] = useState(false);
+  const [acceptedFreelancerId, setAcceptedFreelancerId] = useState<string>("");
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -123,7 +128,7 @@ export default function ClientProjectDetailsClient({ id }: { id: string }) {
 
       // Fetch project details
       const projectResponse = await fetch(
-        `http://localhost:5001/api/v1/projects/${id}`,
+        `/api/v1/projects/${id}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -138,13 +143,19 @@ export default function ClientProjectDetailsClient({ id }: { id: string }) {
       const projectData = await projectResponse.json();
       if (projectData.success && projectData.data) {
         setProject(projectData.data);
+        if (projectData.data.status === "completed") {
+          setShowReview(true);
+        }
+        if (projectData.data.freelancerId) {
+          setAcceptedFreelancerId(String(projectData.data.freelancerId));
+        }
       } else {
         throw new Error("Project not found");
       }
 
       // Fetch bids for this project
       const bidsResponse = await fetch(
-        `http://localhost:5001/api/v1/bids/project/${id}`,
+        `/api/v1/bids/project/${id}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -159,6 +170,14 @@ export default function ClientProjectDetailsClient({ id }: { id: string }) {
       const bidsData = await bidsResponse.json();
       if (bidsData.success && bidsData.data && Array.isArray(bidsData.data)) {
         setBids(bidsData.data);
+        const accepted = bidsData.data.find((b: Bid) => b.status === "accepted");
+        if (accepted) {
+          const fid =
+            typeof accepted.freelancerId === "object"
+              ? (accepted.freelancerId as any)?._id
+              : accepted.freelancerId;
+          if (fid) setAcceptedFreelancerId(String(fid));
+        }
       } else {
         setBids([]);
       }
@@ -203,7 +222,7 @@ export default function ClientProjectDetailsClient({ id }: { id: string }) {
       }
 
       const response = await fetch(
-        `http://localhost:5001/api/v1/bids/${bidId}/status`,
+        `/api/v1/bids/${bidId}/status`,
         {
           method: "PUT",
           headers: {
@@ -219,18 +238,25 @@ export default function ClientProjectDetailsClient({ id }: { id: string }) {
       if (response.ok) {
         const result = await response.json();
         if (result.success) {
+          const accepted = bids.find((b) => b._id === bidId || (b as any).id === bidId);
+          const fid =
+            typeof accepted?.freelancerId === "object"
+              ? (accepted.freelancerId as any)?._id
+              : accepted?.freelancerId;
+          if (fid) setAcceptedFreelancerId(String(fid));
+
           setBids((prevBids) =>
             prevBids.map((bid) =>
               bid._id === bidId || (bid as any).id === bidId
                 ? { ...bid, status: "accepted" }
-                : bid
-            )
+                : { ...bid, status: "rejected" },
+            ),
           );
-          toast.success("Bid accepted successfully!");
-
+          toast.success("Bid accepted! Milestones created — check Payments tab.");
           if (project) {
-            setProject({ ...project, status: "in-progress" });
+            setProject({ ...project, status: "in-progress", freelancerId: fid });
           }
+          setActiveTab("payments");
         } else {
           toast.error(result.message || "Failed to accept bid");
         }
@@ -260,7 +286,7 @@ export default function ClientProjectDetailsClient({ id }: { id: string }) {
       }
 
       const response = await fetch(
-        `http://localhost:5001/api/v1/work-submissions/${submissionId}/status`,
+        `/api/v1/work-submissions/${submissionId}/status`,
         {
           method: "PATCH",
           headers: {
@@ -312,7 +338,7 @@ export default function ClientProjectDetailsClient({ id }: { id: string }) {
       }
 
       const response = await fetch(
-        `http://localhost:5001/api/v1/work-submissions/${selectedSubmissionId}`,
+        `/api/v1/work-submissions/${selectedSubmissionId}`,
         {
           method: "PATCH",
           headers: {
@@ -367,7 +393,7 @@ export default function ClientProjectDetailsClient({ id }: { id: string }) {
       }
 
       const response = await fetch(
-        `http://localhost:5001/api/v1/bids/${bidId}/status`,
+        `/api/v1/bids/${bidId}/status`,
         {
           method: "PUT",
           headers: {
@@ -488,7 +514,7 @@ export default function ClientProjectDetailsClient({ id }: { id: string }) {
         </div>
 
         <div className="flex items-center gap-1 p-1 bg-muted/50 rounded-lg w-full md:w-fit mb-8 backdrop-blur-sm border">
-          {["overview", "bids", "submissions", "messages", "reviews"].map(
+          {["overview", "bids", "payments", "submissions", "messages", "reviews"].map(
             (tab) => (
               <button
                 key={tab}
@@ -771,6 +797,20 @@ export default function ClientProjectDetailsClient({ id }: { id: string }) {
             </Card>
           </motion.div>
         )}
+
+        {activeTab === "payments" && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+            <ProjectPaymentsPanel
+              projectId={id}
+              freelancerId={
+                project?.freelancerId ||
+                acceptedFreelancerId ||
+                (bids.find((b) => b.status === "accepted")?.freelancerId as string)
+              }
+            />
+          </motion.div>
+        )}
+
         {activeTab === "submissions" && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -933,6 +973,15 @@ export default function ClientProjectDetailsClient({ id }: { id: string }) {
           </motion.div>
         )}
       </div>
+      {project?.status === "completed" && acceptedFreelancerId && (
+        <ReviewPrompt
+          projectId={id}
+          revieweeId={acceptedFreelancerId}
+          revieweeName="Freelancer"
+          open={showReview}
+          onClose={() => setShowReview(false)}
+        />
+      )}
       <MeetingRequestModal
         isOpen={meetingModalOpen}
         onClose={() => setMeetingModalOpen(false)}

@@ -17,6 +17,7 @@ export const metadata: Metadata = {
   title: "SkillSync - Professional Collaboration Hub",
   description:
     "A centralized platform for freelancers and clients to collaborate efficiently",
+  manifest: "/manifest.json",
   icons: {
     icon: "/skillsync.webp",
     shortcut: "/skillsync.webp",

@@ -60,7 +60,7 @@ export default function WorkSubmissionPage() {
 
       // Fetch project details
       const projectResponse = await fetch(
-        `http://localhost:5001/api/v1/projects/${id}`,
+        `/api/v1/projects/${id}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,

@@ -349,94 +349,34 @@ export const createProjectSprints = async (
   accessToken: string
 ) => {
   try {
-    // Try to create sprint plan using the correct endpoint
-    const response = await fetch(
-      `/api/v1/sprint-planning/create/${projectId}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({
-          sprints,
-        }),
-      }
-    );
+    const response = await fetch(`/api/v1/sprint-planning/generate/${projectId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        method: "auto",
+        customData: { sprints, tasks: [] },
+      }),
+    });
 
     if (response.ok) {
       return await response.json();
-    } else {
-      // If the main endpoint fails, try alternative approaches
-      console.log(
-        "Sprint planning creation failed, trying alternative approach"
-      );
-
-      // Try to generate AI sprint plan
-      const aiResponse = await fetch(
-        "/api/v1/ai-sprints/generate-plan",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({
-            projectId,
-            sprints,
-          }),
-        }
-      );
-
-      if (aiResponse.ok) {
-        return await aiResponse.json();
-      }
-
-      // If both approaches fail, return error
-      let errorData: { message?: string } = {};
-      try {
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
-          errorData = await response.json();
-        } else {
-          const textResponse = await response.text();
-          errorData = { message: textResponse };
-        }
-      } catch (parseError) {
-        errorData = {
-          message: `HTTP ${response.status}: ${response.statusText}`,
-        };
-      }
-
-      // Only log error if there's meaningful error data
-      if (
-        errorData.message &&
-        typeof errorData.message === "string" &&
-        errorData.message.trim() !== ""
-      ) {
-        console.error("Failed to create sprint plan:", errorData);
-      }
-
-      // Return success with mock data as fallback
-      return {
-        success: true,
-        message: "Sprints created successfully (using mock data)",
-        data: sprints.map((sprint, index) => ({
-          ...sprint,
-          _id: `mock-sprint-${Date.now()}-${index}`,
-        })),
-      };
     }
-  } catch (error) {
-    console.error("Error creating project sprints, using mock data:", error);
-    // Return success with mock data as fallback
+
+    const errorData = await response.json().catch(() => ({}));
     return {
-      success: true,
-      message: "Sprints saved successfully (using mock data)",
-      data: sprints.map((sprint, index) => ({
-        ...sprint,
-        _id: `mock-sprint-${Date.now()}-${index}`,
-      })),
+      success: false,
+      message: errorData.message || "Failed to create sprint plan",
+      data: null,
+    };
+  } catch (error) {
+    console.error("Error creating project sprints:", error);
+    return {
+      success: false,
+      message: "Error creating project sprints",
+      data: null,
     };
   }
 };
@@ -447,55 +387,25 @@ export const updateSprintStatus = async (
   accessToken: string
 ) => {
   try {
-    const response = await fetch(
-      `/api/v1/sprint-planning/${sprintId}`,
-      {
-        method: "PATCH", // Using PATCH for partial update of status
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({ status }),
-      }
-    );
+    const response = await fetch(`/api/v1/sprints/${sprintId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ status }),
+    });
 
     if (response.ok) {
       return await response.json();
-    } else {
-      // Handle potential error responses
-      let errorData: { message?: string } = {};
-      try {
-        // Check if response has content before trying to parse
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
-          errorData = await response.json();
-        } else {
-          // If not JSON, get text response
-          const textResponse = await response.text();
-          errorData = { message: textResponse };
-        }
-      } catch (parseError) {
-        // If parsing fails, use a generic error
-        errorData = {
-          message: `HTTP ${response.status}: ${response.statusText}`,
-        };
-      }
-
-      // Only log error if there's meaningful error data
-      if (
-        errorData.message &&
-        typeof errorData.message === "string" &&
-        errorData.message.trim() !== ""
-      ) {
-        console.error("Error response from updateSprintStatus:", errorData);
-      }
-
-      return {
-        success: false,
-        message: errorData.message || "Failed to update sprint status",
-        data: null,
-      };
     }
+
+    const errorData = await response.json().catch(() => ({}));
+    return {
+      success: false,
+      message: errorData.message || "Failed to update sprint status",
+      data: null,
+    };
   } catch (error) {
     console.error("Error updating sprint status:", error);
     return {

@@ -18,6 +18,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import RealtimeMessaging from "../common/realtime-messaging";
+import TaskManagement from "../tasks/task-management";
 import WorkSubmission from "../tasks/work-submission";
 import SprintPlan from "./sprint-planning";
 
@@ -396,6 +397,16 @@ export default function EnhancedProjectDetailsClient({
               onClick={() => setActiveTab("sprint-plan")}
             >
               Sprint Plan
+            </button>
+            <button
+              className={`px-6 py-3 font-medium text-base ${
+                activeTab === "tasks"
+                  ? "border-b-2 border-purple-600 text-purple-600"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              onClick={() => setActiveTab("tasks")}
+            >
+              Tasks
             </button>
             <button
               className={`px-6 py-3 font-medium text-base ${
@@ -911,6 +922,16 @@ export default function EnhancedProjectDetailsClient({
               transition={{ delay: 0.1 }}
             >
               <SprintPlan projectId={projectId} project={project} />
+            </motion.div>
+          )}
+
+          {activeTab === "tasks" && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <TaskManagement projectId={projectId} />
             </motion.div>
           )}
 

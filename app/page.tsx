@@ -9,7 +9,6 @@ import { HowItWorksSection } from "@/components/shared/how-it-works-section";
 import { Navbar } from "@/components/shared/navbar";
 
 import { StatsSection } from "@/components/shared/stats-section";
-import { TestimonialsSection } from "@/components/shared/testimonials-section";
 
 export default function HomePage() {
   return (
@@ -23,7 +22,6 @@ export default function HomePage() {
         <StatsSection />
         <FeaturesSection />
         <HowItWorksSection />
-        <TestimonialsSection />
         <FAQSection />
         <ArticlesSection />
         <CTASection />

@@ -39,8 +39,7 @@ export const createReview = async (
   accessToken: string
 ): Promise<ApiResponse<Review>> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/reviews`
-      || `localhost:5001/api/v1/reviews`, {
+    const response = await fetch(`${API_BASE_URL}/reviews`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -88,8 +87,7 @@ export const getReviewById = async (
       headers.Authorization = `Bearer ${accessToken}`;
     }
 
-    const response = await fetch(`${API_BASE_URL}/reviews/${reviewId}`
-      || `localhost:5001/api/v1/reviews/${reviewId}`, {
+    const response = await fetch(`${API_BASE_URL}/reviews/${reviewId}`, {
       method: "GET",
       headers,
     });
@@ -136,8 +134,7 @@ export const getReviewsByUser = async (
     }
 
     const response = await fetch(
-      `${API_BASE_URL}/reviews/user/${userId}?limit=${limit}&page=${page}`
-      || `localhost:5001/api/v1/reviews/user/${userId}?limit=${limit}&page=${page}`,
+      `${API_BASE_URL}/reviews/user/${userId}?limit=${limit}&page=${page}`,
       {
         method: "GET",
         headers,
@@ -183,8 +180,7 @@ export const getReviewsByProject = async (
       headers.Authorization = `Bearer ${accessToken}`;
     }
 
-    const response = await fetch(`${API_BASE_URL}/reviews/project/${projectId}`
-      || `localhost:5001/api/v1/reviews/project/${projectId}`, {
+    const response = await fetch(`${API_BASE_URL}/reviews/project/${projectId}`, {
       method: "GET",
       headers,
     });
@@ -220,8 +216,7 @@ export const deleteReview = async (
   accessToken: string
 ): Promise<ApiResponse<null>> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/reviews/${reviewId}`
-      || `localhost:5001/api/v1/reviews/${reviewId}`, {
+    const response = await fetch(`${API_BASE_URL}/reviews/${reviewId}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",

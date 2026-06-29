@@ -22,7 +22,7 @@ interface User {
 
 export default function ChatClient() {
   const { data: session } = useSession();
-  const { socket, sendMessage, messages, setMessages } = useSocket();
+  const { socket, sendMessage, messages, setMessages, isConnected } = useSocket();
   const [conversations, setConversations] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [newMessage, setNewMessage] = useState("");
@@ -99,11 +99,94 @@ export default function ChatClient() {
     }
   }, [selectedUser, currentUser, setMessages]);
 
-  const handleSend = () => {
-    if (!newMessage.trim() || !selectedUser) return;
-    sendMessage(selectedUser._id, newMessage);
+  const handleSend = async () => {
+    if (!newMessage.trim() || !selectedUser || !currentUser?.accessToken) return;
+
+    const msgText = newMessage.trim();
     setNewMessage("");
+
+    if (isConnected && socket) {
+      sendMessage(selectedUser._id, msgText);
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/v1/chat/messages", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${currentUser.accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ receiverId: selectedUser._id, message: msgText }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.data) setMessages((prev: any[]) => [...prev, data.data]);
+      }
+    } catch (error) {
+      console.error("Failed to send message:", error);
+    }
   };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedUser || !currentUser?.accessToken) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const uploadRes = await fetch("/api/v1/files/upload", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${currentUser.accessToken}` },
+        body: formData,
+      });
+      if (!uploadRes.ok) return;
+      const uploadData = await uploadRes.json();
+      const url = uploadData.data?.url || uploadData.data?.fileUrl;
+
+      await fetch("/api/v1/chat/messages", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${currentUser.accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          receiverId: selectedUser._id,
+          message: `📎 ${file.name}`,
+          attachmentUrl: url,
+        }),
+      });
+
+      const historyRes = await fetch(`/api/v1/chat/history/${selectedUser._id}`, {
+        headers: { Authorization: `Bearer ${currentUser.accessToken}` },
+      });
+      if (historyRes.ok) {
+        const data = await historyRes.json();
+        setMessages(data.data);
+      }
+    } catch (error) {
+      console.error("Attachment upload failed:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (!selectedUser || !currentUser?.accessToken) return;
+    const poll = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/v1/chat/history/${selectedUser._id}`, {
+          headers: { Authorization: `Bearer ${currentUser.accessToken}` },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setMessages(data.data);
+        }
+      } catch {
+        /* ignore poll errors */
+      }
+    }, 5000);
+    return () => clearInterval(poll);
+  }, [selectedUser, currentUser?.accessToken, setMessages]);
 
   const currentMessages = messages.filter(
       msg => 
@@ -201,6 +284,20 @@ export default function ChatClient() {
                         </ScrollArea>
                         
                         <div className="mt-4 flex gap-2 pt-2 border-t">
+                             <input
+                               type="file"
+                               id="chat-attachment"
+                               className="hidden"
+                               onChange={handleFileUpload}
+                             />
+                             <Button
+                               type="button"
+                               variant="outline"
+                               size="icon"
+                               onClick={() => document.getElementById("chat-attachment")?.click()}
+                             >
+                               📎
+                             </Button>
                              <Input
                                 value={newMessage}
                                 onChange={(e) => setNewMessage(e.target.value)}

@@ -1,134 +1,127 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GitHubProvider from "next-auth/providers/github";
 
-const authOptions = {
-  providers: [
-    CredentialsProvider({
-      name: "Credentials",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-        role: {
-          label: "Role",
-          type: "select",
-          options: [
-            { value: "client" },
-            { value: "freelancer" },
-            { value: "admin" },
-          ],
-        },
-      },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          console.error("Missing credentials");
-          return null;
-        }
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api/v1";
 
-        try {
-          const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api/v1"}/auth/login`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                email: credentials.email,
-                password: credentials.password,
-                role: credentials.role, // Include selected role for potential backend validation
-              }),
-            }
-          );
+async function syncGitHubUser(profile: {
+  email: string;
+  name: string;
+  avatar?: string;
+  githubId: string;
+}) {
+  const response = await fetch(`${API_URL}/auth/github`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(profile),
+  });
 
-          console.log("Backend response status:", response.status);
+  if (!response.ok) {
+    return null;
+  }
 
-          if (response.ok) {
-            const data = await response.json();
-            console.log("Backend response data:", data);
+  const data = await response.json();
+  const user = data.data?.user || data.data?.userWithoutPassword;
+  if (!user) return null;
 
-            // Handle different response formats
-            let userData;
-            if (data.user) {
-              // Direct user object
-              userData = data.user;
-            } else if (data.data && data.data.userWithoutPassword) {
-              // Nested user object (from your API format)
-              userData = data.data.userWithoutPassword;
-            } else if (data.data && data.data.user) {
-              // Alternative nested format
-              userData = data.data.user;
-            }
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    accessToken: data.data?.accessToken,
+  };
+}
 
-            if (userData) {
-              return {
-                id: userData.id,
-                name: userData.name,
-                email: userData.email,
-                role: userData.role,
-                // Include access token if available in the response
-                accessToken: data.data?.accessToken,
-              };
-            } else {
-              console.error("No user data found in response");
-              return null;
-            }
-          } else {
-            console.error("Backend login failed with status:", response.status);
-            const errorData = await response.text();
-            console.error("Backend error response:", errorData);
-            return null;
-          }
-        } catch (error) {
-          console.error("Error during authentication:", error);
-
-          // Return mock user data for development when backend is not available
-          if (process.env.NODE_ENV === "development") {
-            console.log(
-              "Backend not available, using mock user data for development"
-            );
-
-            // Mock user data based on email
-            const mockUsers = {
-              "admin@example.com": {
-                id: "mock-admin-id",
-                name: "Admin User",
-                email: "admin@example.com",
-                role: "admin",
-                accessToken: "mock-jwt-token-admin",
-              },
-              "client@example.com": {
-                id: "mock-client-id",
-                name: "Client User",
-                email: "client@example.com",
-                role: "client",
-                accessToken: "mock-jwt-token-client",
-              },
-              "freelancer@example.com": {
-                id: "mock-freelancer-id",
-                name: "Freelancer User",
-                email: "freelancer@example.com",
-                role: "freelancer",
-                accessToken: "mock-jwt-token-freelancer",
-              },
-            };
-
-            const mockUser =
-              mockUsers[credentials.email as keyof typeof mockUsers];
-            if (mockUser) {
-              return mockUser;
-            }
-          }
-
-          return null;
-        }
-      },
-    }),
-  ],
-  callbacks: {
-    async signIn({ user, account, profile, email }) {
-      // This callback is called after successful sign in
-      // We can use this to redirect to the appropriate dashboard
-      return true; // Allow sign in
+const providers: any[] = [
+  CredentialsProvider({
+    name: "Credentials",
+    credentials: {
+      email: { label: "Email", type: "email" },
+      password: { label: "Password", type: "password" },
     },
-    async jwt({ token, user }) {
+    async authorize(credentials) {
+      if (!credentials?.email || !credentials?.password) {
+        return null;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: credentials.email,
+            password: credentials.password,
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const userData =
+            data.data?.userWithoutPassword || data.data?.user || data.user;
+
+          if (userData) {
+            return {
+              id: userData.id,
+              name: userData.name,
+              email: userData.email,
+              role: userData.role,
+              accessToken: data.data?.accessToken,
+            };
+          }
+        }
+        return null;
+      } catch {
+        return null;
+      }
+    },
+  }),
+];
+
+if (process.env.GITHUB_ID && process.env.GITHUB_SECRET) {
+  providers.push(
+    GitHubProvider({
+      clientId: process.env.GITHUB_ID,
+      clientSecret: process.env.GITHUB_SECRET,
+    }),
+  );
+}
+
+export const authOptions = {
+  providers,
+  callbacks: {
+    async signIn({ user, account, profile }: any) {
+      if (account?.provider === "github") {
+        const email =
+          user.email ||
+          (profile as { email?: string })?.email ||
+          (profile as { emails?: { email: string }[] })?.emails?.[0]?.email;
+
+        if (!email) {
+          return "/auth/login?error=GitHubEmailRequired";
+        }
+
+        const synced = await syncGitHubUser({
+          email,
+          name: user.name || (profile as { name?: string })?.name || "GitHub User",
+          avatar: user.image || undefined,
+          githubId: account.providerAccountId,
+        });
+
+        if (!synced) {
+          return false;
+        }
+
+        user.id = synced.id;
+        user.role = synced.role;
+        user.accessToken = synced.accessToken;
+        user.email = synced.email;
+        return true;
+      }
+      return true;
+    },
+    async jwt({ token, user }: any) {
       if (user) {
         token.role = user.role;
         token.id = user.id;
@@ -138,10 +131,8 @@ const authOptions = {
       }
       return token;
     },
-    async session({ session, token }) {
-      if (!session.user) {
-        session.user = {};
-      }
+    async session({ session, token }: any) {
+      if (!session.user) session.user = {};
       session.user.id = token.id as string;
       session.user.name = token.name as string;
       session.user.email = token.email as string;
@@ -149,30 +140,18 @@ const authOptions = {
       session.user.accessToken = token.accessToken as string;
       return session;
     },
-    async redirect({ url, baseUrl }) {
-      // Only allow relative URLs or URLs on the same origin
-      try {
-        // If it's a relative URL, allow it
-        if (url.startsWith("/")) {
-          // Prevent redirect loops by checking if URL contains auth paths
-          // But allow role-redirect to pass through for role-based redirection
-          if (url.includes("/auth/") && !url.includes("role-redirect")) {
-            return `${baseUrl}/dashboard`;
-          }
-          return `${baseUrl}${url}`;
+    async redirect({ url, baseUrl }: { url: string; baseUrl: string }) {
+      if (url.startsWith("/")) {
+        if (url.includes("/auth/") && !url.includes("role-redirect")) {
+          return `${baseUrl}/dashboard`;
         }
-
-        // If it's an absolute URL, check if it's on the same origin
-        const parsedUrl = new URL(url);
-        if (parsedUrl.origin === baseUrl) {
-          return url;
-        }
-      } catch (error) {
-        // If URL parsing fails, return to dashboard
-        console.error("Redirect URL parsing error:", error);
+        return `${baseUrl}${url}`;
       }
-
-      // Default to dashboard to avoid redirect loops
+      try {
+        if (new URL(url).origin === baseUrl) return url;
+      } catch {
+        /* ignore */
+      }
       return `${baseUrl}/dashboard`;
     },
   },
@@ -184,15 +163,11 @@ const authOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt" as const,
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 30 * 24 * 60 * 60,
   },
-  trustHost: true, // Fix for Vercel deployments to correctly detect host
+  trustHost: true,
 };
 
 const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
-
-// Export auth options separately for server-side use
-  export { authOptions };
-

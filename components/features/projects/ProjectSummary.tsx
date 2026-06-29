@@ -92,7 +92,7 @@ export function ProjectSummary({ projectId }: ProjectSummaryProps) {
         try {
             setLoading(true);
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/projects/${projectId}/summary`,
+                `/api/v1/projects/${projectId}/summary`,
                 {
                     headers: {
                         Authorization: `Bearer ${(session as any)?.accessToken}`,
@@ -118,7 +118,7 @@ export function ProjectSummary({ projectId }: ProjectSummaryProps) {
         try {
             setGenerating(true);
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/projects/${projectId}/generate-summary`,
+                `/api/v1/projects/${projectId}/generate-summary`,
                 {
                     method: "POST",
                     headers: {

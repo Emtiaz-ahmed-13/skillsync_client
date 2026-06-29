@@ -266,8 +266,7 @@ export default function FreelancerDashboardClient() {
                     : bid.projectId;
 
                 const projectResponse = await fetch(
-                  `${process.env.NEXT_PUBLIC_API_URL}/projects/${projectIdStr}` ||
-                    `localhost:5001/api/v1/projects/${projectIdStr}`,
+                  `/api/v1/projects/${projectIdStr}`,
                   {
                     headers: {
                       Authorization: `Bearer ${accessToken}`,
@@ -353,54 +352,7 @@ export default function FreelancerDashboardClient() {
             })
           );
 
-          let assignedProjects = [];
-          try {
-            const assignedProjectsResponse = await fetch(
-              `/api/v1/projects/freelancer/${freelancerId}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${accessToken}`,
-                },
-              }
-            );
-
-            if (assignedProjectsResponse.ok) {
-              const assignedProjectsData =
-                await assignedProjectsResponse.json();
-              if (
-                assignedProjectsData.success &&
-                assignedProjectsData.data &&
-                Array.isArray(assignedProjectsData.data)
-              ) {
-                assignedProjects = assignedProjectsData.data.map(
-                  (project: Project) => ({
-                    id: project._id || project.id,
-                    _id: `${
-                      project._id || project.id
-                    }-${Date.now()}-${Math.random()}`,
-                    title: project.title || "Project Title",
-                    description: project.description || "Project description",
-                    minimumBid: project.minimumBid || 0,
-                    budget: project.budget || 0,
-                    technology: project.technology || [],
-                    status: project.status || "in-progress",
-                    ownerId: project.ownerId || "",
-                    createdAt: project.createdAt,
-                    updatedAt: project.updatedAt,
-                    progress: project.progress || 0,
-                    realProjectId: project._id || project.id,
-                  })
-                );
-              }
-            }
-          } catch (error) {
-            console.error("Error fetching assigned projects:", error);
-          }
-
-          const allActiveProjects = [
-            ...activeProjectsFromBids,
-            ...assignedProjects,
-          ].filter(
+          const allActiveProjects = activeProjectsFromBids.filter(
             (project) => project && project.title && project.title !== ""
           );
           const uniqueProjectsMap = new Map();

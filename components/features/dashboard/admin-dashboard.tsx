@@ -242,8 +242,7 @@ export default function AdminDashboardClient() {
 
         try {
           const statsResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/admin/analytics` ||
-              `localhost:5001/api/v1/admin/analytics`,
+            `/api/v1/admin/analytics`,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -266,28 +265,46 @@ export default function AdminDashboardClient() {
             let statsObj: StatsResponse = {};
 
             if (statsData.success && statsData.data) {
-              statsObj = statsData.data;
+              const d = statsData.data;
+              if (d.counts) {
+                setStats({
+                  totalUsers: d.counts.totalUsers || 0,
+                  activeProjects: d.projectStatus?.inProgress || 0,
+                  totalRevenue: (d.counts.totalRevenue || 0) / 100,
+                  pendingTasks: d.projectStatus?.pending || 0,
+                });
+              } else {
+                statsObj = d;
+                setStats({
+                  totalUsers: statsObj.totalUsers || statsObj.total_users || 0,
+                  activeProjects:
+                    statsObj.activeProjects || statsObj.active_projects || 0,
+                  totalRevenue:
+                    statsObj.totalRevenue || statsObj.total_revenue || 0,
+                  pendingTasks:
+                    statsObj.pendingTasks || statsObj.pending_tasks || 0,
+                });
+              }
             } else if (statsData.totalUsers !== undefined) {
               statsObj = statsData;
+              setStats({
+                totalUsers: statsObj.totalUsers || statsObj.total_users || 0,
+                activeProjects:
+                  statsObj.activeProjects || statsObj.active_projects || 0,
+                totalRevenue:
+                  statsObj.totalRevenue || statsObj.total_revenue || 0,
+                pendingTasks:
+                  statsObj.pendingTasks || statsObj.pending_tasks || 0,
+              });
             } else {
               console.error("Unexpected stats API response format:", statsData);
-              statsObj = {
+              setStats({
                 totalUsers: 0,
                 activeProjects: 0,
                 totalRevenue: 0,
                 pendingTasks: 0,
-              };
+              });
             }
-
-            setStats({
-              totalUsers: statsObj.totalUsers || statsObj.total_users || 0,
-              activeProjects:
-                statsObj.activeProjects || statsObj.active_projects || 0,
-              totalRevenue:
-                statsObj.totalRevenue || statsObj.total_revenue || 0,
-              pendingTasks:
-                statsObj.pendingTasks || statsObj.pending_tasks || 0,
-            });
           } else {
             console.error(
               "Failed to fetch stats:",
@@ -305,8 +322,7 @@ export default function AdminDashboardClient() {
 
           // Fetch pending projects
           const projectsResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/projects/pending` ||
-              `localhost:5001/api/v1/projects/pending`,
+            `/api/v1/projects/pending`,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -368,8 +384,7 @@ export default function AdminDashboardClient() {
 
               try {
                 const usersResponse = await fetch(
-                  `${process.env.NEXT_PUBLIC_API_URL}/admin/users` ||
-                    `localhost:5001/api/v1/admin/users`,
+                  `/api/v1/admin/users`,
                   {
                     headers: {
                       Authorization: `Bearer ${accessToken}`,
@@ -485,8 +500,7 @@ export default function AdminDashboardClient() {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/projects/${projectId}/approve` ||
-          `localhost:5001/api/v1/projects/${projectId}/approve`,
+        `/api/v1/projects/${projectId}/approve`,
         {
           method: "PUT",
           headers: {

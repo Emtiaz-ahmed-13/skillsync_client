@@ -3,7 +3,8 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { ArrowRight, CheckCircle2, Star, Zap } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, CheckCircle2, Shield, Zap } from "lucide-react";
 
 export function HeroSection() {
   return (
@@ -38,48 +39,36 @@ export function HeroSection() {
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button
+                asChild
                 size="lg"
                 className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold px-8 py-6 text-base shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition-all rounded-full"
               >
-                Get Started
-                <ArrowRight className="w-5 h-5 ml-2" />
+                <Link href="/auth/signup">
+                  Get Started
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Link>
               </Button>
               <Button
+                asChild
                 size="lg"
                 variant="outline"
                 className="border-input hover:bg-accent font-medium px-8 py-6 text-base rounded-full"
               >
-                View Demo
+                <Link href="/projects">View Demo</Link>
               </Button>
             </div>
             
-            <div className="flex items-center gap-8 pt-8 border-t border-border/40">
-              <div className="flex items-center gap-4">
-                <div className="flex -space-x-3">
-                  {[1, 2, 3].map((i) => (
-                    <div
-                      key={i}
-                      className="w-10 h-10 rounded-full border-2 border-background bg-muted flex items-center justify-center text-xs font-bold overflow-hidden"
-                      style={{ backgroundImage: `url(https://i.pravatar.cc/100?img=${i + 10})`, backgroundSize: 'cover' }}
-                    />
-                  ))}
-                  <div className="w-10 h-10 rounded-full border-2 border-background bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-xs font-bold text-indigo-600 dark:text-indigo-400">
-                    2k+
-                  </div>
+            <div className="flex flex-wrap items-center gap-6 pt-8 border-t border-border/40">
+              {[
+                { icon: Shield, label: "Milestone-based payments" },
+                { icon: CheckCircle2, label: "Project tracking built in" },
+                { icon: Zap, label: "AI sprint planning" },
+              ].map(({ icon: Icon, label }) => (
+                <div key={label} className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Icon className="w-4 h-4 text-indigo-500 shrink-0" />
+                  <span>{label}</span>
                 </div>
-                <div>
-                  <div className="font-bold text-foreground">Active Users</div>
-                  <div className="text-xs text-muted-foreground">Trusted by pros</div>
-                </div>
-              </div>
-              <div className="w-px h-10 bg-border/60" />
-              <div>
-                <div className="flex items-center gap-1.5 font-bold text-foreground">
-                  <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                  4.9/5
-                </div>
-                <div className="text-xs text-muted-foreground">Platform Rating</div>
-              </div>
+              ))}
             </div>
           </motion.div>
 

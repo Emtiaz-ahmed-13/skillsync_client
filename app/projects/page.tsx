@@ -53,9 +53,11 @@ export default function ProjectsPage() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:5001/api/v1/projects/approved"
-        );
+        const params = new URLSearchParams({ limit: "50" });
+        if (searchTerm) params.set("search", searchTerm);
+        if (selectedTech !== "all") params.set("technology", selectedTech);
+
+        const response = await fetch(`/api/v1/projects/approved?${params}`);
 
         if (response.ok) {
           const data = await response.json();
@@ -83,33 +85,11 @@ export default function ProjectsPage() {
     };
 
     fetchProjects();
-  }, []);
+  }, [searchTerm, selectedTech]);
 
   useEffect(() => {
-    // Filter projects based on search term and selected technology
-    let result = projects;
-
-    if (searchTerm) {
-      result = result.filter(
-        (project) =>
-          project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          project.description
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          project.technology.some((tech) =>
-            tech.toLowerCase().includes(searchTerm.toLowerCase())
-          )
-      );
-    }
-
-    if (selectedTech !== "all") {
-      result = result.filter((project) =>
-        project.technology.includes(selectedTech)
-      );
-    }
-
-    setFilteredProjects(result);
-  }, [projects, searchTerm, selectedTech]);
+    setFilteredProjects(projects);
+  }, [projects]);
 
   const handleProjectClick = (projectId: string) => {
     if (status === "authenticated") {

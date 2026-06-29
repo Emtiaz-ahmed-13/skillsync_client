@@ -4,11 +4,12 @@ import { motion } from "framer-motion";
 import { LayoutDashboard, Search, Zap } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { ThemeToggle } from "../ui/theme-toggle";
 import { MobileMenu } from "./mobile-menu";
+import { NotificationBell } from "./notification-bell";
 
 interface NavItem {
   name: string;
@@ -22,7 +23,9 @@ interface NavItem {
 export function Navbar() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const isAuthenticated = status === "authenticated";
   const isUserAuthenticated = isAuthenticated && session?.user !== undefined;
   const isOnDashboard = pathname?.startsWith("/dashboard");
@@ -39,6 +42,7 @@ export function Navbar() {
     { name: "Features", href: "#features" },
     { name: "How It Works", href: "#how-it-works" },
     { name: "Projects", href: "/projects" },
+    { name: "Freelancers", href: "/freelancers" },
     { name: "Articles", href: "/articles" },
   ];
 
@@ -125,7 +129,14 @@ export function Navbar() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
               <input
                 type="text"
-                placeholder="Search..."
+                placeholder="Search projects..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && searchQuery.trim()) {
+                    router.push(`/projects?search=${encodeURIComponent(searchQuery.trim())}`);
+                  }
+                }}
                 className="pl-10 pr-4 py-2 text-sm rounded-full border border-border bg-muted/50 focus:bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 w-40 hover:w-56 focus:w-64 transition-all duration-300"
               />
             </div>
@@ -137,6 +148,7 @@ export function Navbar() {
 
             {isUserAuthenticated ? (
               <div className="flex items-center gap-3 pl-2">
+                <NotificationBell />
                 {!isOnDashboard && (
                   <Button
                     variant="default"

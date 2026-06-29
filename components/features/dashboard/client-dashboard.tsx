@@ -1,6 +1,7 @@
 "use client";
 
 import { ClientProposals } from "@/components/features/dashboard/client-proposals";
+import { PDFAnalyzer } from "@/components/features/projects/PDFAnalyzer";
 import { Navbar } from "@/components/shared/navbar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -366,8 +367,7 @@ export default function ClientDashboardClient() {
               }
 
               const projectsResponse = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/projects/owner/${userId}` ||
-                  `localhost:5001/api/v1/projects/owner/${userId}`,
+                `/api/v1/projects/owner/${userId}`,
                 {
                   headers: {
                     Authorization: `Bearer ${accessToken}`,
@@ -575,8 +575,7 @@ export default function ClientDashboardClient() {
         }
 
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/projects/owner/${userId}` ||
-            `localhost:5001/api/v1/projects/owner/${userId}`,
+          `/api/v1/projects/owner/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -655,8 +654,7 @@ export default function ClientDashboardClient() {
                 const projectId = project._id || project.id;
 
                 const bidsResponse = await fetch(
-                  `${process.env.NEXT_PUBLIC_API_URL}/bids/project/${projectId}` ||
-                    `localhost:5001/api/v1/bids/project/${projectId}`,
+                  `/api/v1/bids/project/${projectId}`,
                   {
                     headers: {
                       Authorization: `Bearer ${accessToken}`,
@@ -770,6 +768,16 @@ export default function ClientDashboardClient() {
 
       {/* CONTENT */}
       <div className="relative z-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24">
+        {/* PDF project brief — quick start for new clients */}
+        <div className="mb-6 p-4 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800 rounded-lg">
+          <h3 className="text-lg font-semibold text-indigo-900 dark:text-indigo-100 mb-1">
+            Create your first project faster
+          </h3>
+          <p className="text-sm text-indigo-700 dark:text-indigo-300 mb-3">
+            Upload a PDF brief and let AI extract requirements, tech stack, and timeline.
+          </p>
+        </div>
+
         {/* Notification Banner for Work Submissions */}
         {workSubmissionNotifications.length > 0 && (
           <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
@@ -1149,6 +1157,7 @@ export default function ClientDashboardClient() {
                             required
                           />
                         </div>
+                        <PDFAnalyzer />
                         <div>
                           <Label htmlFor="file">
                             Upload Project File (Optional)
